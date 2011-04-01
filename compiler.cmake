@@ -26,6 +26,21 @@ macro(mz_add_definition ...)
 	endif()
 endmacro()
 
+macro(mz_add_cxx_flag FLAG)
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAG}")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FLAG}")
+endmacro()
+
+macro(mz_add_c_flag FLAG)
+    SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FLAG}")
+    SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${FLAG}")
+endmacro()
+
+macro(mz_add_flag FLAG)
+    mz_add_cxx_flag(${FLAG})
+    mz_add_c_flag(${FLAG})
+endmacro()
+
 # borrowed from find_boost
 #
 # Runs compiler with "-dumpversion" and parses major/minor
@@ -121,8 +136,8 @@ if(MZ_IS_GCC)
 		
 		# optional C++0x features on gcc (on vs2010 this is enabled by default)
 		if(MZ_HAS_CXX0X) # AND NOT DARWIN)
-			SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=gnu++0x")
-			SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=gnu++0x")
+            mz_add_cxx_flag(-std=gnu++0x)
+            mz_add_definition(MZ_HAS_CXX0X)
 			message("-- forcing C++0x support on this platform")
 		endif()
 
