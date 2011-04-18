@@ -37,6 +37,11 @@
 # macro(mz_add_definition DEF)
 #		add the macro DEF as definition to the compiler flags
 #
+# macro(mz_auto_moc MOCCED ...)
+#		search all passed files in (...) for Q_OBJECT and if found
+#		run moc on them via qt4_wrap_cpp. Assign the output files
+#		to MOCCED
+#
 ########################################################################
 
 # if global.cmake was not included yet, report it
@@ -77,4 +82,16 @@ endmacro(mz_add_target)
 
 macro(mz_target_props NAME)
     set_target_properties(${NAME} PROPERTIES DEBUG_POSTFIX "D")
+endmacro()
+
+macro(mz_auto_moc OUTPUT)
+	#message("Input: ${ARGN}")
+	foreach(ENTRY ${ARGN})
+		file(STRINGS ${ENTRY} CONTENT LIMIT_COUNT 1 REGEX .*Q_OBJECT.*)
+		if("${CONTENT}" MATCHES .*Q_OBJECT.*)
+			qt4_wrap_cpp(MOC ${ENTRY})
+			#message("mocced ${MOC}")
+		endif()
+	endforeach()
+	set(OUTPUT ${MOC})
 endmacro()
