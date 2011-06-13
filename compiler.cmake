@@ -112,6 +112,17 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 	else()
 		message(FATAL_ERROR "!! compiler platform currently unsupported by mz tools !!")
 	endif()
+	
+	# platform (32bit / 64bit)
+	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+		message("-- 64bit platform")
+		set(MZ_64BIT TRUE CACHE BOOL MZ_64BIT)
+		set(MZ_32BIT FALSE CACHE BOOL MZ_32BIT)
+	else()
+		message("-- 32bit platform")
+		set(MZ_32BIT TRUE CACHE BOOL MZ_32BIT)
+		set(MZ_64BIT FALSE CACHE BOOL MZ_64BIT)
+	endif()
 
 endif() #MZ_COMPILER_TEST_HAS_RUN
 

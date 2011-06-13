@@ -26,7 +26,7 @@ goto MAIN
 	cd %BUILD_DIR%
 
 	echo.== configuring target system '%TARGET%(Debug)'
-	cmake	-D BASE_DIR=%BASE_DIR% -DX64=TRUE -D CMAKE_BUILD_TYPE=Debug -G"%GENERATOR%" %BASE_DIR%/
+	cmake	-D BASE_DIR=%BASE_DIR% -D CMAKE_BUILD_TYPE=Debug -G"%GENERATOR%" %BASE_DIR%/
 GOTO:EOF
 
 :make_release
@@ -37,7 +37,7 @@ GOTO:EOF
 	cd %BUILD_DIR%
 
 	echo.== configuring target system '%TARGET%(Release)'
-	cmake	-D BASE_DIR=%BASE_DIR% -DX64=TRUE -D CMAKE_BUILD_TYPE=Release -G"%GENERATOR%" %BASE_DIR%/
+	cmake	-D BASE_DIR=%BASE_DIR% -D CMAKE_BUILD_TYPE=Release -G"%GENERATOR%" %BASE_DIR%/
 GOTO:EOF
 
 :debug_hint

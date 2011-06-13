@@ -34,11 +34,5 @@ if(NOT HAS_MZ_GLOBAL)
   	set(MAKE_DEBUG true)
   endif()
 
-  # hint to the code that 64bit is available
-  if(X64)
-	  message("-- Forcing 64bit")
-	  mz_add_definition("IS_64BIT")
-  endif()
-
 # EOF: global.cmake
 endif() 
