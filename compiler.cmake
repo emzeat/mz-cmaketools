@@ -41,6 +41,13 @@ macro(mz_add_flag FLAG)
     mz_add_c_flag(${FLAG})
 endmacro()
 
+macro(mz_use_default_compiler_settings)
+	SET(CMAKE_C_FLAGS_DEBUG "${_MZ_C_DEFAULT_DEBUG}")
+	SET(CMAKE_CXX_FLAGS_DEBUG "${_MZ_CXX_DEFAULT_DEBUG}")
+	SET(CMAKE_C_FLAGS_RELEASE "${_MZ_C_DEFAULT_RELEASE}")
+	SET(CMAKE_CXX_FLAGS_RELEASE "${_MZ_CXX_DEFAULT_RELEASE}")
+endmacro()
+
 # borrowed from find_boost
 #
 # Runs compiler with "-dumpversion" and parses major/minor
@@ -62,6 +69,12 @@ ENDFUNCTION()
 if(NOT MZ_COMPILER_TEST_HAS_RUN)
 
 	message("-- running mz compiler detection tools")
+
+	# cache the default compiler settings
+	SET(_MZ_C_DEFAULT_DEBUG "${CMAKE_C_FLAGS_DEBUG}" CACHE STRING _MZ_C_DEFAULT_DEBUG)
+	SET(_MZ_CXX_DEFAULT_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING _MZ_CXX_DEFAULT_DEBUG)
+	SET(_MZ_C_DEFAULT_RELEASE "${CMAKE_C_FLAGS_RELEASE}" CACHE STRING _MZ_C_DEFAULT_RELEASE)
+	SET(_MZ_CXX_DEFAULT_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING _MZ_CXX_DEFAULT_RELEASE)
 	
 	# compiler settings and defines depending on platform
 	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
