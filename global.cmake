@@ -28,11 +28,5 @@ if(NOT HAS_MZ_GLOBAL)
   # user info
   message("-- configuring for build type: ${CMAKE_BUILD_TYPE}")
 
-  if (${CMAKE_BUILD_TYPE} STREQUAL Release)
-	  set(MAKE_RELEASE true)
-  else()
-  	set(MAKE_DEBUG true)
-  endif()
-
 # EOF: global.cmake
 endif() 
