@@ -101,7 +101,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 		# detect compiler version
 		_Boost_MZ_COMPILER_DUMPVERSION(GCC_VERSION)
 		set(GCC_VERSION "${GCC_VERSION}")
-		if(GCC_VERSION STREQUAL "45")
+		if(GCC_VERSION STRGREATER "44")
 			message("-- C++0x support detected")
 			set(MZ_HAS_CXX0X TRUE CACHE BOOL MZ_HAS_CXX0X)
 		endif()
