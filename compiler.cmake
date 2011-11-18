@@ -8,37 +8,34 @@
 # 	compiler variables. If available features
 #	for c++0x will be enabled automatically
 #
-#	(c) 2010 Marius Zwicker
+#	(c) 2010-2011 Marius Zwicker
 #
 ##################################################
 
-macro(mz_add_definition ...)
+macro(mz_add_definition DEF)
 	if (MZ_IS_GCC)	
-		SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D${ARGV0}" ${ARGV1})
-		SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D${ARGV0}" ${ARGV1})
-		SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -D${ARGV0}" ${ARGV1})
-		SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D${ARGV0}" ${ARGV1})
+                mz_add_flag("-D${DEF}")
 	elseif(MZ_IS_VS)
-		SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D${ARGV0}" ${ARGV1})
-		SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D${ARGV0}" ${ARGV1})
-		SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /D${ARGV0}" ${ARGV1})
-		SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D${ARGV0}" ${ARGV1})
+                mz_add_flag("/D${DEF}")
 	endif()
 endmacro()
 
 macro(mz_add_cxx_flag FLAG)
-    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAG}")
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FLAG}")
+    #SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAG}")
+    #SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FLAG}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}")
 endmacro()
 
 macro(mz_add_c_flag FLAG)
-    SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FLAG}")
-    SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${FLAG}")
+    #SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FLAG}")
+    #SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${FLAG}")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAG}")
 endmacro()
 
 macro(mz_add_flag FLAG)
     mz_add_cxx_flag(${FLAG})
     mz_add_c_flag(${FLAG})
+message("-- add flag ${FLAG}")
 endmacro()
 
 macro(mz_use_default_compiler_settings)
@@ -65,6 +62,22 @@ FUNCTION(_Boost_MZ_COMPILER_DUMPVERSION _OUTPUT_VERSION)
   SET(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
 ENDFUNCTION()
 
+# runs compiler with "--version" and searches for clang
+#
+FUNCTION(_MZ_COMPILER_IS_CLANG _OUTPUT)
+  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+  ARGS ${CMAKE_CXX_COMPILER_ARG1} --version
+  OUTPUT_VARIABLE _MZ_CLANG_VERSION
+  )
+
+  if(${_MZ_CLANG_VERSION} MATCHES ".*clang.*")
+    set(${_OUTPUT} TRUE PARENT_SCOPE)
+  else()
+    set(${_OUTPUT} FALSE PARENT_SCOPE)
+  endif()
+
+ENDFUNCTION()
+
 # we only run the very first time
 if(NOT MZ_COMPILER_TEST_HAS_RUN)
 
@@ -88,7 +101,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 	# gnu compiler
 	#message("IS_GCC ${CMAKE_COMPILER_IS_GNU_CC}")
 	if(UNIX OR MINGW)
-		message("-- Gnu GCC compiler found")
+                message("-- Gnu GCC compatible compiler found")
 		
 		set(MZ_IS_GCC TRUE CACHE BOOL MZ_IS_GCC)
 		
@@ -125,9 +138,16 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 	else()
 		message(FATAL_ERROR "!! compiler platform currently unsupported by mz tools !!")
 	endif()
+
+        # clang is gcc compatible but still different
+        _MZ_COMPILER_IS_CLANG( _MZ_TEST_CLANG )
+        if( _MZ_TEST_CLANG )
+            message("-- compiler is clang")
+            set(MZ_IS_CLANG TRUE CACHE BOOL MZ_IS_CLANG)
+        endif()
 	
 	# platform (32bit / 64bit)
-	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+        if(CMAKE_SIZEOF_VOID_P MATCHES "8")
 		message("-- 64bit platform")
 		set(MZ_64BIT TRUE CACHE BOOL MZ_64BIT)
 		set(MZ_32BIT FALSE CACHE BOOL MZ_32BIT)
@@ -172,3 +192,4 @@ elseif(MZ_IS_VS)
 		SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /MDd /D DEBUG /D WIN32 /D WIN32_VS  ${TARGET_DEFS}")
 		SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /MD /D WIN32 /D WIN32_VS  /O2 ${TARGET_DEFS}")
 endif()
+
