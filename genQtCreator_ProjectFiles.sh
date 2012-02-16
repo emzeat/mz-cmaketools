@@ -2,9 +2,9 @@
 #######################################################################
 #
 #  Configure Codeblocks/QtCreator project files
-# (c) 2012 Marius Zwicker
+#  (c) 2012 Marius Zwicker
 #
-# Pass 'Release' as argument to build without debug flags
+#  Pass 'Release' as argument to build without debug flags
 #
 #######################################################################
 
@@ -14,4 +14,4 @@ GENERATOR="CodeBlocks - Unix Makefiles"
 TARGET="Qt Creator"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-sh $DIR/util.sh $@
+source $DIR/util.sh $@

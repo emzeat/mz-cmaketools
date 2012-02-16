@@ -2,9 +2,9 @@
 #######################################################################
 #
 #  Configure Makefile project files
-# (c) 2012 Marius Zwicker
+#  (c) 2012 Marius Zwicker
 #
-# Pass 'Release' as argument to build without debug flags
+#  Pass 'Release' as argument to build without debug flags
 #
 #######################################################################
 
@@ -13,4 +13,5 @@ RELEASE_DIR="Release_$BUILD_DIR"
 GENERATOR="Unix Makefiles"
 TARGET="Makefiles"
 
-sh util.sh $@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/util.sh $@

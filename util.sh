@@ -1,7 +1,7 @@
 #!/bin/bash
 ##############################################################
 #
-#   BUILD/util.bat
+#   BUILD/util.sh
 #
 # 	This file generates a Project Configuration for
 #   building the configured Project at a default directory
@@ -10,7 +10,6 @@
 #   Pass 'Release' as argument to build without debug flags
 #
 ##############################################################
-
 
 function make_debug {
 	cd $BASE_DIR/Build
@@ -44,11 +43,11 @@ function make_release {
 
 function debug_hint {
 	echo
-	echo "IMPORTANT HINT:\tWhen using this script to generate projects with build"
-	echo "\t\ttype 'debug', please use the 'Debug' configuration for building"
-	echo "\t\tbinaries only. Otherwise dependencies might not be set correctly."
+	echo -e "IMPORTANT HINT:\tWhen using this script to generate projects with build"
+	echo -e "\t\ttype 'debug', please use the 'Debug' configuration for building"
+	echo -e "\t\tbinaries only. Otherwise dependencies might not be set correctly."
 	echo
-	echo "\t\tTRICK:\tTo Build a Release Binary, run with argument 'Release' given"
+	echo -e "\t\tTRICK:\tTo Build a Release Binary, run with argument 'Release' given"
 	echo
 }
 
