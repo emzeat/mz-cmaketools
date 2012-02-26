@@ -5,9 +5,11 @@
 # 	This file is for providing a defined environment
 #	of compiler definitions/macros and cmake functions
 #	or variables throughout several projects. It can
-#	be included twice or more without any issues.
+#	be included twice or more without any issues and
+#   will automatically included the utility files 
+#   compiler.cmake and macros.cmake
 #
-#	(c) 2009-2010 Marius Zwicker
+#	(c) 2009-2012 Marius Zwicker
 #
 ##################################################
 
