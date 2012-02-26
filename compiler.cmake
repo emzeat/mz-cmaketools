@@ -28,21 +28,22 @@
 #
 # PROVIDED MACROS
 # -----------------------
-# mz_add_definition <definition>
-#		add the definition <definition> to the list of definitions
-#		passed to the compiler, automatically switches between
-#       the syntax of msvc and gcc/clang
+# mz_add_definition <definition1> ...
+#		add the definition <definition> (and following)
+#       to the list of definitions passed to the compiler.
+#       Automatically switches between the syntax of msvc 
+#       and gcc/clang
 #       Example: mz_add_definition(NO_DEBUG)
 #
-# mz_add_cxx_flag GCC|CLANG|MSVC|ALL <flag>
+# mz_add_cxx_flag GCC|CLANG|MSVC|ALL <flag1> <flag2> ...
 # 		pass the given flag to the C++ compiler when
 #       the compiler matches the given platform
 #
-# mz_add_c_flag GCC|CLANG|MSVC|ALL <flag>
+# mz_add_c_flag GCC|CLANG|MSVC|ALL <flag1> <flag2> ...
 # 		pass the given flag to the C compiler when
 #       the compiler matches the given platform
 #
-# mz_add_flag GCC|CLANG|MSVC|ALL <flag>
+# mz_add_flag GCC|CLANG|MSVC|ALL <flag1> <flag2> ...
 # 		pass the given flag to the compiler, no matter
 #       wether compiling C or C++ files. The selected platform
 #       is still respected
@@ -80,7 +81,7 @@ macro(mz_message MSG)
     message("-- ${MSG}")
 endmacro()
 
-#set(MZ_MSG_DEBUG FALSE)
+#set(MZ_MSG_DEBUG TRUE)
 
 macro(mz_debug_message MSG)
     if(MZ_MSG_DEBUG)
@@ -93,15 +94,17 @@ macro(mz_error_message MSG)
     return()
 endmacro()
 
-macro(mz_add_definition DEF)
-	if (MZ_IS_GCC)	
-        mz_add_flag(ALL "-D${DEF}")
-	elseif(MZ_IS_VS)
-        mz_add_flag(ALL "/D${DEF}")
-	endif()
+macro(mz_add_definition)
+    FOREACH(DEF ${ARGN})
+    	if (MZ_IS_GCC)	
+            mz_add_flag(ALL "-D${DEF}")
+    	elseif(MZ_IS_VS)
+            mz_add_flag(ALL "/D${DEF}")
+	    endif()
+	ENDFOREACH(DEF)
 endmacro()
 
-macro(__mz_add_compiler_flag COMPILER_FLAGS PLATFORM FLAG)
+macro(__mz_add_compiler_flag COMPILER_FLAGS PLATFORM)
     if( NOT "${PLATFORM}" MATCHES "(GCC)|(CLANG)|(MSVC)|(ALL)" )
         mz_error_message("Please provide a valid platform when adding a compiler flag: GCC|CLANG|MSVC|ALL")
     endif()
@@ -110,25 +113,28 @@ macro(__mz_add_compiler_flag COMPILER_FLAGS PLATFORM FLAG)
             OR ("${PLATFORM}" STREQUAL "GCC" AND MZ_IS_GCC)
             OR ("${PLATFORM}" STREQUAL "MSVC" AND MZ_IS_VS)
             OR ("${PLATFORM}" STREQUAL "CLANG" AND MZ_IS_CLANG) )
-        set(${COMPILER_FLAGS} "${${COMPILER_FLAGS}} ${FLAG}")
-        mz_debug_message("Adding flag ${FLAG}")
+        
+        FOREACH(_current ${ARGN})
+            set(${COMPILER_FLAGS} "${${COMPILER_FLAGS}} ${_current}")
+            mz_debug_message("Adding flag ${_current}")
+        ENDFOREACH(_current)
         #mz_debug_message("Compiler flags: ${${COMPILER_FLAGS}}")
     else()
         mz_debug_message("Skipping flag ${FLAG}, needs platform ${PLATFORM}")
     endif()
 endmacro()
 
-macro(mz_add_cxx_flag PLATFORM FLAG)
-    __mz_add_compiler_flag(CMAKE_CXX_FLAGS ${PLATFORM} ${FLAG})
+macro(mz_add_cxx_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_CXX_FLAGS ${PLATFORM} ${ARGN})
 endmacro()
 
-macro(mz_add_c_flag PLATFORM FLAG)
-    __mz_add_compiler_flag(CMAKE_C_FLAGS ${PLATFORM} ${FLAG})
+macro(mz_add_c_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_C_FLAGS ${PLATFORM} ${ARGN})
 endmacro()
 
-macro(mz_add_flag PLATFORM FLAG)
-    __mz_add_compiler_flag(CMAKE_CXX_FLAGS ${PLATFORM} ${FLAG})
-    __mz_add_compiler_flag(CMAKE_C_FLAGS ${PLATFORM} ${FLAG})
+macro(mz_add_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_CXX_FLAGS ${PLATFORM} ${ARGN})
+    __mz_add_compiler_flag(CMAKE_C_FLAGS ${PLATFORM} ${ARGN})
 endmacro()
 
 macro(mz_use_default_compiler_settings)
@@ -254,41 +260,40 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 
 endif() #MZ_COMPILER_TEST_HAS_RUN
 
+# optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
+if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
+    mz_add_cxx_flag(GCC -std=gnu++0x)
+	mz_message("forcing C++11 support on this platform")
+endif()
+
 # compiler flags
+mz_add_definition(${CMAKE_SYSTEM_PROCESSOR}=1)
+mz_add_flag(GCC -Wall -Werror -Wno-unused-function)
+if(WINDOWS)
+    mz_add_definition(WIN32=1 WINDOWS=1)
+else()
+    mz_add_definition(${CMAKE_SYSTEM_NAME}=1)
+endif()
+
 if(MZ_IS_GCC)
-		# default macros and configuration
-		if(WINDOWS) # windows would be defined otherwise, this collides with some qt headers
-			SET(CMAKE_C_FLAGS_DEBUG "-DDEBUG ${TARGET_DEFS} -Wall -Werror -Wno-unused-function -D${CMAKE_SYSTEM_PROCESSOR} -DWIN32=1 -DWINDOWS=1")
-			SET(CMAKE_C_FLAGS_RELEASE "-D${CMAKE_SYSTEM_PROCESSOR} -Wall -Werror -Wno-unused-function ${TARGET_DEFS} -DWIN32=1 -DWINDOWS=1 -O3")
-			SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D${CMAKE_SYSTEM_PROCESSOR} ${TARGET_DEFS} -Wall -Werror -Wno-unused-function -DWIN32=1 -DWINDOWS=1")
-			SET(CMAKE_CXX_FLAGS_RELEASE "-D${CMAKE_SYSTEM_PROCESSOR} -Wall -Werror -Wno-unused-function ${TARGET_DEFS} -DWIN32=1 -DWINDOWS=1 -O3")
-		else()
-			SET(CMAKE_C_FLAGS_DEBUG "-DDEBUG ${TARGET_DEFS} -Wall -Werror -Wno-unused-function -D${CMAKE_SYSTEM_PROCESSOR} -D${CMAKE_SYSTEM_NAME}=1")
-			SET(CMAKE_C_FLAGS_RELEASE "-D${CMAKE_SYSTEM_PROCESSOR} -Wall -Werror -Wno-unused-function ${TARGET_DEFS} -D${CMAKE_SYSTEM_NAME}=1 -O3")
-			SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D${CMAKE_SYSTEM_PROCESSOR} ${TARGET_DEFS} -Wall -Werror -Wno-unused-function -D${CMAKE_SYSTEM_NAME}=1")
-			SET(CMAKE_CXX_FLAGS_RELEASE "-D${CMAKE_SYSTEM_PROCESSOR} -Wall -Werror -Wno-unused-function ${TARGET_DEFS} -D${CMAKE_SYSTEM_NAME}=1 -O3")
-		endif()
+	SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
+	SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 		
-		if(WINDOWS)
-		    if(MZ_64BIT)
-    			mz_add_definition("WIN32_MINGW64=1")
-    		else()
-    		    mz_add_definition("WIN32_MINGW=1")
-    		endif()
-		endif()
-		
-		# optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
-		if(MZ_HAS_CXX0X) # AND NOT DARWIN)
-            mz_add_cxx_flag(GCC -std=gnu++0x)
-			mz_message("forcing C++11 support on this platform")
-		endif()
+	if(WINDOWS)
+        if(MZ_64BIT)
+        	mz_add_definition("WIN32_MINGW64=1")
+    	else()
+    	    mz_add_definition("WIN32_MINGW=1")
+    	endif()
+	endif()
 
 elseif(MZ_IS_VS)
-		# default macros and configuration
-		SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MP /MDd /D DEBUG /D WIN32=1 /D WINDOWS=1 /D WIN32_VS=1 ${TARGET_DEFS}")
-		SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MP /MD /D WIN32 /D WIN32_VS=1 /D WINDOWS=1 /O2 ${TARGET_DEFS}")
-		SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /MDd /D DEBUG /D WIN32=1 /D WIN32_VS=1 /D WINDOWS=1 ${TARGET_DEFS}")
-		SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /MD /D WIN32 /D WIN32_VS=1 /D WINDOWS=1 /O2 ${TARGET_DEFS}")
+	SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MP /MDd /D DEBUG /D WIN32_VS=1")
+	SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MP /MD /D WIN32_VS=1 /O2")
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /MDd /D DEBUG /D WIN32_VS=1")
+	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /MD /D WIN32_VS=1 /O2")
 endif()
 
 if(MZ_HAS_CXX11)
