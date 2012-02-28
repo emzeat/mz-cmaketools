@@ -90,7 +90,7 @@ macro(mz_add_external NAME FOLDER)
 endmacro()
 
 macro(__mz_add_target NAME FOLDER)
-    add_subdirectory(${FOLDER} ${CMAKE_BINARY_DIR}/${NAME})
+    add_subdirectory(${FOLDER})
 endmacro()
 
 macro(mz_target_props NAME)
@@ -121,11 +121,16 @@ endmacro()
 include(CheckIncludeFiles)
 
 macro(mz_find_include_library NAME SYS HEADER LIB SRC DIRECTORY INC_DIR TARGET)
-    check_include_files (${HEADER} ${NAME}_SYSTEM)
-    if( ${NAME}_SYSTEM )
-        set(${NAME}_INCLUDE_DIR "")
-        set(${NAME}_LIBRARIES ${LIB})
-    else()
+    
+    foreach(_header ${HEADER})
+	    check_include_files (${_header} ${NAME}_SYSTEM)  
+	    if( ${NAME}_SYSTEM )
+			set(${NAME}_INCLUDE_DIR "")
+			set(${NAME}_LIBRARIES ${LIB})
+		endif()
+	endforeach(_header)
+
+    if( NOT ${NAME}_SYSTEM )
         set(${NAME}_INCLUDE_DIR ${INC_DIR})
         set(${NAME}_LIBRARIES ${TARGET})
         
