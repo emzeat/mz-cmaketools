@@ -16,7 +16,7 @@
 ### CONFIGURATION SECTION
 
 # path to the mz tools files
-set(MZ_TOOLS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Build")
+set(MZ_TOOLS_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 ### END OF CONFIGURATION SECTION
 
@@ -29,6 +29,9 @@ if(NOT HAS_MZ_GLOBAL)
 
   # user info
   message("-- configuring for build type: ${CMAKE_BUILD_TYPE}")
+  
+  # macros
+  include("${MZ_TOOLS_PATH}/macros.cmake")
 
 # EOF: global.cmake
 endif() 
