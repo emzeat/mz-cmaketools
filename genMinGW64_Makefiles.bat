@@ -15,4 +15,4 @@ set RELEASE_DIR=Release_%BUILD_DIR%
 set GENERATOR=MinGW Makefiles
 set TARGET=MinGW64/Windows
 
-call %~dp0\util.bat %*
+call "%~dp0\util.bat" %*

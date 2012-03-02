@@ -15,4 +15,4 @@ set RELEASE_DIR=Release_%BUILD_DIR%
 set GENERATOR=Visual Studio 10 Win64
 set TARGET=VS10(Testing)/Windows
 
-call %~dp0\util.bat %*
+call "%~dp0\util.bat" %*

@@ -16,23 +16,23 @@ REM #############################################################
 goto MAIN
 
 :make_debug
-	cd %BASE_DIR%\Build
+	cd "%BASE_DIR%\Build"
 	if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
 	cd %BUILD_DIR%
 
 	echo.== configuring target system '%TARGET%(Debug)'
-	cmake	-D CMAKE_BUILD_TYPE=Debug -G"%GENERATOR%" %BASE_DIR%/
+	cmake	-D CMAKE_BUILD_TYPE=Debug -G"%GENERATOR%" "%BASE_DIR%/"
 GOTO:EOF
 
 :make_release
 	set BUILD_DIR="%RELEASE_DIR%"
 	
-	cd %BASE_DIR%\Build
+	cd "%BASE_DIR%\Build"
 	if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
 	cd %BUILD_DIR%
 
 	echo.== configuring target system '%TARGET%(Release)'
-	cmake	-D CMAKE_BUILD_TYPE=Release -G"%GENERATOR%" %BASE_DIR%/
+	cmake	-D CMAKE_BUILD_TYPE=Release -G"%GENERATOR%" "%BASE_DIR%/"
 GOTO:EOF
 
 :debug_hint
@@ -50,9 +50,9 @@ GOTO:EOF
 	echo.== running global configuration
 
 	REM dirty hack, um root pfad korrekt herauszufinden
-	cd /d %~dp0	
+	cd /d "%~dp0"
 	cd ..
-	set BASE_DIR=%CD%
+	set "BASE_DIR=%CD%"
 	cd Build
 	echo.-- determining working directory: %BASE_DIR%\Build
 	echo.

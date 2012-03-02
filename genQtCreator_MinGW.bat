@@ -15,4 +15,4 @@ set RELEASE_DIR=Release_%BUILD_DIR%
 set GENERATOR=CodeBlocks - MinGW Makefiles
 set TARGET=QtCreator,MinGW/Windows
 
-call %~dp0\util.bat %*
+call "%~dp0\util.bat" %*

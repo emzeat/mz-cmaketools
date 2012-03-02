@@ -15,4 +15,4 @@ set RELEASE_DIR=Release_%BUILD_DIR%
 set GENERATOR=Visual Studio 9 2008
 set TARGET=VS/Windows
 
-call %~dp0\util.bat %*
+call "%~dp0\util.bat" %*
