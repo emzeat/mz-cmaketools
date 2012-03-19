@@ -38,15 +38,15 @@
 #       and gcc/clang
 #       Example: mz_add_definition(NO_DEBUG)
 #
-# mz_add_cxx_flag GCC|CLANG|MSVC|ALL <flag1> <flag2> ...
+# mz_add_cxx_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
 # 		pass the given flag to the C++ compiler when
 #       the compiler matches the given platform
 #
-# mz_add_c_flag GCC|CLANG|MSVC|ALL <flag1> <flag2> ...
+# mz_add_c_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
 # 		pass the given flag to the C compiler when
 #       the compiler matches the given platform
 #
-# mz_add_flag GCC|CLANG|MSVC|ALL <flag1> <flag2> ...
+# mz_add_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
 # 		pass the given flag to the compiler, no matter
 #       wether compiling C or C++ files. The selected platform
 #       is still respected
@@ -108,13 +108,13 @@ macro(mz_add_definition)
 endmacro()
 
 macro(__mz_add_compiler_flag COMPILER_FLAGS PLATFORM)
-    if( NOT "${PLATFORM}" MATCHES "(GCC)|(CLANG)|(MSVC)|(ALL)" )
-        mz_error_message("Please provide a valid platform when adding a compiler flag: GCC|CLANG|MSVC|ALL")
+    if( NOT "${PLATFORM}" MATCHES "(GCC)|(CLANG)|(VS)|(ALL)" )
+        mz_error_message("Please provide a valid platform when adding a compiler flag: GCC|CLANG|VS|ALL")
     endif()
 
     if(  ("${PLATFORM}" STREQUAL "ALL")
             OR ("${PLATFORM}" STREQUAL "GCC" AND MZ_IS_GCC)
-            OR ("${PLATFORM}" STREQUAL "MSVC" AND MZ_IS_VS)
+            OR ("${PLATFORM}" STREQUAL "VS" AND MZ_IS_VS)
             OR ("${PLATFORM}" STREQUAL "CLANG" AND MZ_IS_CLANG) )
         
         FOREACH(_current ${ARGN})
@@ -316,3 +316,18 @@ if(MZ_HAS_CXX11)
     mz_add_definition(MZ_HAS_CXX0X=1)
 endif()
 
+# On Windows, MS Visual Studio will ignore the
+# environment variables INCLUDE and LIB by default. This forces
+# them to be used
+if(WINDOWS)
+    FOREACH(_inc $ENV{INCLUDE})
+		file(TO_CMAKE_PATH ${_inc} _inc)
+        include_directories("${_inc}")
+        mz_debug_message("Including ${_inc} for headers")
+    ENDFOREACH(_inc)
+    FOREACH(_lib $ENV{LIB})
+		file(TO_CMAKE_PATH ${_lib} _lib)
+        link_directories("${_lib}")
+        mz_debug_message("Including ${_lib} for libs")
+    ENDFOREACH(_lib)	
+endif()
