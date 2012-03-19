@@ -12,7 +12,7 @@
 ##############################################################
 
 function make_debug {
-	cd $BASE_DIR/$SCRIPT_DIR
+	cd "$BASE_DIR/$SCRIPT_DIR"
 	if ! test -r $BUILD_DIR ; then
 		mkdir $BUILD_DIR
 	fi
@@ -28,7 +28,7 @@ function make_debug {
 function make_release {
 	BUILD_DIR="$RELEASE_DIR"
 	
-	cd $BASE_DIR/$SCRIPT_DIR
+	cd "$BASE_DIR/$SCRIPT_DIR"
 	if ! test -r $BUILD_DIR ; then
 		mkdir $BUILD_DIR
 	fi
@@ -56,12 +56,10 @@ function detect_dir {
 	echo "== running global configuration"
 
 	# configuration detection
-	BASE_DIR=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
+	BASE_DIR=`cd "${0%/*}/.." 2>/dev/null; echo "$PWD"/"${0##*/}"`
 	BASE_DIR=`dirname "$BASE_DIR"`
-	BASE_DIR=${BASE_DIR//\/Build/}
-	BASE_DIR=${BASE_DIR//\/build/}	
 	
-	cd $BASE_DIR
+	cd "$BASE_DIR"
 	if [ -d build ] 
 	then
 	    SCRIPT_DIR="build"

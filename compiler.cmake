@@ -119,7 +119,7 @@ macro(__mz_add_compiler_flag COMPILER_FLAGS PLATFORM)
         
         FOREACH(_current ${ARGN})
             set(${COMPILER_FLAGS} "${${COMPILER_FLAGS}} ${_current}")
-            mz_debug_message("Adding flag ${_current}")
+            mz_debug_message("Adding flag ${_current} to ${COMPILER_FLAGS}")
         ENDFOREACH(_current)
         #mz_debug_message("Compiler flags: ${${COMPILER_FLAGS}}")
     else()
