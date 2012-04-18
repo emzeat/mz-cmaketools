@@ -120,10 +120,37 @@ endmacro()
 
 include(CheckIncludeFiles)
 
+macro(mz_check_include_files FILE VAR)
+	if( IOS )
+		mz_debug_message("Using custom check_include_files")
+		
+		if( NOT DEFINED FOUND_${VAR} )
+			mz_message("Looking for include files ${FILE}")
+			find_file( ${VAR} 
+				NAMES ${FILE} 
+				PATHS ${CMAKE_REQUIRED_INCLUDES}
+			)
+			if( ${VAR} )
+				mz_message("Looking for include files ${FILE} - found")
+				set( FOUND_${VAR} ${${VAR}} CACHE INTERNAL FOUND_${VAR} )
+			else()
+				mz_message("Looking for include files ${FILE} - not found")
+			endif()
+		else()
+			set( ${VAR} ${FOUND_${VAR}} )
+		endif()
+		
+	else()
+		mz_debug_message("Using native check_include_files")
+		
+		CHECK_INCLUDE_FILES( ${FILE} ${VAR} )
+	endif()
+endmacro()
+
 macro(mz_find_include_library NAME SYS HEADER LIB SRC DIRECTORY INC_DIR TARGET)
     
     foreach(_header ${HEADER})
-	    check_include_files (${_header} ${NAME}_SYSTEM)  
+	    mz_check_include_files (${_header} ${NAME}_SYSTEM)  
 	    if( ${NAME}_SYSTEM )
 			set(${NAME}_INCLUDE_DIR "")
 			set(${NAME}_LIBRARIES ${LIB})

@@ -22,7 +22,8 @@
 # MZ_HAS_CXX0X see MZ_HAS_CXX11
 # MZ_HAS_CXX11 true when the compiler supports at least a
 #              (subset) of the upcoming C++11 standard
-# DARWIN true when building on OS X
+# DARWIN true when building on OS X / iOS
+# IOS true when building for iOS
 # WINDOWS true when building on Windows
 # LINUX true when building on Linux
 # MZ_DATE_STRING a string containing day, date and time of the
@@ -66,14 +67,14 @@
 # Provided defines (defined to 1)
 #  WINDOWS / WIN32 on Windows
 #  LINUX on Linux
-#  DARWIN on Darwin / OS X
+#  DARWIN on Darwin / OS X / iOS
+#  IOS on iOS
 #  WIN32_VS on MSVC - note this is deprecated, it is recommended to use _MSC_VER
 #  WIN32_MINGW when using the mingw toolchain
 #  WIN32_MINGW64 when using the mingw-w64 toolchain
 #  MZ_HAS_CXX11 / MZ_HAS_CXX0X when subset of C++11 is available
 #
 ########################################################################
-
 
 
 ########################################################################
@@ -149,6 +150,7 @@ macro(mz_use_default_compiler_settings)
 	set(CMAKE_CXX_FLAGS_RELEASE "${MZ_CXX_DEFAULT_RELEASE}")
 endmacro()
 
+
 # borrowed from find_boost
 #
 # Runs compiler with "-dumpversion" and parses major/minor
@@ -196,7 +198,11 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 	SET(MZ_CXX_DEFAULT_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING MZ_CXX_DEFAULT_RELEASE)
 	
 	# compiler settings and defines depending on platform
-	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	if(IOS_PLATFORM)
+		set(DARWIN TRUE CACHE BOOL DARWIN  )
+		set(IOS TRUE CACHE BOOL IOS)
+		mz_message("dectected toolchain for iOS")	
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 		set(DARWIN TRUE CACHE BOOL DARWIN  )
 	elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		set(LINUX TRUE CACHE BOOL LINUX )
@@ -286,9 +292,12 @@ mz_add_definition(${CMAKE_SYSTEM_PROCESSOR}=1)
 mz_add_flag(GCC -Wall -Werror -Wno-unused-function)
 if(WINDOWS)
     mz_add_definition(WIN32=1 WINDOWS=1)
+elseif(IOS)
+	mz_add_definition(IOS=1)
 else()
     mz_add_definition(${CMAKE_SYSTEM_NAME}=1)
 endif()
+
 
 if(MZ_IS_GCC)
 	SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
