@@ -17,6 +17,7 @@
 # MZ_IS_GCC true when the compiler is gcc or compatible
 # MZ_IS_CLANG true when the compiler is clang
 # MZ_IS_XCODE true when configuring for the XCode IDE
+# MZ_IS_RELEASE true when building with CMAKE_BUILD_TYPE = "Release"
 # MZ_64BIT true when building for a 64bit system
 # MZ_32BIT true when building for a 32bit system
 # MZ_HAS_CXX0X see MZ_HAS_CXX11
@@ -270,6 +271,13 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 		set(MZ_32BIT TRUE CACHE BOOL MZ_32BIT)
 		set(MZ_64BIT FALSE CACHE BOOL MZ_64BIT)
 	endif()
+
+        # configured build type
+        # NOTE: This can be overriden e.g. on Visual Studio
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            set(MZ_IS_RELEASE TRUE CACHE BOOL MZ_IS_RELEASE)
+            mz_debug_message("CMake run in release mode")
+        endif()
 
 endif() #MZ_COMPILER_TEST_HAS_RUN
 
