@@ -156,7 +156,7 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
         set(${_NAME_UPPER}_INCLUDE_DIRS ${INC_DIR})
         set(${_NAME_UPPER}_LIBRARIES ${TARGET})
         
-        mz_add_library(${_NAME} ${DIRECTORY})    
+        mz_add_library(${_NAME} ${_DIRECTORY})    
     endif()
 
 endmacro()
