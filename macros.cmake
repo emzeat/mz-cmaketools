@@ -41,17 +41,17 @@
 #		to <mocced>. Improves the version provided by cmake by searching
 #       for Q_OBJECT first and thus reducing the needed calls to moc
 #
-# mz_find_include_library <name>  SYS <header> <lib> SRC <directory> <include_dir> <target>
+# mz_find_include_library <name>  SYS <version> SRC <directory> <include_dir> <target>
 #       useful when providing a version of a library within the
 #       own sourcetree but prefer the system's library version over it.
 #       Will search for the given header in the system includes and when
 #       not found, it will include the given directory which should contain
 #       a cmake file defining the given target.
 #       After calling this macro the following variables will be declared:
-#           <name>_INCLUDE_DIR The directory containing the header or the passed include_dir if
+#           <name>_INCLUDE_DIRS The directory containing the header or the passed include_dir if
 #                              the lib was not found on the system
 #           <name>_LIBRARIES The libs to link against - either lib or target
-#           <name>_SYSTEM true if the lib was found on the system
+#           <name>_FOUND true if the lib was found on the system
 #
 ########################################################################
 
@@ -147,21 +147,17 @@ macro(mz_check_include_files FILE VAR)
 	endif()
 endmacro()
 
-macro(mz_find_include_library NAME SYS HEADER LIB SRC DIRECTORY INC_DIR TARGET)
+macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET)
     
-    foreach(_header ${HEADER})
-	    mz_check_include_files (${_header} ${NAME}_SYSTEM)  
-	    if( ${NAME}_SYSTEM )
-			set(${NAME}_INCLUDE_DIR "")
-			set(${NAME}_LIBRARIES ${LIB})
-		endif()
-	endforeach(_header)
-
-    if( NOT ${NAME}_SYSTEM )
-        set(${NAME}_INCLUDE_DIR ${INC_DIR})
-        set(${NAME}_LIBRARIES ${TARGET})
+    STRING(TOUPPER ${_NAME} _NAME_UPPER)
+    
+    find_package( ${_NAME} )
+    if( NOT ${_NAME_UPPER}_FOUND )
+        set(${_NAME_UPPER}_INCLUDE_DIRS ${INC_DIR})
+        set(${_NAME_UPPER}_LIBRARIES ${TARGET})
         
-        mz_add_library(${NAME} ${DIRECTORY})
+        mz_add_library(${_NAME} ${DIRECTORY})    
     endif()
+
 endmacro()
 
