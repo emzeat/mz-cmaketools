@@ -48,8 +48,9 @@
 #       not found, it will include the given directory which should contain
 #       a cmake file defining the given target.
 #       After calling this macro the following variables will be declared:
-#           <name>_INCLUDE_DIRS The directory containing the header or the passed include_dir if
-#                              the lib was not found on the system
+#           <name>_INCLUDE_DIRS The directory containing the header or 
+#                              the passed include_dir if the lib was not 
+#                              found on the system
 #           <name>_LIBRARIES The libs to link against - either lib or target
 #           <name>_FOUND true if the lib was found on the system
 #
@@ -120,6 +121,10 @@ endmacro()
 
 include(CheckIncludeFiles)
 
+if( NOT CMAKE_MODULE_PATH )
+    set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules" )
+endif()
+
 macro(mz_check_include_files FILE VAR)
 	if( IOS )
 		mz_debug_message("Using custom check_include_files")
@@ -153,8 +158,8 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     
     find_package( ${_NAME} )
     if( NOT ${_NAME_UPPER}_FOUND )
-        set(${_NAME_UPPER}_INCLUDE_DIRS ${INC_DIR})
-        set(${_NAME_UPPER}_LIBRARIES ${TARGET})
+        set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
+        set(${_NAME_UPPER}_LIBRARIES ${_TARGET})
         
         mz_add_library(${_NAME} ${_DIRECTORY})    
     endif()
