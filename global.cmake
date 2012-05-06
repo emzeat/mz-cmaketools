@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # CMAKE_CURRENT_LIST_DIR is available after CMake 2.8.3 only
 # but we support 2.8.0 as well
 if( NOT CMAKE_CURRENT_LIST_DIR )
-    string(REPLACE "${CMAKE_CURRENT_LIST_FILE}" "/global.cmake" CMAKE_CURRENT_LIST_DIR)
+    string(REPLACE "/global.cmake" "" CMAKE_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_FILE}")
 endif()
 
 # path to the mz tools files
