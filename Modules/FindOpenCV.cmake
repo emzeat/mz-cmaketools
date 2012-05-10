@@ -20,7 +20,10 @@ if( OPENCV_CFG_PATH )
 
 	set( OPENCV_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS} )
 	set( OPENCV_LIBRARIES ${OpenCV_LIBRARIES} )
-	
+else()
+	message("-- Could not find OpenCV, you might have to set an environment")
+	message("   variable 'OpenCV_DIR' pointing to the directory of your")
+	message("   installation containing the file 'OpenCVConfig.cmake'")
 endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
