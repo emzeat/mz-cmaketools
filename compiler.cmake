@@ -157,24 +157,26 @@ endmacro()
 # Runs compiler with "-dumpversion" and parses major/minor
 # version with a regex.
 #
-FUNCTION(__Boost_MZ_COMPILER_DUMPVERSION _OUTPUT_VERSION)
+function(__Boost_MZ_COMPILER_DUMPVERSION _OUTPUT_VERSION)
 
-  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-  ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-  OUTPUT_VARIABLE _boost_COMPILER_VERSION
+  exec_program(${CMAKE_CXX_COMPILER}
+    ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+    OUTPUT_VARIABLE _boost_COMPILER_VERSION
   )
-  STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-  _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+  string(
+    REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+    _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION}
+  )
 
-  SET(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
-ENDFUNCTION()
+  set(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
+endfunction()
 
 # runs compiler with "--version" and searches for clang
 #
-FUNCTION(__MZ_COMPILER_IS_CLANG _OUTPUT)
-  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-  ARGS ${CMAKE_CXX_COMPILER_ARG1} --version
-  OUTPUT_VARIABLE _MZ_CLANG_VERSION
+function(__MZ_COMPILER_IS_CLANG _OUTPUT _OUTPUT_VERSION)
+  exec_program(${CMAKE_CXX_COMPILER}
+    ARGS ${CMAKE_CXX_COMPILER_ARG1} --version
+    OUTPUT_VARIABLE _MZ_CLANG_VERSION
   )
 
   if("${_MZ_CLANG_VERSION}" MATCHES ".*clang.*")
@@ -183,7 +185,14 @@ FUNCTION(__MZ_COMPILER_IS_CLANG _OUTPUT)
     set(${_OUTPUT} FALSE PARENT_SCOPE)
   endif()
 
-ENDFUNCTION()
+  string(
+    REGEX REPLACE "clang version ([0-9])\\.([0-9])(\\.[0-9])? \(.+\)" "\\1\\2"
+    _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
+  )
+  
+  set(${_OUTPUT_VERSION} ${_MZ_CLANG_VERSION} PARENT_SCOPE)
+  mz_debug_message("Possible clang version ${_MZ_CLANG_VERSION}")
+endfunction()
 
 # we only run the very first time
 if(NOT MZ_COMPILER_TEST_HAS_RUN)
@@ -212,7 +221,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 	endif()
 	
     # clang is gcc compatible but still different
-    __MZ_COMPILER_IS_CLANG( _MZ_TEST_CLANG )
+    __MZ_COMPILER_IS_CLANG( _MZ_TEST_CLANG COMPILER_VERSION )
     if( _MZ_TEST_CLANG )
         	mz_message("compiler is clang")
         set(MZ_IS_CLANG TRUE CACHE INTERNAL MZ_IS_CLANG)
@@ -232,19 +241,21 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 		endif()
 	
 		# detect compiler version
-		__Boost_MZ_COMPILER_DUMPVERSION(GCC_VERSION)
-		set(GCC_VERSION "${GCC_VERSION}")
-		mz_message("compiler version ${GCC_VERSION}")
-		if(GCC_VERSION STRGREATER "45")
+
+		if(NOT MZ_IS_CLANG)
+				__Boost_MZ_COMPILER_DUMPVERSION(COMPILER_VERSION)
+		endif()
+		mz_message("compiler version ${COMPILER_VERSION}")
+		if(COMPILER_VERSION STRGREATER "45")
 			mz_message("C++11 support detected")
 			set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
 			set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
-		elseif(GCC_VERSION STRGREATER "44")
+		elseif(COMPILER_VERSION STRGREATER "44")
 			mz_message("experimental C++0x support detected")
 			set(MZ_HAS_EXPERIMENTAL_CXX0X TRUE CACHE BOOL MZ_HAS_EXPERIMENTAL_CXX0X)
 			set(MZ_HAS_CXX0X TRUE CACHE BOOL MZ_HAS_CXX0X)
 			set(MZ_HAS_CXX11 TRUE CACHE BOOL MZ_HAS_CXX11)
-		elseif(MZ_IS_CLANG AND GCC_VERSION STRGREATER "41")
+		elseif(MZ_IS_CLANG AND COMPILER_VERSION STRGREATER "29")
 			mz_message("C++11 support detected")
 			set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
 			set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)		
