@@ -5,7 +5,7 @@ FIND_PATH(
 	OpenCVConfig.cmake
 	HINTS
 	/usr/local/share/OpenCV
-	/usr/share/OpenCV	
+	/usr/share/OpenCV
 	$ENV{OpenCV_DIR}
 )
 
@@ -19,7 +19,7 @@ if( OPENCV_CFG_PATH )
     set(CVLIB_SUFFIX "${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}")
 
 	set( OPENCV_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS} )
-	set( OPENCV_LIBRARIES ${OpenCV_LIBRARIES} )
+	set( OPENCV_LIBRARIES ${OpenCV_LIBRARIES} ${OpenCV_LIBS})
 else()
 	message("-- Could not find OpenCV, you might have to set an environment")
 	message("   variable 'OpenCV_DIR' pointing to the directory of your")
