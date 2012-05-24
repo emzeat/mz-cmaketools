@@ -283,14 +283,12 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 	endif()
 	
 	# platform (32bit / 64bit)
-        if(CMAKE_SIZEOF_VOID_P MATCHES "8")
+	if(CMAKE_SIZEOF_VOID_P MATCHES "8")
 		mz_message("64bit platform")
-		set(MZ_64BIT TRUE CACHE INTERNAL MZ_64BIT)
-		set(MZ_32BIT FALSE CACHE INTERNAL MZ_32BIT)
+		set(MZ_64BIT ON CACHE INTERNAL MZ_64BIT)
 	else()
 		mz_message("32bit platform")
-		set(MZ_32BIT TRUE CACHE INTERNAL MZ_32BIT)
-		set(MZ_64BIT FALSE CACHE INTERNAL MZ_64BIT)
+		set(MZ_32BIT ON CACHE INTERNAL MZ_32BIT)
 	endif()
 
         # configured build type
