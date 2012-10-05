@@ -1,26 +1,3 @@
-##
-# Copyright (c) 2008-2012 Marius Zwicker
-# All rights reserved.
-# 
-# @LICENSE_HEADER_START:Apache@
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# 
-# http://www.mlba-team.de
-# 
-# @LICENSE_HEADER_END:Apache@
-##
-
 ##################################################
 #
 #	BUILD/COMPILER.CMAKE
@@ -31,6 +8,7 @@
 # 	compiler variables. If available features
 #	for c++0x will be enabled automatically
 #
+#	(c) 2010-2012 Marius Zwicker
 #
 #
 # PROVIDED CMAKE VARIABLES
@@ -327,6 +305,7 @@ if(WINDOWS)
   execute_process(COMMAND "date" "/T" OUTPUT_VARIABLE MZ_DATE_STRING)
 else() # Sun, 11 Dec 2011 12:07:00 +0200
   execute_process(COMMAND "date" "+%a, %d %b %Y %T %z" OUTPUT_VARIABLE MZ_DATE_STRING)
+  string(REPLACE "\n" "" MZ_DATE_STRING "${MZ_DATE_STRING}")
 endif()
 mz_message("Today is: ${MZ_DATE_STRING}")
 
