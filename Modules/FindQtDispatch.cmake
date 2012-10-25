@@ -24,7 +24,7 @@
 FIND_PATH(
 	QTDISPATCH_INCLUDE_DIRS
 	NAMES
-	QtDispatch/dispatch.h
+	QtDispatch/qdispatch.h
 	HINTS
 	/Library/Frameworks
 	$ENV{HOME}/include
