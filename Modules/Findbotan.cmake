@@ -21,17 +21,25 @@
 # @LICENSE_HEADER_END:Apache@
 ##
 
+IF (NOT WIN32)
+   # try using pkg-config to get the directories and then use these values
+   # in the FIND_PATH() and FIND_LIBRARY() calls
+   # also fills in BOTAN_DEFINITIONS, although that isn't normally useful
+   FIND_PACKAGE(PkgConfig)
+   PKG_SEARCH_MODULE(PC_BOTAN botan-1.10 botan-1.9 botan-1.8 botan)
+   SET(BOTAN_DEFINITIONS ${PC_BOTAN_CFLAGS})
+ENDIF (NOT WIN32)
+
 FIND_PATH(
   BOTAN_INCLUDE_DIRS
   NAMES
-  botan.h
+  botan/botan.h
   HINTS
   "$ENV{LIB_DIR}/include"
-  "$ENV{LIB_DIR}/include/botan"
-  "$ENV{LIB_DIR}/include/botan-${PACKAGE_FIND_VERSION}"
   c:/msys/local/include
-  /opt/local/include/botan
-  /opt/local/include/botan-${PACKAGE_FIND_VERSION}
+  /opt/local/include
+  ${PC_BOTAN_INCLUDEDIR}
+  ${PC_BOTAN_INCLUDE_DIRS}
 )
 
 set(CMAKE_FIND_FRAMEWORK LAST)
@@ -39,11 +47,14 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 FIND_LIBRARY(
   BOTAN_LIBRARIES 
   NAMES 
-  botan botan-${PACKAGE_FIND_VERSION}
+  botan
+  ${PC_BOTAN_LIBRARIES}
   HINTS
   "$ENV{LIB_DIR}/lib"
   #mingw
   c:/msys/local/lib
+  ${PC_BOTAN_LIBDIR}
+  ${PC_BOTAN_LIBRARY_DIRS}
 )
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(

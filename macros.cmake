@@ -178,7 +178,7 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     
     STRING(TOUPPER ${_NAME} _NAME_UPPER)
     
-    find_package( ${_NAME} )
+    find_package( ${_NAME} ${_VERSION} )
     if( NOT ${_NAME_UPPER}_FOUND )
         set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET})
