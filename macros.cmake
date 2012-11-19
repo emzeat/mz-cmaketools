@@ -115,8 +115,7 @@ macro(mz_auto_moc mocced)
 	# determine the required files
 	__mz_extract_files(to_moc ${ARGN})
 	#mz_debug_message("mz_auto_moc mocced: ${to_moc}")
-    # the definition of -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED is to bypass a parsing bug within moc
-    qt4_wrap_cpp(_mocced ${to_moc} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+	qt4_wrap_cpp(_mocced ${to_moc})
 	set(${mocced} ${${mocced}} ${_mocced})
 endmacro()
 
@@ -157,7 +156,7 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     
     STRING(TOUPPER ${_NAME} _NAME_UPPER)
     
-    find_package( ${_NAME} ${_VERSION} )
+    find_package( ${_NAME} )
     if( NOT ${_NAME_UPPER}_FOUND )
         set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET})
