@@ -53,6 +53,10 @@
 #                              found on the system
 #           <name>_LIBRARIES The libs to link against - either lib or target
 #           <name>_FOUND true if the lib was found on the system
+#           <name>_IGNORE_SYSTEM_LIBRARY Will be an option available
+#                              for custom configuration. Enable to ignore the
+#                              detected system install library and force use
+#                              of the version in <directory>
 #
 ########################################################################
 
@@ -158,7 +162,13 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     STRING(TOUPPER ${_NAME} _NAME_UPPER)
     
     find_package( ${_NAME} ${_VERSION} )
-    if( NOT ${_NAME_UPPER}_FOUND )
+    if( ${_NAME_UPPER}_FOUND )
+        option(${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY "Force use of the in-source library version of ${_NAME}" OFF)
+    else()
+        option(${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY "Force use of the in-source library version of ${_NAME}" ON)
+    endif()
+
+    if( NOT ${_NAME_UPPER}_FOUND OR ${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY )
         set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET} ${ARGN})
         
