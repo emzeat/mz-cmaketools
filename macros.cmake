@@ -95,7 +95,7 @@ macro(mz_add_external NAME FOLDER)
 endmacro()
 
 macro(__mz_add_target NAME FOLDER)
-    add_subdirectory(${FOLDER})
+    add_subdirectory(${FOLDER} ${CMAKE_BINARY_DIR}/${FOLDER})
 endmacro()
 
 macro(mz_target_props NAME)
@@ -125,6 +125,7 @@ macro(mz_auto_moc mocced)
 endmacro()
 
 include(CheckIncludeFiles)
+include(FindPackageHandleStandardArgs)
 
 if( NOT CMAKE_MODULE_PATH )
     set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules" )
@@ -153,7 +154,7 @@ macro(mz_check_include_files FILE VAR)
 	else()
 		mz_debug_message("Using native check_include_files")
 		
-		CHECK_INCLUDE_FILES( ${FILE} ${VAR} )
+        check_include_files( ${FILE} ${VAR} )
 	endif()
 endmacro()
 

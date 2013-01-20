@@ -22,8 +22,14 @@
 ##
 
 ## File containing settings for crosscompiling Linux -> RaspberryPi (armhf)
-set(RASPI_ROOTFS "$ENV{RASPI_ROOT_FS}")
-set(RASPI_TOOLCHAIN "$ENV{RASPI_TOOLCHAIN}")
+
+if(NOT RASPI_ROOTFS)
+  set(RASPI_ROOTFS "$ENV{RASPI_ROOT_FS}" CACHE INTERNAL "RASPI_ROOTFS")
+endif()
+
+if(NOT RASPI_TOOLCHAIN)
+  set(RASPI_TOOLCHAIN "$ENV{RASPI_TOOLCHAIN}" CACHE INTERNAL "RASPI_TOOLCHAIN")
+endif()
 
 if(NOT RASPI_ROOTFS)
   message(FATAL_ERROR "Missing raspberry pi rootfs, please set RASPI_ROOT_FS env variable")
@@ -32,6 +38,8 @@ endif()
 if(NOT RASPI_TOOLCHAIN)
   message(FATAL_ERROR "Missing raspberry pi toolchain, please set RASPI_TOOLCHAIN env variable")
 endif()
+
+mark_as_advanced(RASPI_ROOTFS RASPI_TOOLCHAIN)
 
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_VERSION 1)	
@@ -43,7 +51,7 @@ set(CMAKE_CXX_COMPILER ${RASPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-g++)
 #set(CMAKE_LINKER ${RASPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-ld)
 #set(CMAKE_NM ${RASPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-nm)
 #set(CMAKE_STRIP ${RASPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-strip)
-set(CMAKE_FIND_ROOTPATH ${RASPI_ROOTFS})
+set(CMAKE_FIND_ROOT_PATH ${RASPI_ROOTFS})
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -51,5 +59,5 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-set(RASPI true)
-set(UNIX True)
+set(RASPI true CACHE INTERNAL "RASPI")
+set(UNIX true CACHE INTERNAL "UNIX")
