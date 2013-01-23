@@ -118,9 +118,13 @@ macro(mz_auto_moc mocced)
 	set(_mocced "")
 	# determine the required files
 	__mz_extract_files(to_moc ${ARGN})
-	#mz_debug_message("mz_auto_moc mocced: ${to_moc}")
+    mz_debug_message("mz_auto_moc mocced in: ${to_moc}")
     # the definition of -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED is to bypass a parsing bug within moc
-    qt4_wrap_cpp(_mocced ${to_moc} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+    if( Qt5Core_VERSION_STRING )
+        qt5_wrap_cpp(_mocced ${to_moc} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+    else()
+        qt4_wrap_cpp(_mocced ${to_moc} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
+    endif()
 	set(${mocced} ${${mocced}} ${_mocced})
 endmacro()
 
