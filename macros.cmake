@@ -62,7 +62,7 @@
 
 # if global.cmake was not included yet, report it
 if (NOT HAS_MZ_GLOBAL)
-	message(FATAL_ERROR "!! include global.cmake before including this file !!")
+    message(FATAL_ERROR "!! include global.cmake before including this file !!")
 endif()
 
 ########################################################################
@@ -70,32 +70,35 @@ endif()
 ########################################################################
 
 macro(mz_add_library NAME FOLDER)
-	mz_message("adding library ${NAME}")
-	__mz_add_target(${NAME} ${FOLDER})
+    mz_message("adding library ${NAME}")
+    __mz_add_target(${NAME} ${FOLDER})
 endmacro()
 
 macro(mz_add_executable NAME FOLDER)
-	mz_message("adding executable ${NAME}")
-	__mz_add_target(${NAME} ${FOLDER})
+    mz_message("adding executable ${NAME}")
+    __mz_add_target(${NAME} ${FOLDER})
 endmacro()
 
 macro(mz_add_control NAME FOLDER)
-	mz_message("adding control ${NAME}")
-	__mz_add_target(${NAME} ${FOLDER})
+    mz_message("adding control ${NAME}")
+    __mz_add_target(${NAME} ${FOLDER})
 endmacro()
 
 macro(mz_add_testtool NAME FOLDER)
-	mz_message("adding testtool ${NAME}")
-	__mz_add_target(${NAME} ${FOLDER})
+    mz_message("adding testtool ${NAME}")
+    __mz_add_target(${NAME} ${FOLDER})
 endmacro()
 
 macro(mz_add_external NAME FOLDER)
-	mz_message("adding external dependancy ${NAME}")
-	__mz_add_target(${NAME} ${FOLDER})
+    mz_message("adding external dependancy ${NAME}")
+    __mz_add_target(${NAME} ${FOLDER})
 endmacro()
 
 macro(__mz_add_target NAME FOLDER)
-    add_subdirectory(${FOLDER} ${CMAKE_BINARY_DIR}/${FOLDER})
+    get_filename_component(_ABS_FOLDER ${FOLDER} ABSOLUTE)
+    file(RELATIVE_PATH _REL_FOLDER ${CMAKE_SOURCE_DIR} ${_ABS_FOLDER})
+
+    add_subdirectory(${FOLDER} ${CMAKE_BINARY_DIR}/${_REL_FOLDER})
 endmacro()
 
 macro(mz_target_props NAME)
@@ -103,21 +106,21 @@ macro(mz_target_props NAME)
 endmacro()
 
 macro(__mz_extract_files _qt_files)
-	set(${_qt_files})
-	FOREACH(_current ${ARGN})
-		file(STRINGS ${_current} _content LIMIT_COUNT 1 REGEX .*Q_OBJECT.*)
-		if("${_content}" MATCHES .*Q_OBJECT.*)
-			LIST(APPEND ${_qt_files} "${_current}")
-		endif()
-	ENDFOREACH(_current)
+    set(${_qt_files})
+    FOREACH(_current ${ARGN})
+            file(STRINGS ${_current} _content LIMIT_COUNT 1 REGEX .*Q_OBJECT.*)
+            if("${_content}" MATCHES .*Q_OBJECT.*)
+                    LIST(APPEND ${_qt_files} "${_current}")
+            endif()
+    ENDFOREACH(_current)
 endmacro()
 
 macro(mz_auto_moc mocced)
-	#mz_debug_message("mz_auto_moc input: ${ARGN}")
-	
-	set(_mocced "")
-	# determine the required files
-	__mz_extract_files(to_moc ${ARGN})
+    #mz_debug_message("mz_auto_moc input: ${ARGN}")
+
+    set(_mocced "")
+    # determine the required files
+    __mz_extract_files(to_moc ${ARGN})
     mz_debug_message("mz_auto_moc mocced in: ${to_moc}")
     # the definition of -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED is to bypass a parsing bug within moc
     if( Qt5Core_VERSION_STRING )
@@ -136,30 +139,30 @@ if( NOT CMAKE_MODULE_PATH )
 endif()
 
 macro(mz_check_include_files FILE VAR)
-	if( IOS )
-		mz_debug_message("Using custom check_include_files")
-		
-		if( NOT DEFINED FOUND_${VAR} )
-			mz_message("Looking for include files ${FILE}")
-			find_file( ${VAR} 
-				NAMES ${FILE} 
-				PATHS ${CMAKE_REQUIRED_INCLUDES}
-			)
-			if( ${VAR} )
-				mz_message("Looking for include files ${FILE} - found")
-				set( FOUND_${VAR} ${${VAR}} CACHE INTERNAL FOUND_${VAR} )
-			else()
-				mz_message("Looking for include files ${FILE} - not found")
-			endif()
-		else()
-			set( ${VAR} ${FOUND_${VAR}} )
-		endif()
-		
-	else()
-		mz_debug_message("Using native check_include_files")
-		
+    if( IOS )
+        mz_debug_message("Using custom check_include_files")
+
+        if( NOT DEFINED FOUND_${VAR} )
+            mz_message("Looking for include files ${FILE}")
+            find_file( ${VAR}
+                    NAMES ${FILE}
+                    PATHS ${CMAKE_REQUIRED_INCLUDES}
+            )
+            if( ${VAR} )
+                    mz_message("Looking for include files ${FILE} - found")
+                    set( FOUND_${VAR} ${${VAR}} CACHE INTERNAL FOUND_${VAR} )
+            else()
+                    mz_message("Looking for include files ${FILE} - not found")
+            endif()
+        else()
+            set( ${VAR} ${FOUND_${VAR}} )
+        endif()
+
+    else()
+        mz_debug_message("Using native check_include_files")
+
         check_include_files( ${FILE} ${VAR} )
-	endif()
+    endif()
 endmacro()
 
 macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET)
