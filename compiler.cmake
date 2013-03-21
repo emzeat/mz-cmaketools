@@ -53,6 +53,32 @@
 #       wether compiling C or C++ files. The selected platform
 #       is still respected
 #
+# mz_add_cxx_debug_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
+# 		pass the given flag to the C++ compiler when
+#       the compiler matches the given platform
+#
+# mz_add_c_debug_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
+# 		pass the given flag to the C compiler when
+#       the compiler matches the given platform
+#
+# mz_add_debug_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
+# 		pass the given flag to the compiler, no matter
+#       wether compiling C or C++ files. The selected platform
+#       is still respected
+#
+# mz_add_cxx_release_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
+# 		pass the given flag to the C++ compiler when
+#       the compiler matches the given platform
+#
+# mz_add_c_release_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
+# 		pass the given flag to the C compiler when
+#       the compiler matches the given platform
+#
+# mz_add_release_flag GCC|CLANG|VS|ALL <flag1> <flag2> ...
+# 		pass the given flag to the compiler, no matter
+#       wether compiling C or C++ files. The selected platform
+#       is still respected
+#
 # mz_use_default_compiler_settings
 #       resets all configured compiler flags back to the
 #       cmake default. This is especially useful when adding
@@ -140,6 +166,32 @@ endmacro()
 macro(mz_add_flag PLATFORM)
     __mz_add_compiler_flag(CMAKE_CXX_FLAGS ${PLATFORM} ${ARGN})
     __mz_add_compiler_flag(CMAKE_C_FLAGS ${PLATFORM} ${ARGN})
+endmacro()
+
+macro(mz_add_cxx_release_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_CXX_FLAGS_RELEASE ${PLATFORM} ${ARGN})
+endmacro()
+
+macro(mz_add_c_release_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_C_FLAGS_RELEASE ${PLATFORM} ${ARGN})
+endmacro()
+
+macro(mz_add_release_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_CXX_FLAGS_RELEASE ${PLATFORM} ${ARGN})
+    __mz_add_compiler_flag(CMAKE_C_FLAGS_RELEASE ${PLATFORM} ${ARGN})
+endmacro()
+
+macro(mz_add_cxx_debug_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_CXX_FLAGS_DEBUG ${PLATFORM} ${ARGN})
+endmacro()
+
+macro(mz_add_c_debug_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_C_FLAGS_DEBUG ${PLATFORM} ${ARGN})
+endmacro()
+
+macro(mz_add_debug_flag PLATFORM)
+    __mz_add_compiler_flag(CMAKE_CXX_FLAGS_DEBUG ${PLATFORM} ${ARGN})
+    __mz_add_compiler_flag(CMAKE_C_FLAGS_DEBUG ${PLATFORM} ${ARGN})
 endmacro()
 
 macro(mz_use_default_compiler_settings)
