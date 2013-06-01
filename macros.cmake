@@ -188,19 +188,29 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     STRING(REPLACE "-" "_" _NAME_UPPER "${_NAME_UPPER2}") # special care for libraries with - in their names
     get_filename_component(_DIRECTORY_ABS ${_DIRECTORY} ABSOLUTE)
 
-    find_package( ${_NAME} ${_VERSION} )
+    # we only search for the library in case
+    # - the given target was not defined before (think hierarchies)
+    if( NOT TARGET ${_TARGET} )
+        find_package( ${_NAME} ${_VERSION} QUIET )
+    endif()
 
+    # take care of find_package not converting to upper-case
     if( ${_NAME}_FOUND OR ${_NAME_UPPER2}_FOUND )
         set( ${_NAME_UPPER}_FOUND TRUE )
     endif()
 
+    # give some choice to the user
     if( ${_NAME_UPPER}_FOUND )
         option(${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY "Force use of the in-source library version of ${_NAME}" OFF)
     else()
         option(${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY "Force use of the in-source library version of ${_NAME}" ON)
     endif()
 
-    if( NOT ${_NAME_UPPER}_FOUND OR ${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY )
+    # we only add the library as our own target in case
+    # - no system library was found
+    # - the given target was not defined before (think hierarchies)
+    # - the use explicitly wants to build the library himself
+    if( ( NOT ${_NAME_UPPER}_FOUND OR ${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY ) AND NOT TARGET ${_TARGET} )
         set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET} ${ARGN})
         set(${_NAME_UPPER}_FOUND TRUE)
@@ -223,22 +233,32 @@ macro(mz_find_checkout_library _NAME SYS _VERSION SVN _REPOSITORY _DEST_DIR _INC
     STRING(REPLACE "-" "_" _NAME_UPPER "${_NAME_UPPER2}") # special care for libraries with - in their names
     get_filename_component(_DEST_DIR_ABS ${_DEST_DIR} ABSOLUTE)
 
-    find_package( ${_NAME} ${_VERSION} )
+    # we only search for the library in case
+    # - the given target was not defined before (think hierarchies)
+    if( NOT TARGET ${_TARGET} )
+        find_package( ${_NAME} ${_VERSION} QUIET )
+    endif()
 
+    # take care of find_package not converting to upper-case
     if( ${_NAME}_FOUND OR ${_NAME_UPPER2}_FOUND )
         set( ${_NAME_UPPER}_FOUND TRUE )
     endif()
 
+    # give some choice to the user
     if( ${_NAME_UPPER}_FOUND )
         option(${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY "Force use of the in-source library version of ${_NAME}" OFF)
     else()
         option(${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY "Force use of the in-source library version of ${_NAME}" ON)
     endif()
 
-    if( NOT ${_NAME_UPPER}_FOUND OR ${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY )
+    # we only add the library as our own target in case
+    # - no system library was found
+    # - the given target was not defined before (think hierarchies)
+    # - the use explicitly wants to build the library himself
+    if( ( NOT ${_NAME_UPPER}_FOUND OR ${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY ) AND NOT TARGET ${_TARGET} )
         mz_message("No system library for '${_NAME}', retrieving own version")
 
-        find_package( Subversion )
+        find_package( Subversion QUIET )
         if( SUBVERSION_FOUND )
             if(NOT EXISTS ${_DEST_DIR_ABS})
                 execute_process(
