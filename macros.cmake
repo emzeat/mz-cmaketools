@@ -184,9 +184,9 @@ endmacro()
 
 macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET)
     
-    STRING(TOUPPER ${_NAME} _NAME_UPPER)
+    STRING(TOUPPER ${_NAME} _NAME_UPPER2)
     STRING(REPLACE "-" "_" _NAME_UPPER "${_NAME_UPPER2}") # special care for libraries with - in their names
-    get_filename_component(_DIRECTORY_ABS ${_DIRECTORY_DIR} ABSOLUTE)
+    get_filename_component(_DIRECTORY_ABS ${_DIRECTORY} ABSOLUTE)
 
     find_package( ${_NAME} ${_VERSION} )
 
@@ -205,12 +205,14 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET} ${ARGN})
         set(${_NAME_UPPER}_FOUND TRUE)
         
-        mz_message("No system library for '{_NAME}', building own version")
+        mz_message("No system library for '${_NAME}', building own version")
         if( NOT ${_TARGET} STREQUAL "" )
             mz_add_library(${_NAME} ${_DIRECTORY})
         else()
             mz_debug_message("${_NAME} is a header only library, no new target")
         endif()
+    else()
+        mz_message("Using system installed version of '${_NAME}'")
     endif()
 
 endmacro()
@@ -263,6 +265,8 @@ macro(mz_find_checkout_library _NAME SYS _VERSION SVN _REPOSITORY _DEST_DIR _INC
         else()
             mz_debug_message("${_NAME} is a header only library, no new target")
         endif()
+    else()
+        mz_message("Using system installed version of '${_NAME}'")
     endif()
 
 endmacro()
