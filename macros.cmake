@@ -211,7 +211,8 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     # - the given target was not defined before (think hierarchies)
     # - the use explicitly wants to build the library himself
     if( ( NOT ${_NAME_UPPER}_FOUND OR ${_NAME_UPPER}_IGNORE_SYSTEM_LIBRARY ) AND NOT TARGET ${_TARGET} )
-        set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
+        get_filename_component(_INC_DIR_ABS ${_INC_DIR} ABSOLUTE)
+        set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR_ABS})
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET} ${ARGN})
         set(${_NAME_UPPER}_FOUND TRUE)
         
@@ -276,7 +277,12 @@ macro(mz_find_checkout_library _NAME SYS _VERSION SVN _REPOSITORY _DEST_DIR _INC
             mz_error_message( "Failed to include ${_DEST_DIR_ABS} as library source, please make sure a valid checkout exists there" )
         endif()
 
-        set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR})
+        set(${_NAME_UPPER}_INCLUDE_DIRS "")
+        foreach(_DIR ${_INC_DIR})
+            get_filename_component(_DIR_ABS ${_DIR} ABSOLUTE)
+            list(APPEND ${_NAME_UPPER}_INCLUDE_DIRS "${_DIR_ABS}")
+            mz_message("Add ${_DIR_ABS} to ${${_NAME_UPPER}_INCLUDE_DIRS}")
+        endforeach(_DIR)
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET} ${ARGN})
         set(${_NAME_UPPER}_FOUND TRUE)
 
