@@ -363,7 +363,7 @@ mz_message("Today is: ${MZ_DATE_STRING}")
 
 # optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
 if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
-    mz_add_cxx_flag(GCC -std=gnu++0x)
+    mz_add_cxx_flag(GCC -std=c++11)
     mz_message("forcing C++11 support on this platform")
 endif()
 
