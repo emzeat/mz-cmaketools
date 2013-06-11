@@ -32,7 +32,7 @@ find_program(
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
   list(LENGTH _sources arg_count)
-  configure_file(${MZ_TOOLS_PATH}/autoformat.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/autoformat.cfg)
+  configure_file(${MZ_TOOLS_PATH}/autoformat.cfg.in ${CMAKE_BINARY_DIR}/autoformat.cfg)
 
   if( NOT arg_count GREATER 0 )
     mz_debug_message("Autoformat was no files given, using the target's sources")
@@ -46,8 +46,8 @@ macro(mz_auto_format _TARGET)
       mz_debug_message("Autoformat using ${UNCRUSTIFY_BIN} for ${abs_file}")
       add_custom_command(TARGET ${_TARGET}
         PRE_BUILD
-        COMMAND ${UNCRUSTIFY_BIN} -c autoformat.cfg --no-backup -q ${abs_file}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${UNCRUSTIFY_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg --no-backup -q ${abs_file}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     endif()
   endforeach()
@@ -55,8 +55,7 @@ macro(mz_auto_format _TARGET)
   mz_debug_message("WORKING_DIRECTORY=${MZ_TOOLS_PATH}")
 endmacro()
 
-
 macro(mz_auto_header _TARGET _HEADER)
-   set(__MZ_AUTOFORMAT_HEADER ${_HEADER})
+   set(__MZ_AUTOFORMAT_ADD_CONFIG "cmt_insert_file_header=${_HEADER}")
    mz_auto_format(${_TARGET} ${ARGN})
 endmacro()

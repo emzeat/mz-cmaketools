@@ -141,7 +141,6 @@ cmt_reflow_mode=2
 cmt_sp_after_star_cont=1
 pp_indent_count=1
 pp_space_count=1
-cmt_insert_file_header=${__MZ_AUTOFORMAT_HEADER}
 newlines=auto
 indent_with_tabs=0
 sp_arith=force
@@ -305,3 +304,4 @@ mod_full_brace_using=remove
 mod_paren_on_return=remove
 pp_indent=force
 pp_space=force
+${__MZ_AUTOFORMAT_ADD_CONFIG}
