@@ -46,7 +46,7 @@ macro(mz_auto_format _TARGET)
       mz_debug_message("Autoformat using ${UNCRUSTIFY_BIN} for ${abs_file}")
       add_custom_command(TARGET ${_TARGET}
         PRE_BUILD
-        COMMAND ${UNCRUSTIFY_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg --no-backup -q ${abs_file}
+        COMMAND ${UNCRUSTIFY_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg --no-backup --mtime -q ${abs_file}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     endif()
