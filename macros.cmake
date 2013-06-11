@@ -4,8 +4,8 @@
 #
 # 	This file provides some useful macros to
 #	simplify adding of componenents and other
-#	taskss
-#	(c) 2009-2012 Marius Zwicker
+#	tasks
+#	Copyright (c) 2009-2013 Marius Zwicker
 #
 # This file defines a whole bunch of macros
 # to add a subdirectory containing another

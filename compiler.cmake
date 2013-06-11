@@ -8,7 +8,7 @@
 # 	compiler variables. If available features
 #	for c++0x will be enabled automatically
 #
-#	(c) 2010-2012 Marius Zwicker
+#	Copyright (c) 2010-2013 Marius Zwicker
 #
 #
 # PROVIDED CMAKE VARIABLES
@@ -30,6 +30,7 @@
 # MZ_DATE_STRING a string containing day, date and time of the
 #                moment cmake was executed
 #                e.g. Mo, 27 Feb 2012 19:47:23 +0100
+# MZ_USER_STRING a string containing the current username
 #
 # PROVIDED MACROS
 # -----------------------
@@ -355,11 +356,14 @@ endif() #MZ_COMPILER_TEST_HAS_RUN
 # determine current date and time
 if(WINDOWS)
     execute_process(COMMAND "date" "/T" OUTPUT_VARIABLE MZ_DATE_STRING)
+    set(MZ_USER_STRING $ENV{USERNAME})
 else() # Sun, 11 Dec 2011 12:07:00 +0200
     execute_process(COMMAND "date" "+%a, %d %b %Y %T %z" OUTPUT_VARIABLE MZ_DATE_STRING)
     string(REPLACE "\n" "" MZ_DATE_STRING "${MZ_DATE_STRING}")
+    set(MZ_USER_STRING $ENV{USER})
 endif()
 mz_message("Today is: ${MZ_DATE_STRING}")
+mz_message("User is: ${MZ_USER_STRING}")
 
 # optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
 if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
