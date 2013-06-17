@@ -29,6 +29,8 @@ find_program(
     uncrustify
 )
 
+set(MZ_CPPLINT_TOOL ${MZ_TOOLS_PATH}/cpplint.py)
+
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
   list(LENGTH _sources arg_count)
@@ -38,15 +40,21 @@ macro(mz_auto_format _TARGET)
     mz_debug_message("Autoformat was no files given, using the target's sources")
     get_target_property(_sources ${_TARGET} SOURCES)
   endif()
+
+  set(CPPLINT_FILTERS
+    -whitespace,-build/header_guard,-build/include,+build/include_what_you_use,-readability/multiline_comment,-readability/namespace,-readability/streams,-runtime/references,-runtime/threadsafe_fn
+  )
     
   foreach(file ${_sources})
     get_filename_component(abs_file ${file} ABSOLUTE)
+    get_filename_component(file_dir ${abs_file} PATH)
     
     if( ${file} MATCHES ".+(cpp|cxx|hpp|h|c)$" AND UNCRUSTIFY_BIN )
       mz_debug_message("Autoformat using ${UNCRUSTIFY_BIN} for ${abs_file}")
       add_custom_command(TARGET ${_TARGET}
         PRE_BUILD
-        COMMAND ${UNCRUSTIFY_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg --no-backup --mtime -q ${abs_file}
+        COMMAND ${UNCRUSTIFY_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg --no-backup --mtime ${abs_file}
+        COMMAND ${MZ_CPPLINT_TOOL} --root=${file_dir} --filter=${CPPLINT_FILTERS} ${abs_file}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       )
     endif()
