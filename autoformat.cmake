@@ -30,6 +30,7 @@ find_program(
 )
 
 set(MZ_CPPLINT_TOOL ${MZ_TOOLS_PATH}/cpplint.py)
+option(MZ_DO_AUTO_FORMAT "Enable to run cpplint and autoformat on configured targets" ON)
 
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
@@ -49,7 +50,7 @@ macro(mz_auto_format _TARGET)
     get_filename_component(abs_file ${file} ABSOLUTE)
     get_filename_component(file_dir ${abs_file} PATH)
     
-    if( ${file} MATCHES ".+(cpp|cxx|hpp|h|c)$" AND UNCRUSTIFY_BIN )
+    if( ${file} MATCHES ".+(cpp|cxx|hpp|h|c)$" AND UNCRUSTIFY_BIN AND MZ_DO_AUTO_FORMAT )
       mz_debug_message("Autoformat using ${UNCRUSTIFY_BIN} for ${abs_file}")
       add_custom_command(TARGET ${_TARGET}
         PRE_BUILD
