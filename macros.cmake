@@ -152,6 +152,7 @@ include(CheckIncludeFiles)
 include(FindPackageHandleStandardArgs)
 
 if( NOT CMAKE_MODULE_PATH )
+    cmake_policy(SET CMP0017 OLD)
     set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules" )
 endif()
 
