@@ -31,6 +31,8 @@
 #                moment cmake was executed
 #                e.g. Mo, 27 Feb 2012 19:47:23 +0100
 # MZ_USER_STRING a string containing the current username
+# MZ_COMPILER_VERSION a string denoting the compiler version,
+#                e.g. with gcc 4.5.1 this is "45"
 #
 # PROVIDED MACROS
 # -----------------------
@@ -314,6 +316,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
             set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
         endif()
 		
+        set(MZ_COMPILER_VERSION ${COMPILER_VERSION} CACHE INTERNAL MZ_COMPILER_VERSION)
         set(MZ_COMPILER_TEST_HAS_RUN TRUE CACHE INTERNAL MZ_COMPILER_TEST_HAS_RUN)
 	
     # ms visual studio
@@ -372,7 +375,7 @@ if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
 endif()
 
 # work around an issue with gcc > 4.7 and eigen3
-if(NOT MZ_IS_CLANG AND COMPILER_VERSION STRGREATER "47")
+if( (NOT MZ_IS_CLANG) AND MZ_COMPILER_VERSION STRGREATER "47")
     mz_add_cxx_flag(GCC -Wno-enum-compare -Wno-unused-local-typedefs)
 endif()
 
