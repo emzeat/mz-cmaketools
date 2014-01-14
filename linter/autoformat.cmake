@@ -25,10 +25,10 @@
 ########################################################################
 
 if( MZ_TOOLS_PATH )
-  set(MZ_TOOLS_LINTER_PATH ${MZ_TOOLS_LINTER_PATH}/linter)
-else
+  set(MZ_TOOLS_LINTER_PATH ${MZ_TOOLS_PATH}/linter)
+else()
   set(MZ_TOOLS_LINTER_PATH ${CMAKE_CURRENT_LIST_DIR})
-endif
+endif()
 
 find_program(
     MZ_UNCRUSTIFY_BIN
