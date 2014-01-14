@@ -149,7 +149,7 @@ function run_cmake {
 	cd ${my_build_dir}
 
 	echo "== configuring target system '${my_compiler}/${my_generator}/${my_mode}'"
-	echo CC=${my_cc} CXX=${my_cxx} \
+    CC=${my_cc} CXX=${my_cxx} \
 	cmake	-D CMAKE_BUILD_TYPE=${my_c_mode} \
 			${my_cmake} \
 			-G"${my_c_generator}" \
@@ -235,7 +235,7 @@ fi
 detect_dir
 
 # print obtained variable values
-verbose
+#verbose
 
 if [ "${my_mode}" = "debug" ]; then
 	debug_hint
