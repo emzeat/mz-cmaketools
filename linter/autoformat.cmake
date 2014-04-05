@@ -38,6 +38,10 @@ if(NOT WINDOWS)
   set(MZ_CPPLINT_BIN ${MZ_TOOLS_LINTER_PATH}/cpplint.py CACHE PATH "Path to cpplint" FORCE)
 endif()
 
+if( MZ_UNCRUSTIFY_BIN )
+  set(MZ_CPPFORMAT_BIN ${MZ_TOOLS_LINTER_PATH}/cppformat.py CACHE PATH "Path to cppformat" FORCE)
+endif()
+
 if( MZ_IS_RELEASE )
     option(MZ_DO_AUTO_FORMAT "Enable to run autoformat on configured targets" OFF)
     option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" OFF)
@@ -72,12 +76,12 @@ macro(mz_auto_format _TARGET)
   set(_new_target_format ${_TARGET}_autoformat)
   set(_new_target_lint ${_TARGET}_cpplint)
 
-  if( MZ_UNCRUSTIFY_BIN AND MZ_DO_AUTO_FORMAT )
+  if( MZ_CPPFORMAT_BIN AND MZ_DO_AUTO_FORMAT )
     add_library(${_new_target_format} STATIC ${CMAKE_CURRENT_BINARY_DIR}/format_step.c)
     set_target_properties(${_new_target_format} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/format_step.c
-        COMMAND ${MZ_UNCRUSTIFY_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg --no-backup --mtime ${_sources2}
+        COMMAND ${MZ_CPPFORMAT_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg -u ${MZ_UNCRUSTIFY_BIN} ${_sources2}
         COMMAND ${CMAKE_COMMAND} -E copy ${MZ_TOOLS_LINTER_PATH}/autoformat.c.in ${CMAKE_CURRENT_BINARY_DIR}/format_step.c
         DEPENDS ${_sources}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
