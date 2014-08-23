@@ -128,6 +128,11 @@ macro(mz_error_message MSG)
     return()
 endmacro()
 
+macro(mz_fatal_message MSG)
+    message(FATAL_ERROR "!! ${MSG}")
+    return()
+endmacro()
+
 macro(mz_add_definition)
     foreach(DEF ${ARGN})
         if(MZ_IS_GCC)

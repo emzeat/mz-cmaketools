@@ -122,32 +122,6 @@ macro(mz_target_props NAME)
     set_target_properties(${NAME} PROPERTIES DEBUG_POSTFIX "D")
 endmacro()
 
-macro(__mz_extract_files _qt_files)
-    set(${_qt_files})
-    FOREACH(_current ${ARGN})
-            file(STRINGS ${_current} _content LIMIT_COUNT 1 REGEX .*Q_OBJECT.*)
-            if("${_content}" MATCHES .*Q_OBJECT.*)
-                    LIST(APPEND ${_qt_files} "${_current}")
-            endif()
-    ENDFOREACH(_current)
-endmacro()
-
-macro(mz_auto_moc mocced)
-    #mz_debug_message("mz_auto_moc input: ${ARGN}")
-
-    set(_mocced "")
-    # determine the required files
-    __mz_extract_files(to_moc ${ARGN})
-    mz_debug_message("mz_auto_moc mocced in: ${to_moc}")
-    # the definition of -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED is to bypass a parsing bug within moc
-    if( Qt5Core_VERSION_STRING )
-        qt5_wrap_cpp(_mocced ${to_moc} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-    else()
-        qt4_wrap_cpp(_mocced ${to_moc} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED -DBOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
-    endif()
-	set(${mocced} ${${mocced}} ${_mocced})
-endmacro()
-
 include(CheckIncludeFiles)
 include(FindPackageHandleStandardArgs)
 
