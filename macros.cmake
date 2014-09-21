@@ -1,11 +1,11 @@
 ########################################################################
 #
-#	BUILD/MACROS.CMAKE
+#   BUILD/MACROS.CMAKE
 #
-# 	This file provides some useful macros to
-#	simplify adding of componenents and other
-#	tasks
-#	Copyright (c) 2009-2013 Marius Zwicker
+#   This file provides some useful macros to
+#   simplify adding of componenents and other
+#   tasks
+#   Copyright (c) 2009-2013 Marius Zwicker
 #
 # This file defines a whole bunch of macros
 # to add a subdirectory containing another
@@ -17,28 +17,28 @@
 # the folder containing a CMakeLists.txt
 #
 # mz_add_library <NAME> <FOLDER>
-#		macro for adding a new library
+#       macro for adding a new library
 #
 # mz_add_executable <NAME> <FOLDER>
-# 		macro for adding a new executable
+#       macro for adding a new executable
 #
 # mz_add_control <NAME> <FOLDER>
-#		macro for adding a new control
+#       macro for adding a new control
 #
 # mz_add_testtool <NAME> <FOLDER>
-#		macro for adding a folder containing testtools
+#       macro for adding a folder containing testtools
 #
 # mz_add_external <NAME> <FOLDER>
-#		macro for adding an external library/tool dependancy
+#       macro for adding an external library/tool dependancy
 #
 # mz_target_props <target>
-#		automatically add a "D" postfix when compiling in debug
+#       automatically add a "D" postfix when compiling in debug
 #       mode to the given target
 #
 # mz_auto_moc <mocced> ...
-#		search all passed files in (...) for Q_OBJECT and if found
-#		run moc on them via qt4_wrap_cpp. Assign the output files
-#		to <mocced>. Improves the version provided by cmake by searching
+#       search all passed files in (...) for Q_OBJECT and if found
+#       run moc on them via qt4_wrap_cpp. Assign the output files
+#       to <mocced>. Improves the version provided by cmake by searching
 #       for Q_OBJECT first and thus reducing the needed calls to moc
 #
 # mz_find_include_library <name>  SYS <version> SRC <directory> <include_dir> <target>
