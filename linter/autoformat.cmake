@@ -62,7 +62,7 @@ macro(mz_auto_format _TARGET)
 
   # remove readability/alt_tokens again when the bug of cpplint detecting "and" within comments is fixed
   set(CPPLINT_FILTERS
-    -whitespace,-build/header_guard,-build/include,+build/include_what_you_use,-readability/multiline_comment,-readability/namespace,-readability/streams,-runtime/references,-runtime/threadsafe_fn,-readability/alt_tokens
+    -whitespace,-build/header_guard,-build/include,-build/include_what_you_use,-readability/multiline_comment,-readability/namespace,-readability/streams,-runtime/references,-runtime/threadsafe_fn,-readability/alt_tokens
   )
 
   set(_sources2 "")

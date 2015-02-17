@@ -30,6 +30,6 @@ if uncrustify is None:
 
 for file in args.files:
     subprocess.call([uncrustify, '-c', args.cfg, '--no-backup', '--mtime', file])
-    for lines in fileinput.input( file, inplace=1 ):    
+    for lines in fileinput.input( file, inplace=1 ):
         print lines.rstrip()
     fileinput.close()
