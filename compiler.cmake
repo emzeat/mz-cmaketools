@@ -376,16 +376,12 @@ else() # Sun, 11 Dec 2011 12:07:00 +0200
 endif()
 mz_message("Today is: ${MZ_DATE_STRING}")
 mz_message("User is: ${MZ_USER_STRING}")
+mz_message("Compiler version is: ${MZ_COMPILER_VERSION}")
 
 # optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
 if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
     mz_add_cxx_flag(GCC -std=c++11 -fgnu-keywords)
     mz_message("forcing C++11 support on this platform")
-endif()
-
-# work around an issue with gcc > 4.7 and eigen3
-if( (NOT MZ_IS_CLANG) AND MZ_COMPILER_VERSION STRGREATER "47")
-    mz_add_cxx_flag(GCC -Wno-enum-compare -Wno-unused-local-typedefs)
 endif()
 
 # compiler flags
@@ -398,6 +394,15 @@ else()
     mz_add_definition(${CMAKE_SYSTEM_NAME}=1)
 endif()
 
+# work around an issue with gcc > 4.7 and eigen3
+if( (NOT MZ_IS_CLANG) AND MZ_COMPILER_VERSION STRGREATER "47")
+    mz_add_cxx_flag(GCC -Wno-enum-compare -Wno-unused-local-typedefs)
+endif()
+
+# work around an issue with Qt5 and clang 6.1
+if( MZ_IS_CLANG AND MZ_COMPILER_VERSION STRGREATER 6.0.3 )
+    mz_add_cxx_flag(GCC -Wno-unknown-pragmas)
+endif()
 
 if(MZ_IS_GCC)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
