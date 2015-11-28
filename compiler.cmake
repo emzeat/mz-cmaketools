@@ -404,6 +404,11 @@ if( MZ_IS_CLANG AND MZ_COMPILER_VERSION STRGREATER 6.0.3 )
     mz_add_cxx_flag(GCC -Wno-unknown-pragmas)
 endif()
 
+# work around an issue with boost and clang 7.0
+if( MZ_IS_CLANG )
+    mz_add_cxx_flag(GCC -Wno-unused-local-typedefs)
+endif()
+
 if(MZ_IS_GCC)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
