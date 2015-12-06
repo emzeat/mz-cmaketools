@@ -39,7 +39,7 @@
 # mz_add_definition <definition1> ...
 #       add the definition <definition> (and following)
 #       to the list of definitions passed to the compiler.
-#       Automatically switches between the syntax of msvc 
+#       Automatically switches between the syntax of msvc
 #       and gcc/clang
 #       Example: mz_add_definition(NO_DEBUG)
 #
@@ -156,7 +156,7 @@ macro(__mz_add_compiler_flag COMPILER_FLAGS PLATFORM)
             OR ("${PLATFORM}" STREQUAL "GCC" AND MZ_IS_GCC)
             OR ("${PLATFORM}" STREQUAL "VS" AND MZ_IS_VS)
             OR ("${PLATFORM}" STREQUAL "CLANG" AND MZ_IS_CLANG) )
-        
+
         foreach(_current ${ARGN})
             set(${COMPILER_FLAGS} "${${COMPILER_FLAGS}} ${_current}")
             mz_debug_message("Adding flag ${_current} to ${COMPILER_FLAGS}")
@@ -253,7 +253,7 @@ function(__MZ_COMPILER_IS_CLANG _OUTPUT _OUTPUT_VERSION)
     REGEX MATCH "[0-9]\\.[0-9](\\.[0-9])?(\\-[0-9])?"
     _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
   )
-  
+
   set(${_OUTPUT_VERSION} ${_MZ_CLANG_VERSION} PARENT_SCOPE)
   mz_debug_message("Possible clang version ${_MZ_CLANG_VERSION}")
 endfunction()
@@ -270,7 +270,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
     set(MZ_CXX_DEFAULT_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE INTERNAL MZ_CXX_DEFAULT_DEBUG)
     set(MZ_C_DEFAULT_RELEASE "${CMAKE_C_FLAGS_RELEASE}" CACHE INTERNAL MZ_C_DEFAULT_RELEASE)
     set(MZ_CXX_DEFAULT_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE INTERNAL MZ_CXX_DEFAULT_RELEASE)
-    
+
     # compiler settings and defines depending on platform
     if(IOS_PLATFORM)
         set(DARWIN TRUE CACHE INTERNAL DARWIN  )
@@ -283,27 +283,27 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
     else()
         set(WINDOWS TRUE CACHE INTERNAL WINDOWS )
     endif()
-    
+
     # clang is gcc compatible but still different
     __MZ_COMPILER_IS_CLANG( _MZ_TEST_CLANG COMPILER_VERSION )
     if( _MZ_TEST_CLANG )
         mz_message("compiler is clang")
         set(MZ_IS_CLANG TRUE CACHE INTERNAL MZ_IS_CLANG)
     endif()
-    
+
     # gnu compiler
     #message("IS_GCC ${CMAKE_COMPILER_IS_GNU_CC}")
     if(UNIX OR MINGW)
         mz_message("GCC compatible compiler found")
-        
+
         set(MZ_IS_GCC TRUE CACHE INTERNAL MZ_IS_GCC)
-        
+
         # xcode?
         if(CMAKE_GENERATOR STREQUAL "Xcode")
             mz_message("Found active XCode generator")
             set(MZ_IS_XCODE TRUE CACHE INTERNAL MZ_IS_XCODE)
         endif()
-    
+
         # detect compiler version
         if(NOT MZ_IS_CLANG)
             __Boost_MZ_COMPILER_DUMPVERSION(COMPILER_VERSION)
@@ -324,16 +324,16 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
             set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
             set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
         endif()
-        
+
         set(MZ_COMPILER_VERSION ${COMPILER_VERSION} CACHE INTERNAL MZ_COMPILER_VERSION)
         set(MZ_COMPILER_TEST_HAS_RUN TRUE CACHE INTERNAL MZ_COMPILER_TEST_HAS_RUN)
-    
+
     # ms visual studio
     elseif(MSVC OR MSVC_IDE)
         mz_message("Microsoft Visual Studio Compiler found")
-        
+
         set(MZ_IS_VS TRUE CACHE INTERNAL MZ_IS_VS)
-        
+
         if(MSVC10)
             mz_message("C++11 support detected")
             set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X )
@@ -341,12 +341,12 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
         endif()
 
         set(MZ_COMPILER_TEST_HAS_RUN TRUE CACHE INTERNAL MZ_COMPILER_TEST_HAS_RUN)
-        
+
     # currently unsupported
     else()
         mz_error_message("compiler platform currently unsupported by mz tools !!")
     endif()
-    
+
     # platform (32bit / 64bit)
     if(CMAKE_SIZEOF_VOID_P MATCHES "8")
         mz_message("64bit platform")
@@ -405,7 +405,7 @@ if( MZ_IS_CLANG AND MZ_COMPILER_VERSION STRGREATER 6.0.3 )
 endif()
 
 # work around an issue with boost and clang 7.0
-if( MZ_IS_CLANG )
+if( MZ_IS_CLANG AND NOT MZ_COMPILER_VERSION STRLESS 7.0.0 )
     mz_add_cxx_flag(GCC -Wno-unused-local-typedefs)
 endif()
 
@@ -419,7 +419,7 @@ if(MZ_IS_GCC)
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ggdb -O0 -fno-inline")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0 -fno-inline")
     endif()
-        
+
     if(WINDOWS)
         if(MZ_64BIT)
             mz_add_definition("WIN32_MINGW64=1")
