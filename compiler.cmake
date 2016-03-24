@@ -395,19 +395,14 @@ else()
 endif()
 
 # work around an issue with gcc > 4.7 and eigen3
-if( (NOT MZ_IS_CLANG) AND MZ_COMPILER_VERSION STRGREATER "47")
-    mz_add_cxx_flag(GCC -Wno-enum-compare -Wno-unused-local-typedefs)
-endif()
+# work around an issue with boost and clang 7.0
+mz_add_cxx_flag(GCC -Wno-unused-local-typedefs)
 
 # work around an issue with Qt5 and clang 6.1
 if( MZ_IS_CLANG AND MZ_COMPILER_VERSION STRGREATER 6.0.3 )
     mz_add_cxx_flag(GCC -Wno-unknown-pragmas)
 endif()
 
-# work around an issue with boost and clang 7.0
-if( MZ_IS_CLANG AND NOT MZ_COMPILER_VERSION STRLESS 7.0.0 )
-    mz_add_cxx_flag(GCC -Wno-unused-local-typedefs)
-endif()
 
 if(MZ_IS_GCC)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
