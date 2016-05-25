@@ -378,6 +378,11 @@ mz_message("Today is: ${MZ_DATE_STRING}")
 mz_message("User is: ${MZ_USER_STRING}")
 mz_message("Compiler version is: ${MZ_COMPILER_VERSION}")
 
+# define the DEBUG macro
+if(NOT MZ_IS_RELEASE)
+    mz_add_definition(DEBUG=1)
+endif()
+
 # optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
 if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
     mz_add_cxx_flag(GCC -std=c++11 -fgnu-keywords)
