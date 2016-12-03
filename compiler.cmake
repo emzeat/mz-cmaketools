@@ -361,6 +361,9 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         set(MZ_IS_RELEASE TRUE CACHE INTERNAL MZ_IS_RELEASE)
         mz_debug_message("CMake run in release mode")
+    else()
+        set(MZ_IS_RELEASE FALSE CACHE INTERNAL MZ_IS_RELEASE)
+        mz_debug_message("CMake run in debug mode")
     endif()
 
 endif() #MZ_COMPILER_TEST_HAS_RUN
