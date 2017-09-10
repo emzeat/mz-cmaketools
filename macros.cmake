@@ -48,8 +48,8 @@
 #       not found, it will include the given directory which should contain
 #       a cmake file defining the given target.
 #       After calling this macro the following variables will be declared:
-#           <name>_INCLUDE_DIRS The directory containing the header or 
-#                              the passed include_dir if the lib was not 
+#           <name>_INCLUDE_DIRS The directory containing the header or
+#                              the passed include_dir if the lib was not
 #                              found on the system
 #           <name>_LIBRARIES The libs to link against - either lib or target
 #           <name>_FOUND true if the lib was found on the system
@@ -126,7 +126,7 @@ include(CheckIncludeFiles)
 include(FindPackageHandleStandardArgs)
 
 if( NOT CMAKE_MODULE_PATH )
-    cmake_policy(SET CMP0017 OLD)
+    cmake_policy(SET CMP0017 NEW)
     set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules" )
 endif()
 
@@ -158,7 +158,7 @@ macro(mz_check_include_files FILE VAR)
 endmacro()
 
 macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET)
-    
+
     STRING(TOUPPER ${_NAME} _NAME_UPPER2)
     STRING(REPLACE "-" "_" _NAME_UPPER "${_NAME_UPPER2}") # special care for libraries with - in their names
     get_filename_component(_DIRECTORY_ABS ${_DIRECTORY} ABSOLUTE)
@@ -190,7 +190,7 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
         set(${_NAME_UPPER}_INCLUDE_DIRS ${_INC_DIR_ABS})
         set(${_NAME_UPPER}_LIBRARIES ${_TARGET} ${ARGN})
         set(${_NAME_UPPER}_FOUND TRUE)
-        
+
         mz_message("No system library for '${_NAME}', building own version")
         if( NOT ${_TARGET} STREQUAL "" )
             mz_add_library(${_NAME} ${_DIRECTORY})
