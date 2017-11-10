@@ -118,8 +118,13 @@ macro(__mz_add_target NAME FOLDER)
     add_subdirectory(${FOLDER} ${CMAKE_BINARY_DIR}/${_REL_FOLDER})
 endmacro()
 
+include("${CMAKE_CURRENT_LIST_DIR}/Modules/UseDebugSymbols.cmake")
+
 macro(mz_target_props NAME)
     set_target_properties(${NAME} PROPERTIES DEBUG_POSTFIX "D")
+    if( MZ_IS_RELEASE )
+        strip_debug_symbols(${NAME})
+    endif()
 endmacro()
 
 include(CheckIncludeFiles)
