@@ -53,7 +53,7 @@ endif()
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
   list(LENGTH _sources arg_count)
-  configure_file(${MZ_TOOLS_LINTER_PATH}/autoformat.cfg.in ${CMAKE_BINARY_DIR}/autoformat.cfg)
+  configure_file(${MZ_TOOLS_LINTER_PATH}/autoformat.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/autoformat.cfg)
 
   if( NOT arg_count GREATER 0 )
     mz_debug_message("Autoformat was no files given, using the target's sources")

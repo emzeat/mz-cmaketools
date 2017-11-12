@@ -204,6 +204,11 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
         endif()
     else()
         mz_message("Using system installed version of '${_NAME}'")
+        add_library( ${_NAME} STATIC IMPORTED GLOBAL )
+        set_target_properties( ${_NAME} PROPERTIES
+            IMPORTED_LOCATION ${${_NAME_UPPER}_LIBRARIES}
+            INTERFACE_INCLUDE_DIRECTORIES ${${_NAME_UPPER}_INCLUDE_DIRS}
+        )
     endif()
 
 endmacro()

@@ -3,23 +3,23 @@
 ##
 # Copyright (c) 2008-2014 Marius Zwicker
 # All rights reserved.
-# 
+#
 # @LICENSE_HEADER_START:Apache@
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # http://www.mlba-team.de
-# 
+#
 # @LICENSE_HEADER_END:Apache@
 ##
 
@@ -178,13 +178,13 @@ function detect_dir {
 	my_script_dir=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
 	my_script_dir=`dirname "${my_script_dir}"`
 
-	my_build_dir=${my_script_dir}/${my_compiler}-${my_generator}-${my_mode}
-	
+	my_build_dir=${my_base_dir}_${my_compiler}-${my_generator}-${my_mode}
+
 	echo "-- determining working directory: ${my_script_dir}"
 	echo "-- build root will be: ${my_base_dir}"
 	echo "-- generating to: ${my_build_dir}"
 	echo
-	
+
 }
 
 # default to using env variables
@@ -198,7 +198,7 @@ for arg in "$@"
 do
 	type=`echo ${arg} | awk -F "=" '{print $1}'`
 	value=`echo ${arg} | awk -F "=" '{print $2}'`
-	
+
 	case ${type} in
 		generator)
 			my_generator=${value}
