@@ -150,8 +150,10 @@ function run_cmake {
     cd ${my_build_dir}
 
     echo "== configuring target system '${my_compiler}/${my_generator}/${my_mode}'"
+    echo "-- additional arguments:${my_args}"
     CC=${my_cc} CXX=${my_cxx} \
     cmake   -D CMAKE_BUILD_TYPE=${my_c_mode} \
+            ${my_args} \
             ${my_cmake} \
             -G"${my_c_generator}" \
             ${my_base_dir}/
@@ -228,7 +230,7 @@ do
             exit 0
             ;;
         *)
-            echo "-- WARNING: Unknown flag ${type}, skipping"
+            my_args="${my_args} ${arg}"
             ;;
     esac
 done
