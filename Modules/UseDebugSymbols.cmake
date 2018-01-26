@@ -74,13 +74,14 @@ function (strip_debug_symbols targets)
               )
           endif()
       else ()
-        add_custom_command (TARGET ${target}
-            POST_BUILD
-            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-            COMMAND ${DSYMUTIL_PATH} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.debug $<TARGET_FILE:${target}>
-            COMMAND ${OBJCOPY} ARGS -S $<TARGET_FILE:${target}>
-            VERBATIM
-            )
+          # Stripping symbols is disabled on Linux for now
+          #add_custom_command (TARGET ${target}
+          #  POST_BUILD
+          #  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+          #  COMMAND ${DSYMUTIL_PATH} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.debug $<TARGET_FILE:${target}>
+          #  COMMAND ${OBJCOPY} ARGS -S $<TARGET_FILE:${target}>
+          #  VERBATIM
+          #)
       endif ()
     endforeach ()
   endif ()
