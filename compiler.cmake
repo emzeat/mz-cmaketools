@@ -421,10 +421,6 @@ elseif(MZ_LINUX)
     mz_add_definition(MZ_LINUX=1)
 endif()
 
-# work around an issue with gcc > 4.7 and eigen3
-# work around an issue with boost and clang 7.0
-mz_add_cxx_flag(GCC -Wno-unused-local-typedefs)
-
 # work around an issue with Qt5 and clang 6.1
 if( MZ_IS_CLANG AND MZ_COMPILER_VERSION STRGREATER 6.0.3 )
     mz_add_cxx_flag(GCC -Wno-unknown-pragmas)
