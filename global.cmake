@@ -1,35 +1,33 @@
-##
-# Copyright (c) 2008-2012 Marius Zwicker
+#
+# global.cmake
+#
+# Copyright (c) 2008-2018 Marius Zwicker
 # All rights reserved.
-# 
-# @LICENSE_HEADER_START:Apache@
-# 
+#
+# @LICENSE_HEADER_START@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
-# http://www.mlba-team.de
-# 
-# @LICENSE_HEADER_END:Apache@
-##
+# @LICENSE_HEADER_END@
+#
 
 ##################################################
 #
-#	BUILD/GLOBAL.CMAKE
+# BUILD/GLOBAL.CMAKE
 #
-# 	This file is for providing a defined environment
-#	of compiler definitions/macros and cmake functions
-#	or variables throughout several projects. It can
-#	be included twice or more without any issues and
-#   will automatically included the utility files 
+#   This file is for providing a defined environment
+# of compiler definitions/macros and cmake functions
+# or variables throughout several projects. It can
+# be included twice or more without any issues and
+#   will automatically included the utility files
 #   compiler.cmake and macros.cmake
 #
 ##################################################
@@ -50,14 +48,14 @@ set(MZ_TOOLS_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 # BOF: global.cmake
 if(NOT HAS_MZ_GLOBAL)
-	set(HAS_MZ_GLOBAL true)
+  set(HAS_MZ_GLOBAL true)
 
   # detect compiler
   include("${MZ_TOOLS_PATH}/compiler.cmake")
 
   # user info
   message("-- configuring for build type: ${CMAKE_BUILD_TYPE}")
-  
+
   # macros
   include("${MZ_TOOLS_PATH}/macros.cmake")
 
@@ -65,4 +63,4 @@ if(NOT HAS_MZ_GLOBAL)
   include("${MZ_TOOLS_PATH}/linter/autoformat.cmake")
 
 # EOF: global.cmake
-endif() 
+endif()

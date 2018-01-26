@@ -1,3 +1,24 @@
+#
+# compiler.cmake
+#
+# Copyright (c) 2008-2018 Marius Zwicker
+# All rights reserved.
+#
+# @LICENSE_HEADER_START@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# @LICENSE_HEADER_END@
+#
+
 ##################################################
 #
 #   BUILD/COMPILER.CMAKE
@@ -7,9 +28,6 @@
 #   crossplatform set of functions for setting
 #   compiler variables. If available features
 #   for c++0x will be enabled automatically
-#
-#   Copyright (c) 2010-2013 Marius Zwicker
-#
 #
 # PROVIDED CMAKE VARIABLES
 # -----------------------
@@ -23,10 +41,10 @@
 # MZ_HAS_CXX0X see MZ_HAS_CXX11
 # MZ_HAS_CXX11 true when the compiler supports at least a
 #              (subset) of the upcoming C++11 standard
-# DARWIN true when building on OS X / iOS
-# IOS true when building for iOS
-# WINDOWS true when building on Windows
-# LINUX true when building on Linux
+# MZ_MACOS true when building on macOS
+# MZ_IOS true when building for iOS
+# MZ_WINDOWS true when building on Windows
+# MZ_LINUX true when building on Linux
 # MZ_DATE_STRING a string containing day, date and time of the
 #                moment cmake was executed
 #                e.g. Mo, 27 Feb 2012 19:47:23 +0100
@@ -95,13 +113,13 @@
 # warnings have to be accepted
 #
 # Provided defines (defined to 1)
-#  WINDOWS / WIN32 on Windows
-#  LINUX on Linux
-#  DARWIN on Darwin / OS X / iOS
-#  IOS on iOS
+#  MZ_WINDOWS on Windows
+#  MZ_LINUX on Linux
+#  MZ_MACOS on macOS
+#  MZ_IOS on iOS
 #  WIN32_VS on MSVC - note this is deprecated, it is recommended to use _MSC_VER
-#  WIN32_MINGW when using the mingw toolchain
-#  WIN32_MINGW64 when using the mingw-w64 toolchain
+#  MZ_WIN32_MINGW when using the mingw toolchain
+#  MZ_WIN32_MINGW64 when using the mingw-w64 toolchain
 #  MZ_HAS_CXX11 / MZ_HAS_CXX0X when subset of C++11 is available
 #
 ########################################################################
@@ -273,15 +291,14 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
 
     # compiler settings and defines depending on platform
     if(IOS_PLATFORM)
-        set(DARWIN TRUE CACHE INTERNAL DARWIN  )
-        set(IOS TRUE CACHE INTERNAL IOS)
+        set(MZ_IOS TRUE CACHE INTERNAL MZ_IOS)
         mz_message("dectected toolchain for iOS")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        set(DARWIN TRUE CACHE INTERNAL DARWIN  )
+        set(MZ_MACOS TRUE CACHE INTERNAL MZ_MACOS )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(LINUX TRUE CACHE INTERNAL LINUX )
+        set(MZ_LINUX TRUE CACHE INTERNAL MZ_LINUX )
     else()
-        set(WINDOWS TRUE CACHE INTERNAL WINDOWS )
+        set(MZ_WINDOWS TRUE CACHE INTERNAL MZ_WINDOWS )
     endif()
 
     # clang is gcc compatible but still different
@@ -394,12 +411,14 @@ endif()
 
 # compiler flags
 mz_add_flag(GCC -Wall -Werror -Wno-unused-function)
-if(WINDOWS)
-    mz_add_definition(WIN32=1 WINDOWS=1)
-elseif(IOS)
-    mz_add_definition(IOS=1)
-else()
-    mz_add_definition(${CMAKE_SYSTEM_NAME}=1)
+if(MZ_WINDOWS)
+    mz_add_definition(MZ_WINDOWS=1)
+elseif(MZ_IOS)
+    mz_add_definition(MZ_IOS=1)
+elseif(MZ_MACOS)
+    mz_add_definition(MZ_MACOS=1)
+elseif(MZ_LINUX)
+    mz_add_definition(MZ_LINUX=1)
 endif()
 
 # work around an issue with gcc > 4.7 and eigen3
@@ -423,7 +442,7 @@ if(MZ_IS_GCC)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0 -fno-inline")
     endif()
 
-    if(WINDOWS)
+    if(MZ_WINDOWS)
         if(MZ_64BIT)
             mz_add_definition("WIN32_MINGW64=1")
         else()
@@ -446,7 +465,7 @@ endif()
 # On Windows, MS Visual Studio will ignore the
 # environment variables INCLUDE and LIB by default. This forces
 # them to be used
-if(WINDOWS)
+if(MZ_WINDOWS)
     foreach(_inc $ENV{INCLUDE})
         file(TO_CMAKE_PATH ${_inc} _inc)
         include_directories(SYSTEM "${_inc}")
