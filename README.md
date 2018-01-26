@@ -1,14 +1,14 @@
 MZ CMake Tools
 ==============
 
-Provides some useful extensions to the normal 
+Provides some useful extensions to the normal
 functionality of CMake
 
 
 Additional Modules
 ------------------
 
-When using the mz tools more libraries can be 
+When using the mz tools more libraries can be
 searched for, see the Modules directory for details.
 
 
@@ -21,7 +21,7 @@ than cosmetic...
 ### mz_add_definition <definition1> ...
 add the definition <definition> (and following)
 to the list of definitions passed to the compiler.
-Automatically switches between the syntax of msvc 
+Automatically switches between the syntax of msvc
 and gcc/clang
 Example: mz_add_definition(NO_DEBUG)
 
@@ -65,13 +65,13 @@ MZ_HAS_CXX0X see MZ_HAS_CXX11
 MZ_HAS_CXX11 true when the compiler supports at least a
              (subset) of the upcoming C++11 standard
 
-DARWIN true when building on OS X / iOS
+MZ_MACOS true when building on macOS
 
-IOS true when building for iOS
+MZ_IOS true when building for iOS
 
-WINDOWS true when building on Windows
+MZ_WINDOWS true when building on Windows
 
-LINUX true when building on Linux
+MZ_LINUX true when building on Linux
 
 MZ_DATE_STRING a string containing day, date and time of the
                moment cmake was executed
@@ -87,13 +87,13 @@ warnings have to be accepted
 
 ### Provided defines (defined to 1)
 
-WINDOWS / WIN32 on Windows
+MZ_WINDOWS on Windows
 
-LINUX on Linux
+MZ_LINUX on Linux
 
-DARWIN on Darwin / OS X / iOS
+MZ_MACOS on macOS
 
-IOS on iOS
+MZ_IOS on iOS
 
 WIN32_VS on MSVC - note this is deprecated, it is recommended to use _MSC_VER
 
