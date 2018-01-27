@@ -43,12 +43,11 @@ if( MZ_UNCRUSTIFY_BIN )
 endif()
 
 if( MZ_IS_RELEASE )
-    option(MZ_DO_AUTO_FORMAT "Enable to run autoformat on configured targets" OFF)
     option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" OFF)
 else()
-    option(MZ_DO_AUTO_FORMAT "Enable to run autoformat on configured targets" ON)
     option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" ON)
 endif()
+option(MZ_DO_AUTO_FORMAT "Enable to run autoformat on configured targets" OFF)
 
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
