@@ -1,12 +1,30 @@
+#
+# autoformat.cmake
+#
+# Copyright (c) 2013-2018 Marius Zwicker
+# All rights reserved.
+#
+# @LICENSE_HEADER_START@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# @LICENSE_HEADER_END@
+#
+
 ##################################################
 #
-#	BUILD/AUTOFORMAT.CMAKE
+# BUILD/AUTOFORMAT.CMAKE
 #
-# 	Provides an easy mean to reformat a file using
-#   uncrustify and the settings as defined in autoformat.cfg
-#
-#	Copyright (c) 2013 Marius Zwicker
-#
+#   Provides an easy mean to lint and format a file using
+#   the astyle tool and cpplint.py
 #
 #
 # PROVIDED MACROS
@@ -31,28 +49,36 @@ else()
 endif()
 
 find_program(
-    MZ_UNCRUSTIFY_BIN
-    uncrustify
+    MZ_ASTYLE_BIN
+    astyle
 )
-if(NOT WINDOWS)
+find_program(
+    MZ_PYTHON_BIN
+    python
+)
+
+if(NOT WINDOWS AND MZ_PYTHON_BIN)
   set(MZ_CPPLINT_BIN ${MZ_TOOLS_LINTER_PATH}/cpplint.py CACHE PATH "Path to cpplint" FORCE)
 endif()
 
-if( MZ_UNCRUSTIFY_BIN )
-  set(MZ_CPPFORMAT_BIN ${MZ_TOOLS_LINTER_PATH}/cppformat.py CACHE PATH "Path to cppformat" FORCE)
+if( MZ_ASTYLE_BIN )
+  set(MZ_CPPFORMAT_BIN MZ_ASTYLE_BIN CACHE PATH "Path to astyle" FORCE)
 endif()
 
-if( MZ_IS_RELEASE )
-    option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" OFF)
-else()
-    option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" ON)
+if( MZ_CPPLINT_BIN )
+    if( MZ_IS_RELEASE )
+        option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" OFF)
+    else()
+        option(MZ_DO_CPPLINT "Enable to run cpplint on configured targets" ON)
+    endif()
 endif()
-option(MZ_DO_AUTO_FORMAT "Enable to run autoformat on configured targets" OFF)
+if( MZ_ASTYLE_BIN )
+    option(MZ_DO_AUTO_FORMAT "Enable to run autoformat on configured targets" OFF)
+endif()
 
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
   list(LENGTH _sources arg_count)
-  configure_file(${MZ_TOOLS_LINTER_PATH}/autoformat.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/autoformat.cfg)
 
   if( NOT arg_count GREATER 0 )
     mz_debug_message("Autoformat was no files given, using the target's sources")
@@ -67,38 +93,39 @@ macro(mz_auto_format _TARGET)
   set(_sources2 "")
   foreach(file ${_sources})
     get_filename_component(abs_file ${file} ABSOLUTE)
-    if( ${file} MATCHES ".+\\.(cpp|cxx|hpp|h|c|vert|glsl|frag|cl)$" AND NOT ${file} MATCHES "(ui_|moc_|qrc_).+" )
+    if( ${file} MATCHES ".+\\.(cpp|cxx|hpp|h|c)$" AND NOT ${file} MATCHES "(ui_|moc_|qrc_).+" )
         set(_sources2 ${_sources2} ${abs_file})
     endif()
   endforeach()
 
-  set(_new_target_format ${_TARGET}_autoformat)
-  set(_new_target_lint ${_TARGET}_cpplint)
-
-  if( MZ_CPPFORMAT_BIN AND MZ_DO_AUTO_FORMAT )
-    add_library(${_new_target_format} STATIC ${CMAKE_CURRENT_BINARY_DIR}/format_step.c)
-    set_target_properties(${_new_target_format} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/format_step.c
-        COMMAND ${MZ_CPPFORMAT_BIN} -c ${CMAKE_BINARY_DIR}/autoformat.cfg -u ${MZ_UNCRUSTIFY_BIN} ${_sources2}
-        COMMAND ${CMAKE_COMMAND} -E copy ${MZ_TOOLS_LINTER_PATH}/autoformat.c.in ${CMAKE_CURRENT_BINARY_DIR}/format_step.c
+  if( MZ_DO_AUTO_FORMAT )
+    add_custom_command(TARGET ${_TARGET} PRE_BUILD
+        COMMAND ${MZ_ASTYLE_BIN}
+            -n -z2 -Q # --lineend=linux
+            -A1 # --style=break
+            -s4 # --indent=spaces=4
+            -Y  # --indent-col1-comments
+            -m0 # --min-conditional-indent=0
+            -p  # --pad-oper
+            -D  # --pad-paren-in
+            -U  # --unpad-paren
+            -k1 # --align-pointer=type
+            -W1 # --align-reference=type
+            -j  # --add-brackets
+            -c  # --convert-tabs
+            -xW # --indent-preproc-block
+            ${_sources2}
         DEPENDS ${_sources}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     )
   endif()
-  if( MZ_CPPLINT_BIN AND MZ_DO_CPPLINT AND NOT __MZ_NO_CPPLINT )
-    add_library(${_new_target_lint} STATIC ${CMAKE_CURRENT_BINARY_DIR}/lint_step.c)
-    set_target_properties(${_new_target_lint} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lint_step.c
-        COMMAND ${MZ_CPPLINT_BIN} --root=${CMAKE_CURRENT_LIST_DIR} --filter=${CPPLINT_FILTERS} --output=eclipse ${_sources2}
-        COMMAND ${CMAKE_COMMAND} -E copy ${MZ_TOOLS_LINTER_PATH}/autoformat.c.in ${CMAKE_CURRENT_BINARY_DIR}/lint_step.c
+  if( MZ_DO_CPPLINT AND NOT __MZ_NO_CPPLINT )
+    add_custom_command(TARGET ${_TARGET} PRE_BUILD
+        COMMAND ${MZ_CPPLINT_BIN} --root=${CMAKE_CURRENT_LIST_DIR} --filter=${CPPLINT_FILTERS} --quiet --output=eclipse ${_sources2}
         DEPENDS ${_sources}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     )
   endif()
-
-  mz_debug_message("NEW_TARGET=${_new_target_format};${_new_target_lint}, WORKING_DIRECTORY=${CMAKE_CURRENT_LIST_DIR}")
 endmacro()
 
 macro(mz_auto_format_c _TARGET)
