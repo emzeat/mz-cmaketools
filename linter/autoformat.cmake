@@ -90,11 +90,11 @@ macro(mz_auto_format _TARGET)
     -whitespace,-build/header_guard,-build/include,-build/include_what_you_use,-readability/multiline_comment,-readability/namespace,-readability/streams,-runtime/references,-runtime/threadsafe_fn,-readability/alt_tokens
   )
 
-  set(_sources2 "")
+  set(_cpp_sources "")
   foreach(file ${_sources})
     get_filename_component(abs_file ${file} ABSOLUTE)
-    if( ${file} MATCHES ".+\\.(cpp|cxx|hpp|h|c)$" AND NOT ${file} MATCHES "(ui_|moc_|qrc_).+" )
-        set(_sources2 ${_sources2} ${abs_file})
+    if( ${file} MATCHES ".+\\.(cpp|cxx|hpp|h|c)$" AND NOT ${file} MATCHES "(ui_|moc_|qrc_|lemon_).+" )
+        set(_cpp_sources ${_cpp_sources} ${abs_file})
     endif()
   endforeach()
 
@@ -114,14 +114,14 @@ macro(mz_auto_format _TARGET)
             -j  # --add-brackets
             -c  # --convert-tabs
             -xW # --indent-preproc-block
-            ${_sources2}
+            ${_cpp_sources}
         DEPENDS ${_sources}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     )
   endif()
   if( MZ_DO_CPPLINT AND NOT __MZ_NO_CPPLINT )
     add_custom_command(TARGET ${_TARGET} PRE_BUILD
-        COMMAND ${MZ_CPPLINT_BIN} --root=${CMAKE_CURRENT_LIST_DIR} --filter=${CPPLINT_FILTERS} --quiet --output=eclipse ${_sources2}
+        COMMAND ${MZ_CPPLINT_BIN} --root=${CMAKE_CURRENT_LIST_DIR} --filter=${CPPLINT_FILTERS} --quiet --output=eclipse ${_cpp_sources}
         DEPENDS ${_sources}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     )
