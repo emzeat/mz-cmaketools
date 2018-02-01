@@ -48,6 +48,8 @@
 # MZ_DATE_STRING a string containing day, date and time of the
 #                moment cmake was executed
 #                e.g. Mo, 27 Feb 2012 19:47:23 +0100
+# MZ_YEAR_STRING a string containing the year of the moment
+#                cmake was executed
 # MZ_USER_STRING a string containing the current username
 # MZ_COMPILER_VERSION a string denoting the compiler version,
 #                e.g. with gcc 4.5.1 this is "45"
@@ -392,9 +394,11 @@ if(WINDOWS)
 else() # Sun, 11 Dec 2011 12:07:00 +0200
     execute_process(COMMAND "date" "+%Y-%m-%dT%H:%M:%SZ" OUTPUT_VARIABLE MZ_DATE_STRING)
     string(REPLACE "\n" "" MZ_DATE_STRING "${MZ_DATE_STRING}")
+    execute_process(COMMAND "date" "+%Y" OUTPUT_VARIABLE MZ_YEAR_STRING)
+    string(REPLACE "\n" "" MZ_YEAR_STRING "${MZ_YEAR_STRING}")
     set(MZ_USER_STRING $ENV{USER})
 endif()
-mz_message("Today is: ${MZ_DATE_STRING}")
+mz_message("Today is: ${MZ_DATE_STRING} (Year ${MZ_YEAR_STRING})")
 mz_message("User is: ${MZ_USER_STRING}")
 mz_message("Compiler version is: ${MZ_COMPILER_VERSION}")
 
