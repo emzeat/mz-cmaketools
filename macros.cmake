@@ -49,7 +49,7 @@
 #       automatically add a "D" postfix when compiling in debug
 #       mode to the given target
 #
-# mz_auto_moc <mocced> ...
+# mz_qt_auto_moc <mocced> ...
 #       search all passed files in (...) for Q_OBJECT and if found
 #       run moc on them via qt4_wrap_cpp. Assign the output files
 #       to <mocced>. Improves the version provided by cmake by searching
