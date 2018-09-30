@@ -36,7 +36,7 @@ Valid arguments:
     'help' show this list
     'mode=(release|reldbg|debug)' to control build configuration
     'compiler=(clang|gcc|vs2008|vs2010|mingw|mingw64)' to select compiler
-    'generator=(ninja|makefiles|eclipse)'
+    'generator=(ninja|makefiles|eclipse|xcode)'
     'cmake="-D.."' options to pass to cmake
     'name=".."' custom name prefix
     'location=(inside|outside)' configures location of build files
