@@ -270,8 +270,11 @@ function(__MZ_COMPILER_IS_CLANG _OUTPUT _OUTPUT_VERSION)
   endif()
 
   string(
-    REGEX MATCH "[0-9]\\.[0-9](\\.[0-9])?(\\-[0-9])?"
+    REGEX MATCH "[0-9]+\\.[0-9](\\.[0-9])?(\\-[0-9])?"
     _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
+  )
+  string(
+    REPLACE "." "" _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
   )
 
   set(${_OUTPUT_VERSION} ${_MZ_CLANG_VERSION} PARENT_SCOPE)
@@ -338,7 +341,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
             set(MZ_HAS_EXPERIMENTAL_CXX0X TRUE CACHE BOOL MZ_HAS_EXPERIMENTAL_CXX0X)
             set(MZ_HAS_CXX0X TRUE CACHE BOOL MZ_HAS_CXX0X)
             set(MZ_HAS_CXX11 TRUE CACHE BOOL MZ_HAS_CXX11)
-        elseif(MZ_IS_CLANG AND COMPILER_VERSION STRGREATER "29")
+        elseif(MZ_IS_CLANG AND COMPILER_VERSION GREATER "29")
             mz_message("clang 3.1+ with C++11 support detected")
             set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
             set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
