@@ -8,81 +8,80 @@
 
 
 # only debugging using the GNU toolchain is supported for now
-if (MZ_IS_GCC)
+if(MZ_IS_GCC)
   # extracting the debug info is done by a separate utility in the GNU
   # toolchain. check that this is actually installed.
   message (STATUS "Looking for strip utility")
-  if (APPLE)
+  if(MZ_MACOS)
     # MacOS X has a duo of utilities; we need both
-    find_program (OBJCOPY strip)
-    find_program (DSYMUTIL_PATH dsymutil)
-    mark_as_advanced (DSYMUTIL_PATH)
-    if (NOT DSYMUTIL_PATH)
-        set (OBJCOPY dsymutil-NOTFOUND)
-    endif (NOT DSYMUTIL_PATH)
-  else (APPLE)
-    find_program (OBJCOPY objcopy)
-  endif (APPLE)
-  mark_as_advanced (OBJCOPY)
-  if (OBJCOPY)
-    message (STATUS "Looking for strip utility - found")
-  else (OBJCOPY)
-    message (WARNING "Looking for strip utility - not found")
-  endif (OBJCOPY)
+    find_program(DSYMUTIL dsymutil)
+    find_program(STRIP strip)
+    if(NOT DSYMUTIL)
+      set(STRIP dsymutil-NOTFOUND)
+    endif()
+    mark_as_advanced(STRIP)
+    mark_as_advanced(DSYMUTIL)
+  else()
+    find_program(OBJCOPY objcopy)
+    find_program(STRIP strip)
+    if(NOT OBJCOPY)
+      set(STRIP objcopy-NOTFOUND)
+    endif()
+    mark_as_advanced(OBJCOPY)
+    mark_as_advanced(STRIP)
+  endif()
+  if(STRIP)
+    message(STATUS "Looking for strip utility - found")
+  else(STRIP)
+    message(WARNING "Looking for strip utility - not found")
+  endif(STRIP)
 endif ()
 
 # command to separate the debug information from the executable into
 # its own file; this must be called for each target; optionally takes
 # the name of a variable to receive the list of .debug files
-function (strip_debug_symbols targets)
-  if (MZ_IS_GCC AND OBJCOPY)
-    foreach (target IN LISTS targets)
+function(strip_debug_symbols targets)
+  if(MZ_IS_GCC AND STRIP)
+    foreach(target IN LISTS targets)
       # libraries must retain the symbols in order to link to them, but
       # everything can be stripped in an executable
-      get_target_property (_kind ${target} TYPE)
+      get_target_property(MZ_KIND ${target} TYPE)
 
       # don't strip static libraries
-      if ("${_kind}" STREQUAL "STATIC_LIBRARY")
+      if("${MZ_KIND}" STREQUAL "STATIC_LIBRARY")
         return ()
       endif ()
 
-      # don't strip public symbols in shared objects
-      if ("${_kind}" STREQUAL "EXECUTABLE")
-        set (_strip_args "--strip-all")
-      else ()
-        set (_strip_args "--strip-debug")
-      endif ()
-
-      if (APPLE)
-          get_target_property(_is_bundle ${target} MACOSX_BUNDLE_INFO_PLIST )
-          get_target_property(_is_framework ${target} FRAMEWORK )
-          if( _is_framework OR _is_bundle )
-            add_custom_command (TARGET ${target}
-              POST_BUILD
-              WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-              COMMAND ${DSYMUTIL_PATH} ARGS --out=$<TARGET_BUNDLE_DIR:${target}>.dSYM $<TARGET_FILE:${target}>
-              COMMAND ${OBJCOPY} ARGS -S $<TARGET_FILE:${target}>
-              VERBATIM
-              )
-          else()
-            add_custom_command (TARGET ${target}
-              POST_BUILD
-              WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-              COMMAND ${DSYMUTIL_PATH} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.dSYM $<TARGET_FILE:${target}>
-              COMMAND ${OBJCOPY} ARGS -S $<TARGET_FILE:${target}>
-              VERBATIM
-              )
-          endif()
-      else ()
-          # Stripping symbols is disabled on Linux for now
-          #add_custom_command (TARGET ${target}
-          #  POST_BUILD
-          #  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-          #  COMMAND ${DSYMUTIL_PATH} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.debug $<TARGET_FILE:${target}>
-          #  COMMAND ${OBJCOPY} ARGS -S $<TARGET_FILE:${target}>
-          #  VERBATIM
-          #)
-      endif ()
-    endforeach ()
-  endif ()
-endfunction ()
+      if(MZ_MACOS)
+        get_target_property(MZ_IS_BUNDLE ${target} MACOSX_BUNDLE_INFO_PLIST )
+        get_target_property(MZ_IS_FRAMEWORK ${target} FRAMEWORK )
+        if( MZ_IS_FRAMEWORK OR MZ_IS_BUNDLE )
+          add_custom_command(TARGET ${target}
+            POST_BUILD
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+            COMMAND ${DSYMUTIL_PATH} ARGS --out=$<TARGET_BUNDLE_DIR:${target}>.dSYM $<TARGET_FILE:${target}>
+            COMMAND ${STRIP} ARGS -S $<TARGET_FILE:${target}>
+            VERBATIM
+          )
+        else()
+          add_custom_command(TARGET ${target}
+            POST_BUILD
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+            COMMAND ${DSYMUTIL_PATH} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.dSYM $<TARGET_FILE:${target}>
+            COMMAND ${STRIP} ARGS -S $<TARGET_FILE:${target}>
+            VERBATIM
+          )
+        endif()
+      else()
+          add_custom_command (TARGET ${target}
+            POST_BUILD
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+            COMMAND ${OBJCOPY} ARGS --only-keep-debug $<TARGET_FILE:${target}> ${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.debug
+            COMMAND ${STRIP} ARGS --strip-debug --strip-unneeded $<TARGET_FILE:${target}>
+            COMMAND ${OBJCOPY} ARGS --add-gnu-debuglink=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.debug $<TARGET_FILE:${target}>
+            VERBATIM
+          )
+      endif()
+    endforeach()
+  endif()
+endfunction()
