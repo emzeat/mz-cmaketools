@@ -11,30 +11,45 @@
 if(MZ_IS_GCC)
   # extracting the debug info is done by a separate utility in the GNU
   # toolchain. check that this is actually installed.
-  message (STATUS "Looking for strip utility")
   if(MZ_MACOS)
     # MacOS X has a duo of utilities; we need both
+    message(STATUS "Looking for strip utility")
     find_program(DSYMUTIL dsymutil)
-    find_program(STRIP strip)
-    if(NOT DSYMUTIL)
-      set(STRIP dsymutil-NOTFOUND)
-    endif()
-    mark_as_advanced(STRIP)
     mark_as_advanced(DSYMUTIL)
+    if(DSYMUTIL)
+      message(STATUS "Looking for dsymutil - found")
+    else()
+      message(WARNING "Looking for dsymutil - not found")
+    endif()
+    find_program(STRIP strip)
+    mark_as_advanced(STRIP)
+    if(NOT DSYMUTIL)
+      set(STRIP strip-NOTFOUND)
+    endif()
+    if(STRIP)
+        message(STATUS "Looking for strip - found")
+    else()
+        message(WARNING "Looking for strip - not found")
+    endif()
   else()
     find_program(OBJCOPY objcopy)
-    find_program(STRIP strip)
-    if(NOT OBJCOPY)
-      set(STRIP objcopy-NOTFOUND)
-    endif()
     mark_as_advanced(OBJCOPY)
+    if(OBJCOPY)
+        message(STATUS "Looking for objcopy - found")
+    else()
+        message(WARNING "Looking for objcopy - not found")
+    endif()
+    find_program(STRIP strip)
     mark_as_advanced(STRIP)
+    if(NOT OBJCOPY)
+      set(STRIP strip-NOTFOUND)
+    endif()
+    if(STRIP)
+        message(STATUS "Looking for strip - found")
+    else()
+        message(WARNING "Looking for strip - not found")
+    endif()
   endif()
-  if(STRIP)
-    message(STATUS "Looking for strip utility - found")
-  else(STRIP)
-    message(WARNING "Looking for strip utility - not found")
-  endif(STRIP)
 endif ()
 
 # command to separate the debug information from the executable into
@@ -59,7 +74,7 @@ function(strip_debug_symbols targets)
           add_custom_command(TARGET ${target}
             POST_BUILD
             WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-            COMMAND ${DSYMUTIL_PATH} ARGS --out=$<TARGET_BUNDLE_DIR:${target}>.dSYM $<TARGET_FILE:${target}>
+            COMMAND ${DSYMUTIL} ARGS --out=$<TARGET_BUNDLE_DIR:${target}>.dSYM $<TARGET_FILE:${target}>
             COMMAND ${STRIP} ARGS -S $<TARGET_FILE:${target}>
             VERBATIM
           )
@@ -67,7 +82,7 @@ function(strip_debug_symbols targets)
           add_custom_command(TARGET ${target}
             POST_BUILD
             WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-            COMMAND ${DSYMUTIL_PATH} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.dSYM $<TARGET_FILE:${target}>
+            COMMAND ${DSYMUTIL} ARGS --out=${EXECUTABLE_OUTPUT_PATH}/$<TARGET_FILE_NAME:${target}>.dSYM $<TARGET_FILE:${target}>
             COMMAND ${STRIP} ARGS -S $<TARGET_FILE:${target}>
             VERBATIM
           )
