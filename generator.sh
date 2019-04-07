@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##
-# Copyright (c) 2008-2014 Marius Zwicker
+# Copyright (c) 2008-2019 Marius Zwicker
 # All rights reserved.
 #
 # @LICENSE_HEADER_START:Apache@
@@ -35,8 +35,8 @@ cmake using a predefined directory naming scheme
 Valid arguments:
     'help' show this list
     'mode=(release|reldbg|debug)' to control build configuration
-    'compiler=(clang|gcc|vs2008|vs2010|mingw|mingw64)' to select compiler
-    'generator=(ninja|makefiles|eclipse|xcode)'
+    'compiler=(clang|gcc|ios|ios_simulator)' to select compiler
+    'generator=(ninja|makefiles|sublime|xcode)'
     'cmake="-D.."' options to pass to cmake
     'name=".."' custom name prefix
     'location=(inside|outside)' configures location of build files
@@ -89,6 +89,33 @@ function get_mode {
 
 function get_compiler {
     case ${my_compiler} in
+        ios_simulator)
+            my_cc=clang
+            my_cxx=clang++
+            my_args="${my_args} \
+                -DCMAKE_TOOLCHAIN_FILE=${my_script_dir}/iOS.cmake \
+                -DIOS_PLATFORM=SIMULATOR64 \
+                -DENABLE_ARC=0 \
+                -DENABLE_VISIBILITY=1 \
+                -DENABLE_BITCODE=1 \
+                -DIOS_DEPLOYMENT_TARGET=9.0"
+            # force, the others do not work right now
+            my_c_generator="Unix Makefiles"
+            ;;
+        ios)
+            my_cc=clang
+            my_cxx=clang++
+            my_args="${my_args} \
+                -DCMAKE_TOOLCHAIN_FILE=${my_script_dir}/iOS.cmake \
+                -DIOS_PLATFORM=OS \
+                -DENABLE_ARC=0 \
+                -DENABLE_VISIBILITY=1 \
+                -DENABLE_BITCODE=1 \
+                -DIOS_DEPLOYMENT_TARGET=9.0 \
+                -DIOS_ARCH=arm64;armv7"
+            # force, the others do not work right now
+            my_c_generator="Unix Makefiles"
+            ;;
         clang)
             my_cc=clang
             my_cxx=clang++
@@ -235,10 +262,14 @@ do
     esac
 done
 
+
+# get the working directory
+detect_dir
+
 # convert arguments to params
-get_compiler
-get_mode
 get_generator
+get_mode
+get_compiler
 
 # fallback to gcc
 if [ -z ${my_cc} ]; then
@@ -248,9 +279,6 @@ fi
 if [ -z ${my_cxx} ]; then
     my_cxx=g++
 fi
-
-# get the working directory
-detect_dir
 
 # print obtained variable values
 #verbose

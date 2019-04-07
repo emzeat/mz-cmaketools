@@ -48,11 +48,11 @@ else()
   set(MZ_TOOLS_LINTER_PATH ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
-find_program(
+find_host_program(
     MZ_ASTYLE_BIN
     astyle
 )
-find_program(
+find_host_program(
     MZ_PYTHON_BIN
     python
 )

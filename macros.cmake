@@ -185,7 +185,7 @@ macro(mz_find_include_library _NAME SYS _VERSION SRC _DIRECTORY _INC_DIR _TARGET
     # we only search for the library in case
     # - the given target was not defined before (think hierarchies)
     if( NOT TARGET ${_TARGET} )
-        find_package( ${_NAME} ${_VERSION} QUIET )
+        find_host_package( ${_NAME} ${_VERSION} QUIET )
     endif()
 
     # take care of find_package not converting to upper-case

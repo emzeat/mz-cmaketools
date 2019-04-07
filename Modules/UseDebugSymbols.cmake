@@ -6,22 +6,21 @@
 # (2) Run the strip_debug_symbols function on every target that you want
 #     to strip.
 
-
 # only debugging using the GNU toolchain is supported for now
 if(MZ_IS_GCC)
   # extracting the debug info is done by a separate utility in the GNU
   # toolchain. check that this is actually installed.
-  if(MZ_MACOS)
+  if(MZ_MACOS OR MZ_IOS)
     # MacOS X has a duo of utilities; we need both
     message(STATUS "Looking for strip utility")
-    find_program(DSYMUTIL dsymutil)
+    find_host_program(DSYMUTIL dsymutil)
     mark_as_advanced(DSYMUTIL)
     if(DSYMUTIL)
       message(STATUS "Looking for dsymutil - found")
     else()
       message(WARNING "Looking for dsymutil - not found")
     endif()
-    find_program(STRIP strip)
+    find_host_program(STRIP strip)
     mark_as_advanced(STRIP)
     if(NOT DSYMUTIL)
       set(STRIP strip-NOTFOUND)

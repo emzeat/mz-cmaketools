@@ -107,6 +107,11 @@
 #       cmake default. This is especially useful when adding
 #       external libraries which might still have compiler warnings
 #
+# find_host_package (PROGRAM ARGS)
+#       A macro used to find executable programs on the host system, not within the
+#       iOS environment.  Thanks to the android-cmake project for providing the
+#       command.
+#
 # ENABLED COMPILER DEFINITIONS/OPTIONS
 # -----------------------
 # On all compilers supporting it, the option to treat warnings
@@ -463,6 +468,17 @@ endif()
 if(MZ_HAS_CXX11)
     mz_add_definition(MZ_HAS_CXX11=1)
     mz_add_definition(MZ_HAS_CXX0X=1)
+endif()
+
+if(NOT COMMAND find_host_program)
+  macro(find_host_program)
+    find_program(${ARGN})
+  endmacro()
+endif()
+if(NOT COMMAND find_host_package)
+  macro(find_host_package)
+    find_package(${ARGN})
+  endmacro()
 endif()
 
 # On Windows, MS Visual Studio will ignore the
