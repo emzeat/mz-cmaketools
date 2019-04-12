@@ -66,7 +66,7 @@ function(strip_debug_symbols targets)
         return ()
       endif ()
 
-      if(MZ_MACOS)
+      if(MZ_MACOS OR MZ_IOS)
         get_target_property(MZ_IS_BUNDLE ${target} MACOSX_BUNDLE_INFO_PLIST )
         get_target_property(MZ_IS_FRAMEWORK ${target} FRAMEWORK )
         if( MZ_IS_FRAMEWORK OR MZ_IS_BUNDLE )
