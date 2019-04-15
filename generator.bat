@@ -136,4 +136,3 @@ goto END
 cd %BASE_DIR%\build
 echo.All DONE
 :EXIT
-pause
