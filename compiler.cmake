@@ -438,6 +438,13 @@ if( MZ_IS_CLANG AND MZ_COMPILER_VERSION STRGREATER 6.0.3 )
     mz_add_cxx_flag(GCC -Wno-unknown-pragmas)
 endif()
 
+# work around an issue seen when building on macOS catalina and stack alignment checking
+# https://forums.developer.apple.com/thread/121887
+if(MZ_MACOS)
+    mz_add_c_flag(GCC -fno-stack-check)
+    mz_add_cxx_flag(GCC -fno-stack-check)
+endif()
+
 
 if(MZ_IS_GCC)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
