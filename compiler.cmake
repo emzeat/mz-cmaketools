@@ -53,6 +53,8 @@
 # MZ_USER_STRING a string containing the current username
 # MZ_COMPILER_VERSION a string denoting the compiler version,
 #                e.g. with gcc 4.5.1 this is "45"
+# MZ_BUILD_ENV environment variables that should be exported before
+#                building an external dependency through ExternalProject_Add
 #
 # PROVIDED MACROS
 # -----------------------
@@ -445,8 +447,27 @@ if(MZ_MACOS)
     mz_add_cxx_flag(GCC -fno-stack-check)
     set(MZ_CXX_DEFAULT "${MZ_CXX_DEFAULT} -fno-stack-check")
     set(MZ_C_DEFAULT "${MZ_C_DEFAULT} -fno-stack-check")
+    if(CMAKE_OSX_SYSROOT)
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} SDKROOT=${CMAKE_OSX_SYSROOT})
+    endif()
+    if(CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CFLAGS=-fno-stack-check\ -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET})
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CXXFLAGS=-fno-stack-check\ -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET})
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CPPFLAGS=-fno-stack-check\ -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET})
+    else()
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CFLAGS=-fno-stack-check)
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CXXFLAGS=-fno-stack-check)
+        set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CPPFLAGS=-fno-stack-check)
+    endif()
 endif()
 
+# force -fPIC on external libs
+if(MZ_LINUX)
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CFLAGS=-fPIC)
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CXXFLAGS=-fPIC)
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CPPFLAGS=-fPIC)
+endif()
 
 if(MZ_IS_GCC)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
