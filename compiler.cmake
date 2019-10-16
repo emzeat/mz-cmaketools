@@ -443,6 +443,8 @@ endif()
 if(MZ_MACOS)
     mz_add_c_flag(GCC -fno-stack-check)
     mz_add_cxx_flag(GCC -fno-stack-check)
+    set(MZ_CXX_DEFAULT "${MZ_CXX_DEFAULT} -fno-stack-check")
+    set(MZ_C_DEFAULT "${MZ_C_DEFAULT} -fno-stack-check")
 endif()
 
 
