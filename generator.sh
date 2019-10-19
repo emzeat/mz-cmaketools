@@ -35,7 +35,7 @@ cmake using a predefined directory naming scheme
 Valid arguments:
     'help' show this list
     'mode=(release|reldbg|debug)' to control build configuration
-    'compiler=(clang|gcc|ios|ios_simulator)' to select compiler
+    'compiler=(clang|gcc|ios|ios_legacy|ios_simulator)' to select compiler
     'generator=(ninja|makefiles|sublime|xcode)'
     'cmake="-D.."' options to pass to cmake
     'name=".."' custom name prefix
@@ -98,11 +98,11 @@ function get_compiler {
                 -DENABLE_ARC=0 \
                 -DENABLE_VISIBILITY=1 \
                 -DENABLE_BITCODE=1 \
-                -DIOS_DEPLOYMENT_TARGET=9.0"
+                -DIOS_DEPLOYMENT_TARGET=11.0"
             # force, the others do not work right now
             my_c_generator="Unix Makefiles"
             ;;
-        ios)
+        ios_legacy)
             my_cc=clang
             my_cxx=clang++
             my_args="${my_args} \
@@ -112,7 +112,21 @@ function get_compiler {
                 -DENABLE_VISIBILITY=1 \
                 -DENABLE_BITCODE=1 \
                 -DIOS_DEPLOYMENT_TARGET=9.0 \
-                -DIOS_ARCH=arm64;armv7"
+                -DIOS_ARCH=armv7"
+            # force, the others do not work right now
+            my_c_generator="Unix Makefiles"
+            ;;
+        ios)
+            my_cc=clang
+            my_cxx=clang++
+            my_args="${my_args} \
+                -DCMAKE_TOOLCHAIN_FILE=${my_script_dir}/iOS.cmake \
+                -DIOS_PLATFORM=OS64 \
+                -DENABLE_ARC=0 \
+                -DENABLE_VISIBILITY=1 \
+                -DENABLE_BITCODE=1 \
+                -DIOS_DEPLOYMENT_TARGET=11.0 \
+                -DIOS_ARCH=arm64"
             # force, the others do not work right now
             my_c_generator="Unix Makefiles"
             ;;
