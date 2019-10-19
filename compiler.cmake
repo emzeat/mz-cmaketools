@@ -462,6 +462,23 @@ if(MZ_MACOS)
     endif()
 endif()
 
+# prepare env so that basic autoconf toolchains can also be supported
+if(MZ_IOS)
+    foreach(ARCH ${IOS_ARCH})
+        set(ARCH_FLAGS ${ARCH_FLAGS}\ -arch\ ${ARCH})
+    endforeach()
+    set(IOS_BUILD_ENV ${ARCH_FLAGS}\ -O3\ -isysroot\ ${CMAKE_OSX_SYSROOT}\ -m${XCODE_IOS_PLATFORM}-version-min=${IOS_DEPLOYMENT_TARGET}\ -Wno-error-implicit-function-declaration)
+    if (ENABLE_BITCODE_INT)
+        set(IOS_BUILD_ENV ${IOS_BUILD_ENV}\ -fembed-bitcode)
+    endif()
+
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CC=${CMAKE_C_COMPILER} CFLAGS=${IOS_BUILD_ENV})
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${IOS_BUILD_ENV})
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CPPFLAGS=${IOS_BUILD_ENV})
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} LDFLAGS=${ARCH_FLAGS}\ -isysroot\ ${CMAKE_OSX_SYSROOT}\ -m${XCODE_IOS_PLATFORM}-version-min=${IOS_DEPLOYMENT_TARGET})
+    set(MZ_BUILD_ENV ${MZ_BUILD_ENV} ARFLAGS=${ARCH_FLAGS}\ -isysroot\ ${CMAKE_OSX_SYSROOT}\ -m${XCODE_IOS_PLATFORM}-version-min=${IOS_DEPLOYMENT_TARGET})
+endif()
+
 # force -fPIC on external libs
 if(MZ_LINUX)
     set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CFLAGS=-fPIC)
