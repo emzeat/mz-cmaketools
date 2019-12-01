@@ -115,7 +115,7 @@ find_host_package(Git)
 macro(mz_download_lfs FILE)
 
     # read the first 7 bytes to test if the file is still an lfs pointer
-    file(READ ${FILE} FILE_START LIMIT 7 )
+    file(READ ${FILE} FILE_START LIMIT 8 )
     if( "${FILE_START}" MATCHES "version" )
         # not loaded yet, do so now
         if( NOT GIT_FOUND )
