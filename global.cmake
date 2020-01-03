@@ -41,8 +41,22 @@ if( NOT CMAKE_CURRENT_LIST_DIR )
     string(REPLACE "/global.cmake" "" CMAKE_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_FILE}")
 endif()
 
+# Set the minimum version to 10.12 on OS X
+if(APPLE AND NOT IOS_PLATFORM)
+    set( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk )
+    message("-- Setting macOS SDK to ${CMAKE_OSX_SYSROOT}")
+    set( CMAKE_OSX_DEPLOYMENT_TARGET 10.12 )
+    message("-- Setting minimum version of OS X to ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+endif()
+
 # path to the mz tools files
 set(MZ_TOOLS_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+## We need to ouput everything into the same directory
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/ CACHE PATH "Library output path")
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/ CACHE PATH "Executable output path")
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+message("-- Setting binary output path: ${CMAKE_BINARY_DIR}/bin/")
 
 ### END OF CONFIGURATION SECTION
 
