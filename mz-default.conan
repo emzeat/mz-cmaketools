@@ -1,0 +1,40 @@
+include(default)
+
+[options]
+*:fPIC=True
+# conan inspect qt/5.12.9@bincrafters/stable -a=options
+# conan inspect qt/5.12.9@bincrafters/stable -a=default_options
+qt:shared=True
+qt:commercial=False
+qt:openssl=True
+qt:qt3d=False
+qt:qtactiveqt=False
+qt:qtandroidextras=False
+qt:qtcanvas3d=False
+qt:qtcharts=False
+qt:qtconnectivity=False
+qt:qtdatavis3d=False
+qt:qtgamepad=False
+qt:qtpurchasing=False
+qt:qtqa=False
+qt:qtquickcontrols=False
+qt:qtremoteobjects=False
+qt:qtscript=False
+qt:qtsensors=False
+qt:qtserialbus=False
+qt:qtserialport=False
+qt:qtspeech=False
+qt:qtvirtualkeyboard=False
+qt:qtwebchannel=False
+qt:qtwebview=False
+qt:qtwebengine=False
+qt:with_mysql=False
+qt:with_pq=False
+qt:with_odbc=False
+qt:with_sdl2=False
+qt:with_openal=False
+# conan inspect tbb/2020.0@ -a=options
+# tbb:fPIC=True
+# tbb:shared=True
+# conan inspect sqlite3/3.29.0 -a=options
+sqlite3:build_executable=False

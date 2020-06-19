@@ -1,0 +1,15 @@
+include(./mz-default.conan)
+
+[settings]
+os=iOS
+os.version=11.0
+arch=armv8
+arch_build=x86_64
+os_build=Macos
+
+[build_requires]
+darwin-toolchain/1.0.8@theodelrieu/stable
+
+[options]
+*:fPIC=True
+*:shared=False
