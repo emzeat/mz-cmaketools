@@ -98,7 +98,7 @@ function get_compiler {
                 -DENABLE_ARC=0 \
                 -DENABLE_VISIBILITY=1 \
                 -DENABLE_BITCODE=1 \
-                -DIOS_DEPLOYMENT_TARGET=11.0"
+                -DIOS_DEPLOYMENT_TARGET=13.0"
             # force, the others do not work right now
             my_c_generator="Unix Makefiles"
             ;;
@@ -125,7 +125,7 @@ function get_compiler {
                 -DENABLE_ARC=0 \
                 -DENABLE_VISIBILITY=1 \
                 -DENABLE_BITCODE=1 \
-                -DIOS_DEPLOYMENT_TARGET=11.0 \
+                -DIOS_DEPLOYMENT_TARGET=13.0 \
                 -DIOS_ARCH=arm64"
             # force, the others do not work right now
             my_c_generator="Unix Makefiles"
