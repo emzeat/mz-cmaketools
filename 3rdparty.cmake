@@ -60,15 +60,6 @@ if(NOT HAS_MZ_3RDPARTY)
 
     include(ExternalProject)
 
-    find_package(Git REQUIRED)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} log --pretty=format:%h -n 1 .
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE MZ_3RDPARTY_WC_REVISION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    #mz_3rdparty_message("Version #${MZ_3RDPARTY_WC_REVISION} in ${CMAKE_CURRENT_SOURCE_DIR}")
-
     if( DEFINED ENV{MZ_3RDPARTY_MANUAL_BASE} )
         set(MZ_3RDPARTY_BASE $ENV{MZ_3RDPARTY_MANUAL_BASE})
     else()
@@ -151,6 +142,15 @@ endmacro()
 macro(mz_3rdparty_cache NAME TARGET)
 
     project(${NAME})
+
+    find_package(Git REQUIRED)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} log --pretty=format:%h -n 1 .
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_VARIABLE MZ_3RDPARTY_WC_REVISION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    #mz_3rdparty_message("Version #${MZ_3RDPARTY_WC_REVISION} in ${CMAKE_CURRENT_LIST_DIR}")
 
     set(MZ_3RDPARTY_PREFIX_DIR "${MZ_3RDPARTY_BASE}/${NAME}/${MZ_3RDPARTY_WC_REVISION}")
     set(MZ_3RDPARTY_SOURCE_DIR "${MZ_3RDPARTY_PREFIX_DIR}/source")
