@@ -43,8 +43,6 @@ endif()
 
 # Set the minimum version to 10.12 on OS X
 if(APPLE AND NOT IOS_PLATFORM)
-    set( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk )
-    message("-- Setting macOS SDK to ${CMAKE_OSX_SYSROOT}")
     set( CMAKE_OSX_DEPLOYMENT_TARGET 10.12 )
     message("-- Setting minimum version of OS X to ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
