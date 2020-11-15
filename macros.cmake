@@ -311,6 +311,10 @@ macro(mz_download_lfs FILE)
         endif()
         mz_message("   Downloading ${FILE}...")
         execute_process(
+            COMMAND ${GIT_EXECUTABLE} lfs install
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+        execute_process(
             COMMAND ${GIT_EXECUTABLE} lfs pull -I ${FILE} -X override-ignore-from-config
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
