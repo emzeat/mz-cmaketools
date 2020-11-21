@@ -65,6 +65,7 @@ if(NOT HAS_MZ_3RDPARTY)
     else()
         set(MZ_3RDPARTY_BASE $ENV{HOME}/.mz-3rdparty)
     endif()
+    string(REPLACE "\\" "/" MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE})
 
     if( IOS_PLATFORM )
         set(MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE}/${IOS_PLATFORM}-${CMAKE_SYSTEM_PROCESSOR})

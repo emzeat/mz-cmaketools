@@ -65,15 +65,15 @@ GOTO:EOF
         set MY_GENERATOR="Visual Studio 16 2019" -A x86
     )
     if "%GENERATOR%" == "vs2019_64" (
-        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
-        set MY_GENERATOR="Visual Studio 16 2019" -A amd64
+        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
+        set MY_GENERATOR="Visual Studio 16 2019" -A x64
     )
     if "%GENERATOR%" == "ninja" (
         call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
         set MY_GENERATOR="Ninja"
     )
     if "%GENERATOR%" == "ninja_64" (
-        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
+        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
         set MY_GENERATOR=Ninja
     )
 
