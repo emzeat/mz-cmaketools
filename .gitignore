@@ -2,3 +2,4 @@ clang-*
 gcc-*
 vs*
 mingw*
+win32-*

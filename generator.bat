@@ -61,19 +61,27 @@ GOTO:EOF
     echo.-- Using Visual Studio at %MY_VCINSTALLDIR%
 
     if "%GENERATOR%" == "vs2019" (
-        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
+        if not defined DevEnvDir (
+            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
+        )
         set MY_GENERATOR="Visual Studio 16 2019" -A x86
     )
     if "%GENERATOR%" == "vs2019_64" (
-        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
+        if not defined DevEnvDir (
+            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
+        )
         set MY_GENERATOR="Visual Studio 16 2019" -A x64
     )
     if "%GENERATOR%" == "ninja" (
-        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
+        if not defined DevEnvDir (
+            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
+        )
         set MY_GENERATOR="Ninja"
     )
     if "%GENERATOR%" == "ninja_64" (
-        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
+        if not defined DevEnvDir (
+            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
+        )
         set MY_GENERATOR=Ninja
     )
 
@@ -90,7 +98,7 @@ GOTO:EOF
 
     set "BUILD_DIR=%BASE_DIR%_win32-%GENERATOR%-%BUILD_MODE%"
     if "%LOCATION%" == "inside" (
-        set "LOCATION=%BASE_DIR%\build\%GENERATOR%-%BUILD_MODE%"
+        set "BUILD_DIR=%BASE_DIR%\build\win32-%GENERATOR%-%BUILD_MODE%"
     )
 
     cd build
