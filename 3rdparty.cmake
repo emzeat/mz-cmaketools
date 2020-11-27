@@ -176,6 +176,21 @@ macro(mz_3rdparty_cache NAME TARGET)
 
 endmacro()
 
+# having the patch utility is handy
+find_program(MZ_3RDPARTY_PATCH patch patch.exe
+    HINTS "C:/Program Files/Git/usr/bin"
+)
+if(NOT MZ_3RDPARTY_PATCH)
+    mz_error_message("Missing 'patch', cannot continue")
+endif()
+
+# automatically switch between nmake and make
+if( MZ_WINDOWS )
+    set(MZ_3RDPARTY_MAKE nmake)
+else()
+    set(MZ_3RDPARTY_MAKE make -j8)
+endif()
+
 # some properties that need to be set when linking
 file(WRITE ${CMAKE_BINARY_DIR}/3rdparty.cmake "
     set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
