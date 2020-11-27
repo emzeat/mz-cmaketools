@@ -42,6 +42,11 @@
 #
 #       Additional arguments are similar to ExternalProject_Add
 #
+# PROVIDED CMAKE VARIABLES
+# -----------------------
+# MZ_CMAKE_RUNTIME_ARGS runtime variables that should be propagated
+#                to a subinstance of cmake invoked from mz_3rdparty_add
+#
 ########################################################################
 
 # if global.cmake was not included yet, report it
@@ -170,3 +175,29 @@ macro(mz_3rdparty_cache NAME TARGET)
     endif()
 
 endmacro()
+
+# some properties that need to be set when linking
+file(WRITE ${CMAKE_BINARY_DIR}/3rdparty.cmake "
+    set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    message(\"3rdparty injected: CMAKE_C_FLAGS_RELEASE=\${CMAKE_C_FLAGS_RELEASE}\")
+    message(\"3rdparty injected: CMAKE_C_FLAGS_DEBUG=\${CMAKE_C_FLAGS_DEBUG}\")
+    message(\"3rdparty injected: CMAKE_CXX_FLAGS_RELEASE=\${CMAKE_CXX_FLAGS_RELEASE}\")
+    message(\"3rdparty injected: CMAKE_C_FLAGS_RELEASE=\${CMAKE_C_FLAGS_RELEASE}\")
+    message(\"3rdparty injected: CMAKE_BUILD_TYPE=\${CMAKE_BUILD_TYPE}\")
+")
+
+set(MZ_CMAKE_RUNTIME_ARGS
+   # forward all compiler settings
+   -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
+   -DCMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
+   -DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+   -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
+   -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+   -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+   -DCMAKE_PROJECT_INCLUDE_BEFORE=${CMAKE_BINARY_DIR}/3rdparty.cmake
+   # always build 3rdparty deps as Release
+   -DCMAKE_BUILD_TYPE=Release
+   -DCMAKE_DEBUG_POSTFIX=''
+   # forward additional arguments
+   ${CMAKE_RUNTIME_ARGS}
+)
