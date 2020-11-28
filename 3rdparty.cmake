@@ -78,13 +78,8 @@ if(NOT HAS_MZ_3RDPARTY)
         set(MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE}/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
     endif()
 
-    if( MZ_IS_RELEASE )
-        set(MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE}-Rel)
-        #mz_3rdparty_message("Release build")
-    else()
-        set(MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE}-Dbg)
-        #mz_3rdparty_message("Debug build")
-    endif()
+    # builds default to release so this can be safely shared
+    set(MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE}-Rel)
 
     mz_3rdparty_message("Caching artifacts below ${MZ_3RDPARTY_BASE}")
     file(MAKE_DIRECTORY ${MZ_3RDPARTY_BASE})
