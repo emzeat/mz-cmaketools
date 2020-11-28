@@ -198,13 +198,18 @@ file(WRITE ${CMAKE_BINARY_DIR}/3rdparty.cmake "
     message(\"3rdparty injected: CMAKE_BUILD_TYPE=\${CMAKE_BUILD_TYPE}\")
 ")
 
+# never use debug flags in a 3rdparty dependency
+set(MZ_3RDPARTY_C_FLAGS "${CMAKE_C_FLAGS}")
+set(MZ_3RDPARTY_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "/DDEBUG=1" " " MZ_3RDPARTY_C_FLAGS ${MZ_3RDPARTY_C_FLAGS})
+string(REPLACE "/DDEBUG=1" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
+string(REPLACE "-DDEBUG=1" " " MZ_3RDPARTY_C_FLAGS ${MZ_3RDPARTY_C_FLAGS})
+string(REPLACE "-DDEBUG=1" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
+
 # do never fail due to warnings in a 3rdparty dependency
 if( MZ_IS_GCC OR MZ_IS_CLANG )
     set(MZ_3RDPARTY_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error")
     set(MZ_3RDPARTY_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
-else()
-    set(MZ_3RDPARTY_C_FLAGS "${CMAKE_C_FLAGS}")
-    set(MZ_3RDPARTY_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 set(MZ_CMAKE_RUNTIME_ARGS
