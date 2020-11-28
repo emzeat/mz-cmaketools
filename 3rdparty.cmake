@@ -172,7 +172,7 @@ macro(mz_3rdparty_cache NAME TARGET)
 endmacro()
 
 # having the patch utility is handy
-find_program(MZ_3RDPARTY_PATCH patch patch.exe
+find_host_program(MZ_3RDPARTY_PATCH patch patch.exe
     HINTS "C:/Program Files/Git/usr/bin"
 )
 if(NOT MZ_3RDPARTY_PATCH)
@@ -189,19 +189,23 @@ endif()
 # some properties that need to be set when linking
 file(WRITE ${CMAKE_BINARY_DIR}/3rdparty.cmake "
     set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    message(\"3rdparty injected: CMAKE_C_FLAGS=\${CMAKE_C_FLAGS}\")
     message(\"3rdparty injected: CMAKE_C_FLAGS_RELEASE=\${CMAKE_C_FLAGS_RELEASE}\")
     message(\"3rdparty injected: CMAKE_C_FLAGS_DEBUG=\${CMAKE_C_FLAGS_DEBUG}\")
+    message(\"3rdparty injected: CMAKE_CXX_FLAGS=\${CMAKE_CXX_FLAGS}\")
     message(\"3rdparty injected: CMAKE_CXX_FLAGS_RELEASE=\${CMAKE_CXX_FLAGS_RELEASE}\")
-    message(\"3rdparty injected: CMAKE_C_FLAGS_RELEASE=\${CMAKE_C_FLAGS_RELEASE}\")
+    message(\"3rdparty injected: CMAKE_CXX_FLAGS_RELEASE=\${CMAKE_CXX_FLAGS_RELEASE}\")
     message(\"3rdparty injected: CMAKE_BUILD_TYPE=\${CMAKE_BUILD_TYPE}\")
 ")
 
 set(MZ_CMAKE_RUNTIME_ARGS
    # forward all compiler settings
-   -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
+   -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
    -DCMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
-   -DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
    -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
+   -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+   -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
+   -DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
    -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
    -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
    -DCMAKE_PROJECT_INCLUDE_BEFORE=${CMAKE_BINARY_DIR}/3rdparty.cmake
