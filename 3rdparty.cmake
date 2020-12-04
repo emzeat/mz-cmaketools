@@ -44,8 +44,9 @@
 #
 # PROVIDED CMAKE VARIABLES
 # -----------------------
-# MZ_CMAKE_RUNTIME_ARGS runtime variables that should be propagated
+# MZ_3RDPARTY_CMAKE_RUNTIME_ARGS runtime variables that should be propagated
 #                to a subinstance of cmake invoked from mz_3rdparty_add
+# MZ_CMAKE_RUNTIME_ARGS deprecated, use MZ_3RDPARTY_CMAKE_RUNTIME_ARGS
 #
 ########################################################################
 
@@ -212,8 +213,10 @@ if( MZ_IS_GCC OR MZ_IS_CLANG )
     set(MZ_3RDPARTY_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
 endif()
 
-set(MZ_CMAKE_RUNTIME_ARGS
+set(MZ_3RDPARTY_CMAKE_RUNTIME_ARGS
    # forward all compiler settings
+   -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+   -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
    -DCMAKE_C_FLAGS=${MZ_3RDPARTY_C_FLAGS}
    -DCMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
    -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
@@ -229,3 +232,6 @@ set(MZ_CMAKE_RUNTIME_ARGS
    # forward additional arguments
    ${CMAKE_RUNTIME_ARGS}
 )
+
+# deprecated
+set(MZ_CMAKE_RUNTIME_ARGS ${MZ_3RDPARTY_CMAKE_RUNTIME_ARGS})
