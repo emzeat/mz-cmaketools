@@ -3,3 +3,4 @@ gcc-*
 vs*
 mingw*
 win32-*
+ios-*
