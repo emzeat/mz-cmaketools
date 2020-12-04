@@ -42,6 +42,18 @@
 #
 #       Additional arguments are similar to ExternalProject_Add
 #
+# mz_3rdparty_add_flag PLATFORM FLAG ..
+#       adds a compler flag for the upcoming 3rdparty target
+#
+# mz_3rdparty_add_c_flag PLATFORM FLAG ..
+#       adds a C compler flag for the upcoming 3rdparty target
+#
+# mz_3rdparty_add_cxx_flag PLATFORM FLAG ..
+#       adds a CXX compler flag for the upcoming 3rdparty target
+#
+# mz_3rdparty_add_definition DEFINE ..
+#       adds a compler definition for the upcoming 3rdparty target
+#
 # PROVIDED CMAKE VARIABLES
 # -----------------------
 # MZ_3RDPARTY_CMAKE_RUNTIME_ARGS runtime variables that should be propagated
@@ -190,6 +202,9 @@ endif()
 # some properties that need to be set when linking
 file(WRITE ${CMAKE_BINARY_DIR}/3rdparty.cmake "
     set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    message(\"3rdparty injected: Boost_LIBRARIES=\${Boost_LIBRARIES}\")
+    message(\"3rdparty injected: CMAKE_C_COMPILER=\${CMAKE_C_COMPILER}\")
+    message(\"3rdparty injected: CMAKE_CXX_COMPILER=\${CMAKE_CXX_COMPILER}\")
     message(\"3rdparty injected: CMAKE_C_FLAGS=\${CMAKE_C_FLAGS}\")
     message(\"3rdparty injected: CMAKE_C_FLAGS_RELEASE=\${CMAKE_C_FLAGS_RELEASE}\")
     message(\"3rdparty injected: CMAKE_C_FLAGS_DEBUG=\${CMAKE_C_FLAGS_DEBUG}\")
@@ -209,29 +224,58 @@ string(REPLACE "-DDEBUG=1" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
 
 # do never fail due to warnings in a 3rdparty dependency
 if( MZ_IS_GCC OR MZ_IS_CLANG )
-    set(MZ_3RDPARTY_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error")
-    set(MZ_3RDPARTY_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
+    set(MZ_3RDPARTY_C_FLAGS "${MZ_3RDPARTY_C_FLAGS} -Wno-error")
+    set(MZ_3RDPARTY_CXX_FLAGS "${MZ_3RDPARTY_CXX_FLAGS} -Wno-error")
 endif()
 
-set(MZ_3RDPARTY_CMAKE_RUNTIME_ARGS
-   # forward all compiler settings
-   -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-   -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-   -DCMAKE_C_FLAGS=${MZ_3RDPARTY_C_FLAGS}
-   -DCMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
-   -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
-   -DCMAKE_CXX_FLAGS=${MZ_3RDPARTY_CXX_FLAGS}
-   -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
-   -DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
-   -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
-   -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
-   -DCMAKE_PROJECT_INCLUDE_BEFORE=${CMAKE_BINARY_DIR}/3rdparty.cmake
-   # always build 3rdparty deps as Release
-   -DCMAKE_BUILD_TYPE=Release
-   -DCMAKE_DEBUG_POSTFIX=''
-   # forward additional arguments
-   ${CMAKE_RUNTIME_ARGS}
-)
+macro(__mz_3rdparty_update_runtime_args)
+    set(MZ_3RDPARTY_CMAKE_RUNTIME_ARGS
+       # forward all compiler settings
+       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+       -DCMAKE_C_FLAGS=${MZ_3RDPARTY_C_FLAGS}
+       -DCMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
+       -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
+       -DCMAKE_CXX_FLAGS=${MZ_3RDPARTY_CXX_FLAGS}
+       -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
+       -DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+       -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+       -DCMAKE_PROJECT_INCLUDE_BEFORE=${CMAKE_BINARY_DIR}/3rdparty.cmake
+       # always build 3rdparty deps as Release
+       -DCMAKE_BUILD_TYPE=Release
+       -DCMAKE_DEBUG_POSTFIX=''
+       # forward additional arguments
+       ${CMAKE_RUNTIME_ARGS}
+    )
+    # deprecated
+    set(MZ_CMAKE_RUNTIME_ARGS ${MZ_3RDPARTY_CMAKE_RUNTIME_ARGS})
+endmacro()
 
-# deprecated
-set(MZ_CMAKE_RUNTIME_ARGS ${MZ_3RDPARTY_CMAKE_RUNTIME_ARGS})
+__mz_3rdparty_update_runtime_args()
+
+macro(mz_3rdparty_add_cxx_flag PLATFORM)
+    __mz_add_compiler_flag(MZ_3RDPARTY_CXX_FLAGS ${PLATFORM} ${ARGN})
+    __mz_3rdparty_update_runtime_args()
+endmacro()
+
+macro(mz_3rdparty_add_c_flag PLATFORM)
+    __mz_add_compiler_flag(MZ_3RDPARTY_C_FLAGS ${PLATFORM} ${ARGN})
+    __mz_3rdparty_update_runtime_args()
+endmacro()
+
+macro(mz_3rdparty_add_flag PLATFORM)
+    __mz_add_compiler_flag(MZ_3RDPARTY_CXX_FLAGS ${PLATFORM} ${ARGN})
+    __mz_add_compiler_flag(MZ_3RDPARTY_C_FLAGS ${PLATFORM} ${ARGN})
+    __mz_3rdparty_update_runtime_args()
+endmacro()
+
+macro(mz_3rdparty_add_definition)
+    foreach(DEF ${ARGN})
+        if(MZ_IS_GCC)
+            mz_3rdparty_add_flag(ALL "-D${DEF}")
+        elseif(MZ_IS_VS)
+            mz_3rdparty_add_flag(ALL "/D${DEF}")
+        endif()
+    endforeach()
+endmacro()
