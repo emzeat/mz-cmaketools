@@ -202,7 +202,6 @@ endif()
 # some properties that need to be set when linking
 file(WRITE ${CMAKE_BINARY_DIR}/3rdparty.cmake "
     set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
-    message(\"3rdparty injected: Boost_LIBRARIES=\${Boost_LIBRARIES}\")
     message(\"3rdparty injected: CMAKE_C_COMPILER=\${CMAKE_C_COMPILER}\")
     message(\"3rdparty injected: CMAKE_CXX_COMPILER=\${CMAKE_CXX_COMPILER}\")
     message(\"3rdparty injected: CMAKE_C_FLAGS=\${CMAKE_C_FLAGS}\")
