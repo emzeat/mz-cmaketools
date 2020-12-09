@@ -68,7 +68,10 @@ if (NOT HAS_MZ_GLOBAL)
 endif()
 
 macro(mz_3rdparty_message MSG)
-    message("--   3rdparty: ${MSG}")
+    mz_message("  3rdparty: ${MSG}")
+endmacro()
+macro(mz_3rdparty_warning MSG)
+    mz_warning_message("  3rdparty: ${MSG}")
 endmacro()
 
 # BOF: 3rdparty.cmake
@@ -77,6 +80,14 @@ if(NOT HAS_MZ_3RDPARTY)
     set(CMAKE_IGNORE_PATH /opt/local/include;/opt/local/lib)
 
     include(ExternalProject)
+    find_package(Git REQUIRED)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} log --pretty=format:%h -n 1 .
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_VARIABLE MZ_3RDPARTY_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    mz_3rdparty_message("Version '${MZ_3RDPARTY_VERSION}'")
 
     if( DEFINED ENV{MZ_3RDPARTY_MANUAL_BASE} )
         set(MZ_3RDPARTY_BASE $ENV{MZ_3RDPARTY_MANUAL_BASE})
@@ -157,7 +168,6 @@ macro(mz_3rdparty_cache NAME TARGET)
 
     project(${NAME})
 
-    find_package(Git REQUIRED)
     execute_process(
         COMMAND ${GIT_EXECUTABLE} log --pretty=format:%h -n 1 .
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -170,13 +180,18 @@ macro(mz_3rdparty_cache NAME TARGET)
     set(MZ_3RDPARTY_SOURCE_DIR "${MZ_3RDPARTY_PREFIX_DIR}/source")
     set(MZ_3RDPARTY_BINARY_DIR "${MZ_3RDPARTY_PREFIX_DIR}/src/${TARGET}-build")
     set(MZ_3RDPARTY_INSTALL_DIR "${MZ_3RDPARTY_PREFIX_DIR}")
-    set(MZ_3RDPARTY_TEST_COMMAND cmake -E touch ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
+    set(MZ_3RDPARTY_TEST_COMMAND cmake -E echo "${MZ_3RDPARTY_VERSION}" > ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
 
     file(GLOB MZ_3RDPARTY_SOURCE_DIR_CONTENTS ${MZ_3RDPARTY_SOURCE_DIR}/*)
 
     if( EXISTS ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
         mz_3rdparty_message("Reusing ${MZ_3RDPARTY_PREFIX_DIR}")
         set(MZ_3RDPARTY_REBUILD false)
+
+        file(STRINGS ${MZ_3RDPARTY_PREFIX_DIR}/stamp MZ_3RDPARTY_CACHED_VERSION LIMIT_COUNT 1)
+        if( NOT MZ_3RDPARTY_CACHED_VERSION STREQUAL MZ_3RDPARTY_VERSION )
+            mz_3rdparty_warning( "Cache built with outdated version '${MZ_3RDPARTY_CACHED_VERSION}'" )
+        endif()
     else()
         mz_3rdparty_message("Building below ${MZ_3RDPARTY_PREFIX_DIR}")
         set(MZ_3RDPARTY_REBUILD true)
