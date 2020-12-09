@@ -242,6 +242,12 @@ if( MZ_IS_GCC OR MZ_IS_CLANG )
     set(MZ_3RDPARTY_CXX_FLAGS "${MZ_3RDPARTY_CXX_FLAGS} -Wno-error")
 endif()
 
+# make sure we can link all our code to shared libs
+if(MZ_LINUX)
+    set(MZ_3RDPARTY_C_FLAGS "${MZ_3RDPARTY_C_FLAGS} -fPIC")
+    set(MZ_3RDPARTY_CXX_FLAGS "${MZ_3RDPARTY_CXX_FLAGS} -fPIC")
+endif()
+
 macro(__mz_3rdparty_update_runtime_args)
     set(MZ_3RDPARTY_CMAKE_RUNTIME_ARGS
        # forward all compiler settings
