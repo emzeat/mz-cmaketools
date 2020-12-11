@@ -114,9 +114,29 @@ if(NOT HAS_MZ_3RDPARTY)
 
     # aggregate the license information
     set(MZ_3RDPARTY_VERSION_TXT ${EXECUTABLE_OUTPUT_PATH}/3rdparty.txt)
-    file(WRITE  ${MZ_3RDPARTY_VERSION_TXT}
+    file(WRITE ${MZ_3RDPARTY_VERSION_TXT}
         "3rdparty dependencies used in this program\n"
         "==========================================\n\n"
+    )
+
+    # add a helper script to force bump the stamp version
+    set(MZ_3RDPARTY_BUMP_STAMP_SH ${CMAKE_BINARY_DIR}/mz_3rdparty_bump_stamp.sh)
+    file(WRITE ${MZ_3RDPARTY_BUMP_STAMP_SH}
+        "#!/usr/bin/env bash\n"
+        "#\n"
+        "# Use this script to silence warnings about 3rdparty cache entries\n"
+        "# using an outdated version of the build macros.\n"
+        "#\n"
+        "# WARNING: Only do this when you are sure no incompatibilities\n\n"
+    )
+
+    # add a helper script to remove unused builds
+    set(MZ_3RDPARTY_GC_SH ${CMAKE_BINARY_DIR}/mz_3rdparty_gc.sh)
+    file(WRITE ${MZ_3RDPARTY_GC_SH}
+        "#!/usr/bin/env bash\n"
+        "#\n"
+        "# Use this script to remove stale 3rdparty cache entries.\n\n"
+        "echo \"3rdparty CACHE Garbage Collection\"\n"
     )
 
 # EOF: 3rdparty.cmake
@@ -175,19 +195,6 @@ macro(mz_3rdparty_add TARGET FILE)
         )
     endif()
 
-    set(${TARGET}_LICENSE ${CMAKE_CURRENT_LIST_DIR}/LICENSE)
-    if( NOT EXISTS "${${TARGET}_LICENSE}" )
-        mz_3rdparty_warning("No license for ${TARGET}")
-        set(${TARGET}_LICENSE "n/a")
-    else()
-        file(READ ${${TARGET}_LICENSE} ${TARGET}_LICENSE)
-    endif()
-    file(APPEND ${MZ_3RDPARTY_VERSION_TXT}
-        "${TARGET}\n"
-        "------------------------------------------\n"
-        "${${TARGET}_LICENSE}\n\n\n"
-    )
-
 endmacro()
 
 macro(mz_3rdparty_cache NAME TARGET)
@@ -217,11 +224,45 @@ macro(mz_3rdparty_cache NAME TARGET)
         file(STRINGS ${MZ_3RDPARTY_PREFIX_DIR}/stamp MZ_3RDPARTY_CACHED_VERSION LIMIT_COUNT 1)
         if( NOT MZ_3RDPARTY_CACHED_VERSION STREQUAL MZ_3RDPARTY_VERSION )
             mz_3rdparty_warning( "Cache built with outdated version '${MZ_3RDPARTY_CACHED_VERSION}'" )
+
+            # add to the helper script to force bump the stamp version
+            file(APPEND ${MZ_3RDPARTY_BUMP_STAMP_SH}
+                "echo \"+ Bumping ${TARGET} to ${MZ_3RDPARTY_VERSION}\"\n"
+                "\"${CMAKE_COMMAND}\" -E echo \"${MZ_3RDPARTY_VERSION}\" > ${MZ_3RDPARTY_PREFIX_DIR}/stamp\n"
+            )
         endif()
     else()
         mz_3rdparty_message("Building below ${MZ_3RDPARTY_PREFIX_DIR}")
         set(MZ_3RDPARTY_REBUILD true)
     endif()
+
+    # collect licensing data
+    set(${TARGET}_LICENSE ${CMAKE_CURRENT_LIST_DIR}/LICENSE)
+    if( NOT EXISTS "${${TARGET}_LICENSE}" )
+        mz_3rdparty_warning("No license for ${TARGET}")
+        set(${TARGET}_LICENSE "n/a")
+    else()
+        file(READ ${${TARGET}_LICENSE} ${TARGET}_LICENSE)
+    endif()
+    file(APPEND ${MZ_3RDPARTY_VERSION_TXT}
+        "${TARGET}\n"
+        "------------------------------------------\n"
+        "${${TARGET}_LICENSE}\n\n\n"
+    )
+
+    # add a helper script to remove unused builds
+    file(APPEND ${MZ_3RDPARTY_GC_SH}
+        "for d in ${MZ_3RDPARTY_BASE}/${NAME}/*;\n"
+        "do\n"
+        "   if [[ \"$d\" == \"${MZ_3RDPARTY_PREFIX_DIR}\" ]];\n"
+        "   then\n"
+        "      echo \"+ Keeping $d\"\n"
+        "   else\n"
+        "      echo \"- Removing $d\"\n"
+        "      rm -r $d\n"
+        "   fi\n"
+        "done\n"
+    )
 
 endmacro()
 
