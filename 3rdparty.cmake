@@ -108,6 +108,13 @@ if(NOT HAS_MZ_3RDPARTY)
     mz_3rdparty_message("Caching artifacts below ${MZ_3RDPARTY_BASE}")
     file(MAKE_DIRECTORY ${MZ_3RDPARTY_BASE})
 
+    # aggregate the license information
+    set(MZ_3RDPARTY_VERSION_TXT ${EXECUTABLE_OUTPUT_PATH}/3rdparty.txt)
+    file(WRITE  ${MZ_3RDPARTY_VERSION_TXT}
+        "3rdparty dependencies used in this program\n"
+        "==========================================\n\n"
+    )
+
 # EOF: 3rdparty.cmake
 endif()
 
@@ -161,6 +168,19 @@ macro(mz_3rdparty_add TARGET FILE)
             WORKING_DIRECTORY ${MZ_3RDPARTY_INSTALL_DIR}
         )
     endif()
+
+    set(${TARGET}_LICENSE ${CMAKE_CURRENT_LIST_DIR}/LICENSE)
+    if( NOT EXISTS "${${TARGET}_LICENSE}" )
+        mz_3rdparty_warning("No license for ${TARGET}")
+        set(${TARGET}_LICENSE "n/a")
+    else()
+        file(READ ${${TARGET}_LICENSE} ${TARGET}_LICENSE)
+    endif()
+    file(APPEND ${MZ_3RDPARTY_VERSION_TXT}
+        "${TARGET}\n"
+        "------------------------------------------\n"
+        "${${TARGET}_LICENSE}\n\n\n"
+    )
 
 endmacro()
 
