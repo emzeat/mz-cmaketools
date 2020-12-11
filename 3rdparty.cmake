@@ -54,6 +54,10 @@
 # mz_3rdparty_add_definition DEFINE ..
 #       adds a compler definition for the upcoming 3rdparty target
 #
+# mz_3rdparty_import_library TARGET LOCATION INCLUDES
+#       imports an externally buitl library at LOCATION requiring
+#       the given INCLUDES to be used as include path
+#
 # PROVIDED CMAKE VARIABLES
 # -----------------------
 # MZ_3RDPARTY_CMAKE_RUNTIME_ARGS runtime variables that should be propagated
@@ -120,48 +124,50 @@ endif()
 
 macro(mz_3rdparty_add TARGET FILE)
 
+    # see https://cmake.org/cmake/help/v3.18/command/cmake_parse_arguments.html#command:cmake_parse_arguments
+    set(_mz3_options
+        BUILD_ALWAYS
+    )
+    set(_mz3_oneValueArgs
+        PREFIX
+        SOURCE_DIR
+        BINARY_DIR
+        INSTALL_DIR
+        TEST_COMMAND
+    )
+    set(_mz3_multiValueArgs
+    )
+    cmake_parse_arguments( _mz3
+        "${_mz3_options}"
+        "${_mz3_oneValueArgs}"
+        "${_mz3_multiValueArgs}"
+        ${ARGN}
+    )
+
+    if( _mz3_BINARY_DIR )
+        set( MZ_3RDPARTY_BINARY_DIR ${_mz3_BINARY_DIR} )
+    endif()
+    if( _mz3_SOURCE_DIR )
+        set( MZ_3RDPARTY_SOURCE_DIR ${_mz3_SOURCE_DIR} )
+    endif()
+
     if(MZ_3RDPARTY_REBUILD)
         mz_download_lfs( ${FILE} )
 
-        set(LIST_ARGN "${ARGN}")
-        foreach(LOOP_VAR IN LISTS LIST_ARGN)
-            if( LOOP_VAR STREQUAL "BINARY_DIR")
-                set(HAS_BINARY_DIR)
-            endif()
-        endforeach()
+        ExternalProject_Add(
+            ${TARGET}
 
-        # NOTE: CMake started to convert repeated arguments
-        #       into a list, so we need to filter arguments specified when invoked
-        if( HAS_BINARY_DIR )
-            ExternalProject_Add(
-                ${TARGET}
+            PREFIX "${MZ_3RDPARTY_PREFIX_DIR}"
+            SOURCE_DIR "${MZ_3RDPARTY_SOURCE_DIR}"
+            BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}"
+            INSTALL_DIR "${MZ_3RDPARTY_INSTALL_DIR}"
 
-                PREFIX "${MZ_3RDPARTY_PREFIX_DIR}"
-                SOURCE_DIR "${MZ_3RDPARTY_SOURCE_DIR}"
-                BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}"
-                INSTALL_DIR "${MZ_3RDPARTY_INSTALL_DIR}"
+            TEST_COMMAND ${MZ_3RDPARTY_TEST_COMMAND}
 
-                TEST_COMMAND ${MZ_3RDPARTY_TEST_COMMAND}
+            BUILD_ALWAYS true
 
-                BUILD_ALWAYS true
-
-                ${ARGN}
-            )
-        else()
-            ExternalProject_Add(
-                ${TARGET}
-
-                PREFIX "${MZ_3RDPARTY_PREFIX_DIR}"
-                SOURCE_DIR "${MZ_3RDPARTY_SOURCE_DIR}"
-                INSTALL_DIR "${MZ_3RDPARTY_INSTALL_DIR}"
-
-                TEST_COMMAND ${MZ_3RDPARTY_TEST_COMMAND}
-
-                BUILD_ALWAYS true
-
-                ${ARGN}
-            )
-        endif()
+            ${_mz3_UNPARSED_ARGUMENTS}
+        )
     else()
         add_custom_target(${TARGET}
             COMMAND cmake -E echo "${TARGET} is cached at ${MZ_3RDPARTY_PREFIX_DIR}"
@@ -200,7 +206,7 @@ macro(mz_3rdparty_cache NAME TARGET)
     set(MZ_3RDPARTY_SOURCE_DIR "${MZ_3RDPARTY_PREFIX_DIR}/source")
     set(MZ_3RDPARTY_BINARY_DIR "${MZ_3RDPARTY_PREFIX_DIR}/src/${TARGET}-build")
     set(MZ_3RDPARTY_INSTALL_DIR "${MZ_3RDPARTY_PREFIX_DIR}")
-    set(MZ_3RDPARTY_TEST_COMMAND cmake -E echo "${MZ_3RDPARTY_VERSION}" > ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
+    set(MZ_3RDPARTY_TEST_COMMAND ${CMAKE_COMMAND} -E echo "${MZ_3RDPARTY_VERSION}" > ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
 
     file(GLOB MZ_3RDPARTY_SOURCE_DIR_CONTENTS ${MZ_3RDPARTY_SOURCE_DIR}/*)
 
@@ -318,4 +324,20 @@ macro(mz_3rdparty_add_definition)
             mz_3rdparty_add_flag(ALL "/D${DEF}")
         endif()
     endforeach()
+endmacro()
+
+macro(mz_3rdparty_import_library TARGET LOCATION INCLUDES)
+    foreach(INCLUDE ${INCLUDES})
+        file(MAKE_DIRECTORY ${INCLUDE})
+    endforeach()
+
+    if(NOT EXISTS "${LOCATION}")
+      file(WRITE ${LOCATION} "0")
+    endif()
+
+    add_library( ${TARGET} STATIC IMPORTED GLOBAL )
+    set_target_properties( ${TARGET} PROPERTIES
+        IMPORTED_LOCATION "${LOCATION}"
+        INTERFACE_INCLUDE_DIRECTORIES ${INCLUDES}
+    )
 endmacro()
