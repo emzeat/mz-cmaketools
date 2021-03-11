@@ -237,18 +237,20 @@ macro(mz_3rdparty_cache NAME TARGET)
     endif()
 
     # collect licensing data
-    set(${TARGET}_LICENSE ${CMAKE_CURRENT_LIST_DIR}/LICENSE)
-    if( NOT EXISTS "${${TARGET}_LICENSE}" )
-        mz_3rdparty_warning("No license for ${TARGET}")
-        set(${TARGET}_LICENSE "n/a")
-    else()
-        file(READ ${${TARGET}_LICENSE} ${TARGET}_LICENSE)
+    if(NOT MZ_3RDPARTY_EXCLUDE_LICENSE)
+        set(${TARGET}_LICENSE ${CMAKE_CURRENT_LIST_DIR}/LICENSE)
+        if( NOT EXISTS "${${TARGET}_LICENSE}" )
+            mz_3rdparty_warning("No license for ${TARGET}")
+            set(${TARGET}_LICENSE "n/a")
+        else()
+            file(READ ${${TARGET}_LICENSE} ${TARGET}_LICENSE)
+        endif()
+        file(APPEND ${MZ_3RDPARTY_VERSION_TXT}
+            "${TARGET}\n"
+            "------------------------------------------\n"
+            "${${TARGET}_LICENSE}\n\n\n"
+        )
     endif()
-    file(APPEND ${MZ_3RDPARTY_VERSION_TXT}
-        "${TARGET}\n"
-        "------------------------------------------\n"
-        "${${TARGET}_LICENSE}\n\n\n"
-    )
 
     # add a helper script to remove unused builds
     file(APPEND ${MZ_3RDPARTY_GC_SH}
