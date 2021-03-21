@@ -111,7 +111,8 @@ macro(mz_auto_format _TARGET)
           )
         endif()
 
-        if( CLAZY AND MZ_DO_CPPLINT )
+        # clazy is behaving bad on windows and emits a lot of qt header related errors
+        if( CLAZY AND MZ_DO_CPPLINT AND NOT MZ_WINDOWS )
           set(lint_output ${CMAKE_CURRENT_BINARY_DIR}/clazy/${name_file}.stamp)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND ${CLAZY}
