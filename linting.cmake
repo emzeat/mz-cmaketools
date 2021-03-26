@@ -67,11 +67,21 @@ if( CLANG_TIDY )
   endif()
 endif()
 
-if( CLAZY )
+if( Qt5_PREFIX )
+  set(QML_LINT ${Qt5_PREFIX}/bin/qmllint)
+  if(NOT EXISTS ${QML_LINT})
+      set(QML_LINT FALSE)
+  endif()
+  set(QML_FORMAT ${Qt5_PREFIX}/bin/qmlformat)
+  if(NOT EXISTS ${QML_FORMAT})
+      set(QML_FORMAT FALSE)
+  endif()
+endif()
+
+
+if( QML_LINT )
   if( MZ_DO_CPPLINT )
-    mz_debug_message("Linting (Qt) is enabled")
-  else()
-    mz_warning_message("Linting (Qt) is disabled, this is not recommended")
+    mz_debug_message("Linting (QML) is enabled")
   endif()
 endif()
 
@@ -93,7 +103,7 @@ macro(mz_auto_format _TARGET)
 
       if( ${file} MATCHES ".+\\.(cpp|cxx)$" )
         if( CLANG_TIDY AND MZ_DO_CPPLINT )
-          set(lint_output ${CMAKE_CURRENT_BINARY_DIR}/tidy/${name_file}.stamp)
+          set(lint_output ${CMAKE_CURRENT_BINARY_DIR}/tidy/${_TARGET}/${name_file}.stamp)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND ${CLANG_TIDY}
               ${CLANG_TIDY_EXTRA_ARGS}
@@ -110,20 +120,18 @@ macro(mz_auto_format _TARGET)
             PRIVATE ${lint_output}
           )
         endif()
+      endif()
 
-        # clazy is behaving bad on windows and emits a lot of qt header related errors
-        if( CLAZY AND MZ_DO_CPPLINT AND NOT MZ_WINDOWS )
-          set(lint_output ${CMAKE_CURRENT_BINARY_DIR}/clazy/${name_file}.stamp)
+      if( ${file} MATCHES ".+\\.(qml)$" )
+        if( QML_LINT AND MZ_DO_CPPLINT )
+          set(lint_output ${CMAKE_CURRENT_BINARY_DIR}/qml_lint/${_TARGET}/${name_file}.stamp)
           add_custom_command(OUTPUT ${lint_output}
-            COMMAND ${CLAZY}
-              -p ${CMAKE_BINARY_DIR}
-              #--only-qt
-              --checks=level1,no-non-pod-global-static,old-style-connect,rule-of-three,assert-with-side-effects,detaching-member,inefficient-qlist,isempty-vs-count,container-inside-loop
+            COMMAND ${QML_LINT}
               ${abs_file}
             COMMAND ${CMAKE_COMMAND} -E touch ${lint_output}
             DEPENDS ${abs_file}
             COMMAND_EXPAND_LISTS
-            COMMENT "Linting (Qt) ${name_file}"
+            COMMENT "Linting (QML) ${name_file}"
             VERBATIM
           )
           target_sources(${_TARGET}
@@ -133,7 +141,7 @@ macro(mz_auto_format _TARGET)
       endif()
 
       if( ${file} MATCHES ".+\\.(cpp|cxx|hpp|h|c)$" )
-        set(format_output ${CMAKE_CURRENT_BINARY_DIR}/format/${name_file}.stamp)
+        set(format_output ${CMAKE_CURRENT_BINARY_DIR}/format/${_TARGET}/${name_file}.stamp)
         if( CLANG_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
             COMMAND ${CLANG_FORMAT}
@@ -141,6 +149,25 @@ macro(mz_auto_format _TARGET)
               ${abs_file}
             COMMAND ${CMAKE_COMMAND} -E touch ${format_output}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-format ${abs_file}
+            COMMAND_EXPAND_LISTS
+            COMMENT "Formatting ${name_file}"
+            VERBATIM
+          )
+          target_sources(${_TARGET}
+            PRIVATE ${format_output}
+          )
+        endif()
+      endif()
+
+      if( ${file} MATCHES ".+\\.(qml)$" )
+        set(format_output ${CMAKE_CURRENT_BINARY_DIR}/qml_format/${_TARGET}/${name_file}.stamp)
+        if( QML_FORMAT AND MZ_DO_AUTO_FORMAT )
+          add_custom_command(OUTPUT ${format_output}
+            COMMAND ${QML_FORMAT}
+              -n -i
+              ${abs_file}
+            COMMAND ${CMAKE_COMMAND} -E touch ${format_output}
+            DEPENDS ${abs_file}
             COMMAND_EXPAND_LISTS
             COMMENT "Formatting ${name_file}"
             VERBATIM
