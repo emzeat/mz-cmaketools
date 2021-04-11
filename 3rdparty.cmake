@@ -189,8 +189,22 @@ macro(mz_3rdparty_add TARGET FILE)
             ${_mz3_UNPARSED_ARGUMENTS}
         )
     else()
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/deploy-${TARGET}.cmake
+            "file(GLOB 3rdparty_install_lib_shared"
+            "   ${MZ_3RDPARTY_INSTALL_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            ")\n"
+            "if( 3rdparty_install_lib_shared )\n"
+            "   file(INSTALL \${3rdparty_install_lib_shared} DESTINATION ${LIBRARY_OUTPUT_PATH})\n"
+            "endif()\n"
+            "file(GLOB 3rdparty_install_bin_shared"
+            "   ${MZ_3RDPARTY_INSTALL_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            ")\n"
+            "if( 3rdparty_install_bin_shared )\n"
+            "   file(INSTALL \${3rdparty_install_bin_shared} DESTINATION ${EXECUTABLE_OUTPUT_PATH})\n"
+            "endif()\n"
+        )
         add_custom_target(${TARGET}
-            COMMAND cmake -E echo "${TARGET} is cached at ${MZ_3RDPARTY_PREFIX_DIR}"
+            COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/deploy-${TARGET}.cmake
             WORKING_DIRECTORY ${MZ_3RDPARTY_INSTALL_DIR}
         )
     endif()
