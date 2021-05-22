@@ -29,6 +29,12 @@
 #   use in other trees using the same deps or persisting beyond full
 #   rebuilds so that these go faster.
 #
+#   When you have minio's mc in your path, specify
+#       MZ_S3_ALIAS for one of mc's aliases
+#       MZ_3RDPARTY_S3_BUCKET with a bucket name
+#   to enable caching of build artifacts on the s3 server
+#
+#
 # PROVIDED MACROS
 # -----------------------
 # mz_3rdparty_cache NAME TARGET
@@ -83,6 +89,10 @@ if(NOT HAS_MZ_3RDPARTY)
     set(HAS_MZ_3RDPARTY true)
     set(CMAKE_IGNORE_PATH /opt/local/include;/opt/local/lib)
 
+    if(MZ_3RDPARTY_S3_BUCKET)
+        include(${CMAKE_CURRENT_LIST_DIR}/s3storage.cmake)
+    endif()
+
     include(ExternalProject)
     find_package(Git REQUIRED)
     execute_process(
@@ -99,6 +109,7 @@ if(NOT HAS_MZ_3RDPARTY)
         set(MZ_3RDPARTY_BASE $ENV{HOME}/.mz-3rdparty)
     endif()
     string(REPLACE "\\" "/" MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE})
+    set(MZ_3RDPARTY_ROOT ${MZ_3RDPARTY_BASE})
 
     if( IOS_PLATFORM )
         set(MZ_3RDPARTY_BASE ${MZ_3RDPARTY_BASE}/${IOS_PLATFORM}-${CMAKE_SYSTEM_PROCESSOR})
@@ -137,6 +148,15 @@ if(NOT HAS_MZ_3RDPARTY)
         "#\n"
         "# Use this script to remove stale 3rdparty cache entries.\n\n"
         "echo \"3rdparty CACHE Garbage Collection\"\n"
+    )
+
+    # add a helper script to upload binaries
+    set(MZ_3RDPARTY_UPLOAD_SH ${CMAKE_BINARY_DIR}/mz_3rdparty_upload.sh)
+    file(WRITE ${MZ_3RDPARTY_UPLOAD_SH}
+        "#!/usr/bin/env bash\n"
+        "#\n"
+        "# Use this script to re-upload binaries to the 3rdparty cache for sharing.\n\n"
+        "echo \"3rdparty CACHE Reuploading binaries\"\n"
     )
 
 # EOF: 3rdparty.cmake
@@ -227,9 +247,35 @@ macro(mz_3rdparty_cache NAME TARGET)
     set(MZ_3RDPARTY_SOURCE_DIR "${MZ_3RDPARTY_PREFIX_DIR}/source")
     set(MZ_3RDPARTY_BINARY_DIR "${MZ_3RDPARTY_PREFIX_DIR}/src/${TARGET}-build")
     set(MZ_3RDPARTY_INSTALL_DIR "${MZ_3RDPARTY_PREFIX_DIR}")
-    set(MZ_3RDPARTY_TEST_COMMAND ${CMAKE_COMMAND} -E echo "${MZ_3RDPARTY_VERSION}" > ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
+    string(REPLACE ${MZ_3RDPARTY_ROOT}/ "" MZ_3RDPARTY_OBJECT_PATH ${MZ_3RDPARTY_PREFIX_DIR})
+
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake
+        "file(WRITE ${MZ_3RDPARTY_PREFIX_DIR}/stamp \"${MZ_3RDPARTY_VERSION}\")\n"
+    )
+    if(MZ_3RDPARTY_S3_BUCKET)
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake
+            "set(MZ_S3_ALIAS ${MZ_S3_ALIAS})\n"
+            "set(MZ_S3_MC ${MZ_S3_MC})\n"
+            "include(${MZ_S3_INCLUDE_PATH})\n"
+            "mz_s3_upload(${MZ_3RDPARTY_S3_BUCKET}\n"
+            "   DIRECTORY ${MZ_3RDPARTY_PREFIX_DIR}\n"
+            "   DESTINATION ${MZ_3RDPARTY_OBJECT_PATH}\n"
+            "   PUBLIC\n"
+            ")\n"
+        )
+    endif()
+    set(MZ_3RDPARTY_TEST_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake )
 
     file(GLOB MZ_3RDPARTY_SOURCE_DIR_CONTENTS ${MZ_3RDPARTY_SOURCE_DIR}/*)
+
+    if( NOT EXISTS ${MZ_3RDPARTY_PREFIX_DIR} AND MZ_3RDPARTY_S3_BUCKET )
+        mz_3rdparty_message("Trying to fetch binaries from cache")
+        mz_s3_download(${MZ_3RDPARTY_S3_BUCKET}
+            DIRECTORY ${MZ_3RDPARTY_OBJECT_PATH}
+            DESTINATION ${MZ_3RDPARTY_PREFIX_DIR}
+            QUIET
+        )
+    endif()
 
     if( EXISTS ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
         mz_3rdparty_message("Reusing ${MZ_3RDPARTY_PREFIX_DIR}")
@@ -279,6 +325,14 @@ macro(mz_3rdparty_cache NAME TARGET)
         "   fi\n"
         "done\n"
     )
+
+    # add a helper script to upload builds
+    if(MZ_3RDPARTY_S3_BUCKET)
+        file(APPEND ${MZ_3RDPARTY_UPLOAD_SH}
+            "echo \"+ Uploading ${TARGET}\"\n"
+            "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake\n"
+        )
+    endif()
 
 endmacro()
 
