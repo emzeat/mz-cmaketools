@@ -221,7 +221,6 @@ function(mz_s3_upload BUCKET)
 
     execute_process(
         COMMAND ${MZ_S3_MC} cp ${_mz_s3_source} ${MZ_S3_ALIAS}/${BUCKET}/${_mz_s3_DESTINATION}
-        COMMAND_ECHO STDOUT
         ${_mz_s3_quiet}
     )
     if(_mz_s3_DIRECTORY)
