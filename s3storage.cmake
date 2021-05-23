@@ -85,7 +85,7 @@ if(NOT HAS_MZ_S3)
     set(HAS_MZ_S3 true)
 
     if(NOT MZ_S3_MC)
-        find_host_program(MZ_S3_MC minio-mc minio-mc.exe mc )
+        find_host_program(MZ_S3_MC NAMES minio-mc minio-mc.exe mc)
     endif()
     set(MZ_S3_INCLUDE_PATH ${CMAKE_CURRENT_LIST_FILE})
 
