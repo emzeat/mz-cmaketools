@@ -180,6 +180,7 @@ macro(mz_3rdparty_add TARGET FILE)
         PREFIX
         SOURCE_DIR
         BINARY_DIR
+        BUILD_IN_SOURCE
         INSTALL_DIR
         TEST_COMMAND
     )
@@ -192,8 +193,14 @@ macro(mz_3rdparty_add TARGET FILE)
         ${ARGN}
     )
 
-    if( _mz3_BINARY_DIR )
+    if( _mz3_BUILD_IN_SOURCE )
+        set( MZ_3RDPARTY_BINARY_DIR ${MZ_3RDPARTY_SOURCE_DIR} )
+        set( _mz3_binary_dir BUILD_IN_SOURCE ${_mz3_BUILD_IN_SOURCE} ) 
+    elseif( _mz3_BINARY_DIR )
         set( MZ_3RDPARTY_BINARY_DIR ${_mz3_BINARY_DIR} )
+        set( _mz3_binary_dir BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}" ) 
+    else()
+        set( _mz3_binary_dir BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}" )
     endif()
     if( _mz3_SOURCE_DIR )
         set( MZ_3RDPARTY_SOURCE_DIR ${_mz3_SOURCE_DIR} )
@@ -207,7 +214,7 @@ macro(mz_3rdparty_add TARGET FILE)
 
             PREFIX "${MZ_3RDPARTY_PREFIX_DIR}"
             SOURCE_DIR "${MZ_3RDPARTY_SOURCE_DIR}"
-            BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}"
+            ${_mz3_binary_dir}
             INSTALL_DIR "${MZ_3RDPARTY_INSTALL_DIR}"
 
             TEST_COMMAND ${MZ_3RDPARTY_TEST_COMMAND}
@@ -263,7 +270,7 @@ macro(mz_3rdparty_cache NAME TARGET)
     if(MZ_3RDPARTY_S3_BUCKET)
         file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake
             "set(MZ_S3_ALIAS ${MZ_S3_ALIAS})\n"
-            "set(MZ_S3_MC ${MZ_S3_MC})\n"
+            "set(MZ_S3_MC \"${MZ_S3_MC}\")\n"
             "include(${MZ_S3_INCLUDE_PATH})\n"
             "mz_s3_upload(${MZ_3RDPARTY_S3_BUCKET}\n"
             "   DIRECTORY ${MZ_3RDPARTY_PREFIX_DIR}\n"
@@ -338,7 +345,7 @@ macro(mz_3rdparty_cache NAME TARGET)
     if(MZ_3RDPARTY_S3_BUCKET)
         file(APPEND ${MZ_3RDPARTY_UPLOAD_SH}
             "echo \"+ Uploading ${TARGET}\"\n"
-            "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake\n"
+            "\"${CMAKE_COMMAND}\" -P ${CMAKE_CURRENT_BINARY_DIR}/stamp-${TARGET}.cmake\n"
         )
     endif()
 
@@ -380,6 +387,11 @@ string(REPLACE "/DDEBUG=1" " " MZ_3RDPARTY_C_FLAGS ${MZ_3RDPARTY_C_FLAGS})
 string(REPLACE "/DDEBUG=1" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
 string(REPLACE "-DDEBUG=1" " " MZ_3RDPARTY_C_FLAGS ${MZ_3RDPARTY_C_FLAGS})
 string(REPLACE "-DDEBUG=1" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
+# never use warnings-as-errors in a 3rdparty dependency
+string(REPLACE "/WX" " " MZ_3RDPARTY_C_FLAGS ${MZ_3RDPARTY_C_FLAGS})
+string(REPLACE "/WX" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
+string(REPLACE "-Werror" " " MZ_3RDPARTY_C_FLAGS ${MZ_3RDPARTY_C_FLAGS})
+string(REPLACE "-Werror" " " MZ_3RDPARTY_CXX_FLAGS ${MZ_3RDPARTY_CXX_FLAGS})
 
 # do never fail due to warnings in a 3rdparty dependency
 if( MZ_IS_GCC OR MZ_IS_CLANG )
