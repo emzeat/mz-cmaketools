@@ -29,11 +29,10 @@
 #   use in other trees using the same deps or persisting beyond full
 #   rebuilds so that these go faster.
 #
-#   When you have minio's mc in your path, specify
-#       MZ_S3_ALIAS for one of mc's aliases
-#       MZ_3RDPARTY_S3_BUCKET with a bucket name
-#   to enable caching of build artifacts on the s3 server
-#
+#   When you have minio's mc in your path, configure an alias named
+#   'heimdall' and a bucket '3rdparty' to enable caching of build
+#   artifacts on the s3 server or specify the CMake variables
+#   MZ_3RDPARTY_S3_BUCKET and MZ_S3_PREFIX to override these
 #
 # PROVIDED MACROS
 # -----------------------
@@ -89,9 +88,13 @@ if(NOT HAS_MZ_3RDPARTY)
     set(HAS_MZ_3RDPARTY true)
     set(CMAKE_IGNORE_PATH /opt/local/include;/opt/local/lib)
 
-    if(MZ_3RDPARTY_S3_BUCKET)
-        include(${CMAKE_CURRENT_LIST_DIR}/s3storage.cmake)
+    if(NOT MZ_3RDPARTY_S3_BUCKET)
+        set(MZ_3RDPARTY_S3_BUCKET 3rdparty)
     endif()
+    if(NOT MZ_S3_ALIAS)
+        set(MZ_S3_ALIAS heimdall)
+    endif()
+    include(${CMAKE_CURRENT_LIST_DIR}/s3storage.cmake)
 
     include(ExternalProject)
     find_package(Git REQUIRED)
@@ -265,7 +268,7 @@ macro(mz_3rdparty_cache NAME TARGET)
             "mz_s3_upload(${MZ_3RDPARTY_S3_BUCKET}\n"
             "   DIRECTORY ${MZ_3RDPARTY_PREFIX_DIR}\n"
             "   DESTINATION ${MZ_3RDPARTY_OBJECT_PATH}\n"
-            "   PUBLIC\n"
+            "   PUBLIC QUIET\n"
             ")\n"
         )
     endif()
