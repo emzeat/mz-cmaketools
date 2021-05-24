@@ -227,6 +227,7 @@ macro(mz_3rdparty_add TARGET FILE)
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/deploy-${TARGET}.cmake
             "file(GLOB 3rdparty_install_lib_shared"
             "   ${MZ_3RDPARTY_INSTALL_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "   ${MZ_3RDPARTY_INSTALL_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}.*"
             ")\n"
             "if( 3rdparty_install_lib_shared )\n"
             "   file(INSTALL \${3rdparty_install_lib_shared} DESTINATION ${LIBRARY_OUTPUT_PATH})\n"
