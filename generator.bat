@@ -1,7 +1,7 @@
 @echo off
 
 REM REM
-REM Copyright 2008-2019 Marius Zwicker
+REM Copyright 2008 - 2022 Marius Zwicker
 REM All rights reserved.
 REM
 REM @LICENSE_HEADER_START:Apache@

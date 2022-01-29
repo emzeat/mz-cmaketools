@@ -1,10 +1,11 @@
 #
 # RaspberryPi.cmake
 #
-# Copyright (c) 2008-2018 Marius Zwicker
+# Copyright (c) 2008 - 2022 Marius Zwicker
 # All rights reserved.
 #
-# @LICENSE_HEADER_START@
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +17,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# @LICENSE_HEADER_END@
 #
 
 ## File containing settings for crosscompiling Linux -> RaspberryPi (armhf)
@@ -40,7 +40,7 @@ endif()
 mark_as_advanced(RASPI_ROOTFS RASPI_TOOLCHAIN)
 
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_VERSION 1)	
+set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_C_COMPILER ${RASPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-gcc)
 set(CMAKE_CXX_COMPILER ${RASPI_TOOLCHAIN}/bin/arm-linux-gnueabihf-g++)

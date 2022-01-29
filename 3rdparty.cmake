@@ -1,10 +1,11 @@
 #
 # 3rdparty.cmake
 #
-# Copyright (c) 2019-2020 Marius Zwicker
+# Copyright (c) 2019 - 2022 Marius Zwicker
 # All rights reserved.
 #
-# @LICENSE_HEADER_START@
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +17,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# @LICENSE_HEADER_END@
 #
 
 ##################################################
@@ -195,10 +195,10 @@ macro(mz_3rdparty_add TARGET FILE)
 
     if( _mz3_BUILD_IN_SOURCE )
         set( MZ_3RDPARTY_BINARY_DIR ${MZ_3RDPARTY_SOURCE_DIR} )
-        set( _mz3_binary_dir BUILD_IN_SOURCE ${_mz3_BUILD_IN_SOURCE} ) 
+        set( _mz3_binary_dir BUILD_IN_SOURCE ${_mz3_BUILD_IN_SOURCE} )
     elseif( _mz3_BINARY_DIR )
         set( MZ_3RDPARTY_BINARY_DIR ${_mz3_BINARY_DIR} )
-        set( _mz3_binary_dir BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}" ) 
+        set( _mz3_binary_dir BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}" )
     else()
         set( _mz3_binary_dir BINARY_DIR "${MZ_3RDPARTY_BINARY_DIR}" )
     endif()
