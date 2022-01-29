@@ -34,6 +34,9 @@
 #   artifacts on the s3 server or specify the CMake variables
 #   MZ_3RDPARTY_S3_BUCKET and MZ_S3_PREFIX to override these
 #
+#   While writing or upgrading a build definition add the respective target name
+#   to a list named MZ_3RDPARTY_FORCE_REBUILD in order to always force a rebuild
+#
 # PROVIDED MACROS
 # -----------------------
 # mz_3rdparty_cache NAME TARGET
@@ -276,7 +279,7 @@ macro(mz_3rdparty_cache NAME TARGET)
             "mz_s3_upload(${MZ_3RDPARTY_S3_BUCKET}\n"
             "   DIRECTORY ${MZ_3RDPARTY_PREFIX_DIR}\n"
             "   DESTINATION ${MZ_3RDPARTY_OBJECT_PATH}\n"
-            "   PUBLIC QUIET\n"
+            "   QUIET\n"
             ")\n"
         )
     endif()
@@ -293,7 +296,11 @@ macro(mz_3rdparty_cache NAME TARGET)
         )
     endif()
 
-    if( EXISTS ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
+    if( "${TARGET}" IN_LIST MZ_3RDPARTY_FORCE_REBUILD )
+        mz_3rdparty_message("Rebuilding below ${MZ_3RDPARTY_PREFIX_DIR}")
+        file(REMOVE_RECURSE ${MZ_3RDPARTY_PREFIX_DIR})
+        set(MZ_3RDPARTY_REBUILD true)
+    elseif( EXISTS ${MZ_3RDPARTY_PREFIX_DIR}/stamp )
         mz_3rdparty_message("Reusing ${MZ_3RDPARTY_PREFIX_DIR}")
         set(MZ_3RDPARTY_REBUILD false)
 
