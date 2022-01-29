@@ -117,9 +117,9 @@ macro(_mz_s3_env QUIET )
     endif()
 
     execute_process(
-        COMMAND ${_mz_s3_mc} alias list ${MZ_S3_ALIAS}
-        OUTPUT_VARIABLE _mz_s3_alias_output
-        ERROR_QUIET
+        COMMAND ${_mz_s3_mc} stat ${MZ_S3_ALIAS} --debug
+        ERROR_VARIABLE _mz_s3_alias_output
+        OUTPUT_QUIET
         RESULT_VARIABLE _mz_s3_result
     )
     if( _mz_s3_result GREATER "0")
@@ -128,7 +128,7 @@ macro(_mz_s3_env QUIET )
         endif()
         unset(_mz_s3_url)
     else()
-        string(REGEX MATCH "URL +: ([^\n\r]+)" _mz_s3_url ${_mz_s3_alias_output})
+        string(REGEX MATCH "Host: ([^\n\r]+)" _mz_s3_url ${_mz_s3_alias_output})
         set(_mz_s3_url ${CMAKE_MATCH_1})
         set(_mz_s3_archive_ext .zip)
         mz_s3_message("Using alias '${MZ_S3_ALIAS}' for '${_mz_s3_url}'")
