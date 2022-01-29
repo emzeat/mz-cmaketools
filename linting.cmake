@@ -87,7 +87,6 @@ if( Qt5_PREFIX )
   endif()
 endif()
 
-
 if( QML_LINT )
   if( MZ_DO_CPPLINT )
     mz_message("Linting (QML) is enabled")
@@ -143,6 +142,7 @@ macro(mz_auto_format _TARGET)
             COMMAND ${CLANG_TIDY}
               ${CLANG_TIDY_EXTRA_ARGS}
               -p ${CMAKE_BINARY_DIR}
+              --checks=-clang-diagnostic-unused-command-line-argument
               --quiet
               ${abs_file}
             COMMAND ${CMAKE_COMMAND} -E touch ${lint_output}
