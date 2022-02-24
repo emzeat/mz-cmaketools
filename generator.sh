@@ -34,15 +34,15 @@ Valid arguments:
     'mode=(release|reldbg|debug)' to control build configuration
     'compiler=(clang|gcc|ios|ios_legacy|ios_simulator)' to select compiler
     'generator=(ninja|makefiles|sublime|xcode)'
-    'cmake="-D.."' options to pass to cmake
     'name=".."' custom name prefix
     'location=(inside|outside)' configures location of build files
+    '-DFOO=BAR' additional args to pass to cmake
 
 Can also be selected using environment variables:
     MZ_CMAKETOOLS_mode=..
     MZ_CMAKETOOLS_compiler=..
     MZ_CMAKETOOLS_generator=..
-    MZ_CMAKETOOLS_cmake=..
+    MZ_CMAKETOOLS_args=..
     MZ_CMAKETOOLS_name=..
 
 EOF
@@ -192,7 +192,6 @@ function run_cmake {
     CC=${my_cc} CXX=${my_cxx} \
     cmake   -D CMAKE_BUILD_TYPE=${my_c_mode} \
             ${my_args} \
-            ${my_cmake} \
             -G"${my_c_generator}" \
             ${my_base_dir}/
 }
@@ -238,7 +237,7 @@ function detect_dir {
 my_generator=$MZ_CMAKETOOLS_generator
 my_compiler=$MZ_CMAKETOOLS_compiler
 my_mode=$MZ_CMAKETOOLS_mode
-my_cmake=$MZ_CMAKETOOLS_cmake
+my_args=$MZ_CMAKETOOLS_args
 my_location=$MZ_CMAKE_TOOLS_location
 
 # parse the given arguments
@@ -256,9 +255,6 @@ do
             ;;
         compiler)
             my_compiler=${value}
-            ;;
-        cmake)
-            my_cmake=${value}
             ;;
         location)
             my_location=${value}

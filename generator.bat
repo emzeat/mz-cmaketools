@@ -33,7 +33,7 @@ goto MAIN
     echo.cmake using a predefined directory naming scheme
     echo.
     echo.Usage:
-    echo."    generator.bat (release|reldbg|debug) (ninja|vs2019|ninja_64|vs2019_64) (inside|outside)"
+    echo."    generator.bat (release|reldbg|debug) (ninja|vs2019|ninja_64|vs2019_64) (inside|outside) (<other cmake args...>)"
     echo.
 GOTO:EOF
 
@@ -113,7 +113,7 @@ GOTO:EOF
     cd %BUILD_DIR%
 
     echo.== configuring target system '%GENERATOR%/%BUILD_MODE%'
-    cmake -D CMAKE_BUILD_TYPE=%MY_BUILD_MODE% %ARG1% %ARG2% %ARG3% %ARG4% %ARG5% %ARG6% -G%MY_GENERATOR% "%BASE_DIR%/"
+    cmake -D CMAKE_BUILD_TYPE=%MY_BUILD_MODE% %EXTRA_ARGS% -G%MY_GENERATOR% "%BASE_DIR%/"
 GOTO:EOF
 
 :MAIN
@@ -125,14 +125,12 @@ if "%3" == "" (
 
 REM separate the arguments, all above %3 are optional
 set BUILD_MODE=%1
-set GENERATOR=%2
-set LOCATION=%3
-set ARG1=%4
-set ARG2=%5
-set ARG3=%6
-set ARG4=%7
-set ARG5=%8
-set ARG6=%9
+shift
+set GENERATOR=%1
+shift
+set LOCATION=%1
+shift
+for /f "tokens=3,* delims= " %%a in ("%*") do set EXTRA_ARGS=%%b
 
 call:debug_hint
 call:detect_build_mode
