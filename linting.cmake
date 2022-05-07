@@ -74,6 +74,20 @@ if( CLANG_TIDY )
   else()
     mz_warning_message("Linting (C++) is disabled, this is not recommended")
   endif()
+
+  find_program(PYTHON3 python3)
+  find_program(CCACHE ccache)
+  if(PYTHON3 AND CCACHE)
+    mz_message("Linting (C++) will be accelerated using ccache")
+    set(MZ_CLANG_TIDY
+      ${CMAKE_COMMAND} -E env CLANG_TIDY=${CLANG_TIDY} CCACHE=${CCACHE}
+      ${CMAKE_SOURCE_DIR}/build/ccache-tidy.py
+    )
+  else()
+    set(MZ_CLANG_TIDY
+      ${CLANG_TIDY}
+    )
+  endif()
 endif()
 
 if( Qt5_PREFIX )
@@ -139,7 +153,7 @@ macro(mz_auto_format _TARGET)
         if( CLANG_TIDY AND MZ_DO_CPPLINT )
           set(lint_output ${lint_file}.clang-tidy)
           add_custom_command(OUTPUT ${lint_output}
-            COMMAND ${CLANG_TIDY}
+            COMMAND ${MZ_CLANG_TIDY}
               ${CLANG_TIDY_EXTRA_ARGS}
               -p ${CMAKE_BINARY_DIR}
               --checks=-clang-diagnostic-unused-command-line-argument
