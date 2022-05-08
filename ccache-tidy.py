@@ -79,7 +79,7 @@ def invoke_clang_tidy(with_args) -> int:
         sys.stderr.write(ct_output)
         return 0
     except subprocess.CalledProcessError as error:
-        log_info(f"clang-tidy failed: {error}")
+        log_debug(f"clang-tidy failed: {error}")
         ct_output = error.output
         ct_output = filter_clang_tidy(ct_output)
         sys.stderr.write(ct_output)
@@ -99,7 +99,7 @@ def invoke_ccache(with_args, with_env) -> int:
         subprocess.check_call([CCACHE] + with_args, env=patched_env)
         return 0
     except subprocess.CalledProcessError as error:
-        log_info(f"ccache failed: {error}")
+        log_debug(f"ccache failed: {error}")
         return error.returncode
     except FileNotFoundError as error:
         log_info(f"Failed to invoke ccache: {error}")
