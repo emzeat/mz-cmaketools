@@ -59,7 +59,7 @@ def log_debug(msg: str) -> None:
         log_info(msg)
 
 
-def invoke_clang_tidy(with_args) -> int:
+def invoke_clang_tidy(with_args, capture_output=False) -> int:
     '''Invokes clang-tidy using the given arguments'''
 
     def filter_clang_tidy(output) -> str:
@@ -76,12 +76,16 @@ def invoke_clang_tidy(with_args) -> int:
     try:
         ct_output = subprocess.check_output([CLANG_TIDY] + with_args, stderr=subprocess.STDOUT, encoding='utf8')
         ct_output = filter_clang_tidy(ct_output)
+        if capture_output:
+            return 0, ct_output
         sys.stderr.write(ct_output)
         return 0
     except subprocess.CalledProcessError as error:
         log_debug(f"clang-tidy failed: {error}")
         ct_output = error.output
         ct_output = filter_clang_tidy(ct_output)
+        if capture_output:
+            return error.returncode, ct_output
         sys.stderr.write(ct_output)
         return error.returncode
     except FileNotFoundError as error:
@@ -130,11 +134,15 @@ if CCACHE_TIDY_ARGS:
     fwd = json.loads(CCACHE_TIDY_ARGS)
     if '-E' in sys.argv:
         # ccache wants to get the preproc output
+        # we create this from a) the source and b) the effective config
         sourcefile = pathlib.Path(fwd['sourcefile'])
         source = sourcefile.read_text(encoding='utf8')
-        log_debug(f"Preprocessing '{sourcefile}':\n{source}")
-        sys.stdout.write(source)
-        sys.exit(0)
+        ret, config = invoke_clang_tidy(['--dump-config'] + fwd['args'], capture_output=True)
+        log_debug(f"Preprocessing '{sourcefile}':\n{source}\n{fwd['args']}\n{config}")
+        if ret == 0:
+            sys.stdout.write(source)
+            sys.stdout.write(config)
+        sys.exit(ret)
     else:
         # ccache is doing the actual run
         objectfile = pathlib.Path(fwd['objectfile'])
@@ -184,6 +192,13 @@ for sourcefile in sources:
 
     # clang-tidy works like clang, force it
     env['CCACHE_COMPILERTYPE'] = 'clang'
+
+    # in order to work reliably we force the plain preprocessor
+    # mode as this is the most efficient due to our lack of actual
+    # compiler flags and includes
+    env['CCACHE_NODEPEND'] = '1'
+    env['CCACHE_NODIRECT'] = '1'
+
     # ensure the compile db is considered
     if COMPILE_DB:
         extrafiles = os.environ.get('CCACHE_EXTRAFILES', None)
