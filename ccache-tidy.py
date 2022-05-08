@@ -22,7 +22,7 @@
 
 import subprocess
 import sys
-import pathlib
+from pathlib import Path
 import json
 import os
 
@@ -125,6 +125,78 @@ def show_help() -> int:
     return invoke_clang_tidy(['-h'])
 
 
+def parse_arguments(argv=None):
+    '''Parses the arguments to determine the compile path and sources'''
+    if argv is None:
+        argv = sys.argv
+
+    class Args:
+        '''Describes consumed arguments'''
+
+        def __init__(self):
+            self.help = False
+            self.compdb = None
+            self.sources = []
+            self.tidyargs = []
+
+        def __str__(self):
+            return str(dict(help=self.help, compdb=self.compdb, sources=self.sources, tidyargs=self.tidyargs))
+
+    parsed_args = Args()
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        parsed_args.tidyargs.append(arg)
+        if arg in ["-h", "--help"]:
+            parsed_args.help = True
+            break
+        if arg == "-p":
+            # path to compile db
+            i += 1
+            parsed_args.tidyargs.append(sys.argv[i])
+            candidate = Path(sys.argv[i]) / 'compile_commands.json'
+            if candidate.exists():
+                parsed_args.compdb = candidate
+        elif arg.startswith("-p="):
+            # path to compile db
+            candidate = Path(arg.split('=')[1]) / 'compile_commands.json'
+            if candidate.exists():
+                parsed_args.compdb = candidate
+        elif arg in ['--config-file', '--export-fixes', '-load', '--vfsoverlay']:
+            # if the arg is given as '-arg=value' it will be handled in the next case
+            # if given as '-arg value' we will match here and skip the value as these
+            # are special params taking a path we must not mix up with sources below
+            i += 1
+            parsed_args.tidyargs.append(sys.argv[i])
+        elif arg.startswith("-"):
+            # skip any args identified by a -dash
+            pass
+        else:
+            candidate = Path(arg)
+            if candidate.exists():
+                parsed_args.sources.append(candidate)
+                # remove the source from args again
+                del parsed_args.tidyargs[-1]
+        i += 1
+    return parsed_args
+
+
+def filter_compdb(database: Path, sourcepath: Path) -> str:
+    '''Filters the given compdb for lines affecting sourcefile'''
+    out = []
+    with open(database, 'r', encoding='utf8') as raw:
+        # as a minimal performance tuning just iterate
+        # all lines of the file and spare the overhead
+        # to do a full json parsing
+        for line in raw:
+            # match any lines with our filename, while
+            # this might cause false positives it is good
+            # enough and avoids more complicated matching logic
+            if sourcepath.name in line:
+                out.append(line)
+    return ''.join(out)
+
+
 # MAIN flow
 log_debug(f"Invoked as {sys.argv}")
 
@@ -134,87 +206,82 @@ if CCACHE_TIDY_ARGS:
     fwd = json.loads(CCACHE_TIDY_ARGS)
     if '-E' in sys.argv:
         # ccache wants to get the preproc output
-        # we create this from a) the source and b) the effective config
-        sourcefile = pathlib.Path(fwd['sourcefile'])
-        source = sourcefile.read_text(encoding='utf8')
-        ret, config = invoke_clang_tidy(['--dump-config'] + fwd['args'], capture_output=True)
-        log_debug(f"Preprocessing '{sourcefile}':\n{source}\n{fwd['args']}\n{config}")
+        # we create this from
+        #   a) the source
+        #   b) the effective config
+        #   c) the effective lines in compdb
+        sourcefile = Path(fwd['src'])
+        FLAGS = filter_compdb(fwd['db'], sourcefile)
+        SOURCE = sourcefile.read_text(encoding='utf8')
+        ret, CONFIG = invoke_clang_tidy(['--dump-config'] + fwd['args'], capture_output=True)
+        log_debug(f"Preprocessing '{sourcefile}':\n{SOURCE}\n{fwd['args']}\n{FLAGS}\n{CONFIG}")
         if ret == 0:
-            sys.stdout.write(source)
-            sys.stdout.write(config)
+            sys.stdout.write(SOURCE)
+            sys.stdout.write(CONFIG)
+            sys.stdout.write(FLAGS)
         sys.exit(ret)
     else:
         # ccache is doing the actual run
-        objectfile = pathlib.Path(fwd['objectfile'])
-        ret = invoke_clang_tidy(fwd['args'])
+        ret = invoke_clang_tidy(fwd['args'] + [fwd['src']])
         if ret == 0:
+            objectfile = Path(fwd['obj'])
             objectfile.write_text('Success', encoding='utf8')
         sys.exit(ret)
 
 # else determine the compile_db and any sources before running them through ccache
-COMPILE_DB = None
-sources = []
-i = 1
-while i < len(sys.argv):
-    arg = sys.argv[i]
-    if arg in ["-h", "--help"]:
-        sys.exit(show_help())
-    elif arg == "-p":
-        # path to compiledb
-        i += 1
-        COMPILE_DB = pathlib.Path(sys.argv[i]) / 'compile_commands.json'
-        if COMPILE_DB.exists():
-            log_debug(f"Using compile database at {COMPILE_DB}")
-        else:
-            COMPILE_DB = None
-    else:
-        source = pathlib.Path(arg)
-        if source.exists():
-            # FIXME(zwicker): Handle multiple sources and a way to derive the object files
-            sources = [source]
-            log_debug(f"Handling source {source}")
-    i += 1
-
-if not sources:
-    log_info("Missing source input file")
+args = parse_arguments()
+if args.help:
+    ret = show_help()
+    sys.exit(ret)
+if args.compdb:
+    log_debug(f"Using compile database at {args.compdb}")
+if not args.sources:
+    log_info("Missing source input file(s)")
     sys.exit(1)
 
-for sourcefile in sources:
-    env = {}
+for sourcefile in args.sources:
+    cc_env = {}
+    extrafiles = os.environ.get('CCACHE_EXTRAFILES', None)
+    SEP = ';' if sys.platform == 'win32' else ':'
+    if extrafiles:
+        extrafiles = extrafiles.split(SEP)
+    else:
+        extrafiles = []
+
     # forward the initial args to clang-tidy
     objectfile = sourcefile.with_suffix('.ccache-tidy')
     fwd_args = {
-        'sourcefile': str(sourcefile),
-        'objectfile': str(objectfile),
-        'args': sys.argv[1:]
+        'src': str(sourcefile),
+        'obj': str(objectfile),
+        'db': str(args.compdb),
+        'args': args.tidyargs
     }
-    env[CCACHE_TIDY_ARGS_ENV] = json.dumps(fwd_args)
+    cc_env[CCACHE_TIDY_ARGS_ENV] = json.dumps(fwd_args)
 
     # clang-tidy works like clang, force it
-    env['CCACHE_COMPILERTYPE'] = 'clang'
+    cc_env['CCACHE_COMPILERTYPE'] = 'clang'
 
     # in order to work reliably we force the plain preprocessor
     # mode as this is the most efficient due to our lack of actual
     # compiler flags and includes
-    env['CCACHE_NODEPEND'] = '1'
-    env['CCACHE_NODIRECT'] = '1'
+    cc_env['CCACHE_NODEPEND'] = '1'
+    cc_env['CCACHE_NODIRECT'] = '1'
 
-    # ensure the compile db is considered
-    if COMPILE_DB:
-        extrafiles = os.environ.get('CCACHE_EXTRAFILES', None)
-        SEP = ';' if sys.platform == 'win32' else ':'
-        if extrafiles:
-            extrafiles = extrafiles.split(SEP)
-        else:
-            extrafiles = []
-        extrafiles.append(str(COMPILE_DB))
-        env['CCACHE_EXTRAFILES'] = SEP.join(extrafiles)
+    # ccache is considering this script as the compiler to be invoked
+    # and hence will not track any changes to the clang-tidy binary
+    # itself. Manually inject it to the xtra files in case we know the
+    # full path
+    if os.path.exists(CLANG_TIDY):
+        extrafiles.append(CLANG_TIDY)
+
+    if extrafiles:
+        cc_env['CCACHE_EXTRAFILES'] = SEP.join(extrafiles)
 
     # ccache expects a regular compiler call here which is somewhat different
     # so we fake it and use a throw-away output. The actual arguments to clang-tidy
     # will be restored later when ccache is invoking us again in turn
-    args = ['-c', '-o', objectfile, sourcefile]
-    ret = invoke_ccache(args, env)
+    cc_args = ['-c', '-o', str(objectfile), str(sourcefile)]
+    ret = invoke_ccache(cc_args, cc_env)
 
     # ccache forced us to generate an objectfile which we immediately remove again
     objectfile.unlink(missing_ok=True)
