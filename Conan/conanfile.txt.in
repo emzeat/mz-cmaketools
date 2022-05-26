@@ -13,3 +13,4 @@ cmake
 [imports]
 bin, *.dll -> ${EXECUTABLE_OUTPUT_PATH}
 lib, *.dylib* -> ${EXECUTABLE_OUTPUT_PATH}
+., license* -> ${EXECUTABLE_OUTPUT_PATH}/3rdparty @ folder=True, ignore_case=True
