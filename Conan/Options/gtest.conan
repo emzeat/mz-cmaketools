@@ -1,0 +1,2 @@
+gtest:build_gmock=True
+gtest:no_main=False

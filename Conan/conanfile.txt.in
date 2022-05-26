@@ -1,6 +1,9 @@
 [requires]
 ${MZ_CONAN_REQUIRES_ITEMS}
 
+[options]
+${MZ_CONAN_REQUIRES_OPTS}
+
 [tool_requires]
 ${MZ_CONAN_TOOL_REQUIRES_ITEMS}
 

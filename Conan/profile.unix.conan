@@ -1,0 +1,10 @@
+[settings]
+
+[env]
+CXXFLAGS=-D_FORTIFY_SOURCE=1
+CPPFLAGS=-D_FORTIFY_SOURCE=1
+
+[options]
+*:fPIC=True
+*:shared=False
+*:static=True

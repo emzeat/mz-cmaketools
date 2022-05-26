@@ -46,6 +46,13 @@ macro(mz_conan_warning MSG)
     mz_warning_message("  conan: ${MSG}")
 endmacro()
 
+if(MZ_MACOS)
+    set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
+    set(CONAN_DISABLE_CHECK_COMPILER ON)
+elseif(MZ_IOS)
+    set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOS.conan)
+endif()
+
 function(_mz_conan_process_requires _variable _access _value _current_list_file _stack)
     if(_value STREQUAL "")
         mz_conan_message("Processing requirements: ${MZ_CONAN_REQUIRES}")
@@ -53,22 +60,22 @@ function(_mz_conan_process_requires _variable _access _value _current_list_file 
         list(JOIN MZ_CONAN_TOOL_REQUIRES "\n" MZ_CONAN_TOOL_REQUIRES_ITEMS)
         configure_file(${_MZ_CONAN_DIR}/conanfile.txt.in ${CMAKE_BINARY_DIR}/conanfile.txt)
 
-        mz_conan_message("Processing profile")
-        list(APPEND MZ_CONAN_ENV CC=${CMAKE_C_COMPILER} CFLAGS=${MZ_3RDPARTY_C_FLAGS})
-        list(APPEND MZ_CONAN_ENV CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${MZ_3RDPARTY_CXX_FLAGS})
+        mz_conan_message("Processing profile: ${_MZ_CONAN_PROFILE}")
+        list(APPEND MZ_CONAN_ENV CFLAGS="${MZ_3RDPARTY_C_FLAGS}")
+        list(APPEND MZ_CONAN_ENV CXXFLAGS="${MZ_3RDPARTY_CXX_FLAGS}")
         list(JOIN MZ_CONAN_ENV "\n" MZ_CONAN_ENV_ITEMS)
-        configure_file(${_MZ_CONAN_DIR}/profile.conan.in ${CMAKE_BINARY_DIR}/profile.conan)
+        configure_file(${_MZ_CONAN_PROFILE} ${CMAKE_BINARY_DIR}/profile.conan)
 
         include(${_MZ_CONAN_DIR}/conan.cmake)
         conan_cmake_run(
             CONANFILE ${CMAKE_BINARY_DIR}/conanfile.txt
             CONAN_COMMAND ${CONAN}
             PROFILE ${CMAKE_BINARY_DIR}/profile.conan
-            PROFILE_AUTO ALL
             BUILD missing
             BUILD_TYPE Release
             BASIC_SETUP CMAKE_TARGETS
         )
+        mz_conan_message("Imported Targets: ${CONAN_TARGETS}")
     endif()
 endfunction()
 variable_watch(CMAKE_CURRENT_LIST_DIR _mz_conan_process_requires)
@@ -82,6 +89,16 @@ function(_mz_conan_handle_requires VAR DESC ITEMS)
                 "${${VAR}};${ITEM}"
                 CACHE INTERNAL "mz_conan_${DESC}"
             )
+            # ITEM_NAME is <package>/ so strip the trailing /
+            string(REPLACE "/" "" ITEM_NAME ${ITEM_NAME})
+            if(EXISTS ${_MZ_CONAN_DIR}/Options/${ITEM_NAME}.conan)
+                mz_conan_message("Importing options: ${_MZ_CONAN_DIR}/Options/${ITEM_NAME}.conan")
+                file(READ ${_MZ_CONAN_DIR}/Options/${ITEM_NAME}.conan _MZ_CONAN_TMP_OPTS)
+                set(${VAR}_OPTS
+                    "${${VAR}_OPTS}\n${_MZ_CONAN_TMP_OPTS}"
+                    CACHE INTERNAL "mz_conan_${DESC}_opts"
+                )
+            endif()
         else()
             mz_conan_message("Using ${DESC}: ${ITEM}")
         endif()

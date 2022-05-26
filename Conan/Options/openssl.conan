@@ -1,0 +1,3 @@
+openssl:no_asm=False
+#openssl:no_zlib=False
+openssl:no_threads=False
