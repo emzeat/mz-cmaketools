@@ -12,6 +12,7 @@ arch_build=armv8
 
 [options]
 bitcode=True
+libgit2:with_iconv=True
 
 [options]
 *:shared=False

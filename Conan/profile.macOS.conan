@@ -17,3 +17,4 @@ CONAN_CMAKE_DISABLE_CHECK_COMPILER=ON
 [options]
 *:shared=False
 *:static=True
+libgit2:with_iconv=True

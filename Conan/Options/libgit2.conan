@@ -1,0 +1,2 @@
+libgit2:with_libssh2=False
+libgit2:with_iconv=False
