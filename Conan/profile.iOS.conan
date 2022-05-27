@@ -3,17 +3,26 @@ include(${_MZ_CONAN_DIR}/profile.unix.conan)
 [settings]
 os=iOS
 os.version=${IOS_DEPLOYMENT_TARGET}
+os.sdk=iphoneos
 compiler=apple-clang
 compiler.version=13.1
 compiler.libcxx=libc++
 build_type=Release
 arch=armv8
-arch_build=armv8
+os_build=Macos
+arch_build=x86_64
+
+[build_requires]
+*: ios-cmake/4.2.0
 
 [options]
-bitcode=True
+ios-cmake:toolchain_target=SIMULATOR64
+ios-cmake:enable_bitcode=True
+ios-cmake:enable_visibility=True
 libgit2:with_iconv=True
 
-[options]
-*:shared=False
-*:static=True
+[env]
+*: CFLAGS="-fembed-bitcode"
+*: CXXFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
+*: CPPFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
+CONAN_CMAKE_GENERATOR=Xcode
