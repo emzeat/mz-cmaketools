@@ -55,7 +55,11 @@ if(MZ_MACOS)
     set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
     set(CONAN_DISABLE_CHECK_COMPILER ON)
 elseif(MZ_IOS)
-    set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOS.conan)
+    if (IOS_PLATFORM STREQUAL "OS64")
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOS.conan)
+    elseif (IOS_PLATFORM STREQUAL "SIMULATOR64")
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOSsimulator.conan)
+    endif()
 endif()
 
 # will process all conan dependencies and install them

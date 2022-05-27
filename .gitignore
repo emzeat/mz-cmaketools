@@ -4,3 +4,4 @@ vs*
 mingw*
 win32-*
 ios-*
+ios_simulator-*
