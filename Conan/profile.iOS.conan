@@ -16,7 +16,7 @@ arch_build=x86_64
 *: ios-cmake/4.2.0
 
 [options]
-ios-cmake:toolchain_target=SIMULATOR64
+ios-cmake:toolchain_target=OS64
 ios-cmake:enable_bitcode=True
 ios-cmake:enable_visibility=True
 libgit2:with_iconv=True
