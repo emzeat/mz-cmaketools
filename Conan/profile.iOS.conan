@@ -20,6 +20,7 @@ ios-cmake:toolchain_target=OS64
 ios-cmake:enable_bitcode=True
 ios-cmake:enable_visibility=True
 libgit2:with_iconv=True
+qt:opengl=es2
 
 [env]
 *: CFLAGS="-fembed-bitcode"
