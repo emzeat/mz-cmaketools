@@ -22,12 +22,14 @@ ios-cmake:enable_bitcode=True
 ios-cmake:enable_visibility=True
 libgit2:with_iconv=True
 qt:opengl=es2
+qt:config=-sdk iphonesimulator -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
 
 [env]
 *: CFLAGS="-fembed-bitcode"
 *: CXXFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 *: CPPFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 CONAN_CMAKE_GENERATOR=Xcode
+MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
 
 [options]
 *:shared=False

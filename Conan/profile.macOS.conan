@@ -14,8 +14,10 @@ build_type=Release
 
 [env]
 CONAN_CMAKE_DISABLE_CHECK_COMPILER=ON
+MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
 
 [options]
 *:shared=False
 *:static=True
 libgit2:with_iconv=True
+qt:config=-device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}

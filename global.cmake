@@ -36,9 +36,9 @@
 
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-# Set the minimum version to 10.12 on OS X
+# Set the minimum version to 10.13 on OS X
 if(APPLE AND NOT IOS_PLATFORM)
-    set( CMAKE_OSX_DEPLOYMENT_TARGET 10.12 )
+    set( CMAKE_OSX_DEPLOYMENT_TARGET 10.13 )
     message("-- Setting minimum version of OS X to ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
