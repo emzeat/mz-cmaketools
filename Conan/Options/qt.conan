@@ -1,3 +1,4 @@
+[options]
 qt:with_vulkan=False
 qt:with_mysql=False
 qt:with_pq=False
