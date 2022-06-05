@@ -1,0 +1,24 @@
+[options]
+openimageio:with_dicom=False
+openimageio:with_ffmpeg=False
+openimageio:with_freetype=False
+openimageio:with_giflib=False
+openimageio:with_hdf5=False
+openimageio:with_libheif=False
+# Setting this causes
+# ERROR: At least two recipes provides the same functionality:
+# - 'libjpeg' provided by 'libjpeg/9d', 'libjpeg-turbo/2.1.2'
+openimageio:with_libjpeg=libjpeg-turbo
+openimageio:with_libpng=False
+openimageio:with_libwebp=False
+openimageio:with_opencolorio=False
+openimageio:with_opencv=False
+openimageio:with_openjpeg=False
+openimageio:with_openvdb=False
+openimageio:with_ptex=False
+openimageio:with_raw=False
+openimageio:with_tbb=False
+
+libraw:with_jasper=False
+*:with_jpeg=libjpeg-turbo
+libraw:with_lcms=True

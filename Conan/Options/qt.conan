@@ -8,6 +8,7 @@ qt:with_dbus=False
 qt:with_openal=False
 qt:with_gstreamer=False
 qt:with_pulseaudio=False
+qt:with_libjpeg=libjpeg-turbo
 
 qt:commercial=False
 qt:shared=True
