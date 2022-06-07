@@ -16,9 +16,22 @@ openimageio:with_opencv=False
 openimageio:with_openjpeg=False
 openimageio:with_openvdb=False
 openimageio:with_ptex=False
-openimageio:with_raw=False
+openimageio:with_raw=True
 openimageio:with_tbb=False
 
 libraw:with_jasper=False
-*:with_jpeg=libjpeg-turbo
+libraw:with_jpeg=libjpeg-turbo
 libraw:with_lcms=True
+
+libtiff:jpeg=libjpeg-turbo
+libtiff:jbig=False
+libtiff:zstd=False
+libtiff:webp=False
+libtiff:libdeflate=False
+
+libjpeg-turbo:SIMD=True
+libjpeg-turbo:libjpeg7_compatibility=True
+libjpeg-turbo:libjpeg8_compatibility=True
+libjpeg-turbo:java=False
+libjpeg-turbo:turbojpeg=True
+*:with_jpeg=libjpeg-turbo
