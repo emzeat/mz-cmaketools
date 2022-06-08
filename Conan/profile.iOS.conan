@@ -28,5 +28,4 @@ qt:config=-sdk iphoneos -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPL
 *: CFLAGS="-fembed-bitcode"
 *: CXXFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 *: CPPFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
-CONAN_CMAKE_GENERATOR=Xcode
 MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
