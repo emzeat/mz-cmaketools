@@ -9,7 +9,7 @@ openimageio:with_libheif=False
 # ERROR: At least two recipes provides the same functionality:
 # - 'libjpeg' provided by 'libjpeg/9d', 'libjpeg-turbo/2.1.2'
 openimageio:with_libjpeg=libjpeg-turbo
-openimageio:with_libpng=False
+openimageio:with_libpng=True
 openimageio:with_libwebp=False
 openimageio:with_opencolorio=False
 openimageio:with_opencv=False
