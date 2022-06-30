@@ -22,7 +22,10 @@ ios-cmake:enable_bitcode=True
 ios-cmake:enable_visibility=True
 libgit2:with_iconv=True
 qt:opengl=es2
-qt:config=-sdk iphoneos -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+qt:config=-sdk iphoneos -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+qt:shared=False
+*:shared=False
+*:static=True
 
 [env]
 *: CFLAGS="-fembed-bitcode"

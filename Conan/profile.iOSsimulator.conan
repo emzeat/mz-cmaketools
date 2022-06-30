@@ -23,7 +23,8 @@ ios-cmake:enable_visibility=True
 libgit2:with_iconv=True
 libjpeg-turbo:SIMD=False
 qt:opengl=es2
-qt:config=-sdk iphonesimulator -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+qt:config=-sdk iphonesimulator -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+qt:shared=False
 *:shared=False
 *:static=True
 
