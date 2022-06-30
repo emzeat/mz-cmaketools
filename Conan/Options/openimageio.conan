@@ -4,7 +4,7 @@ openimageio:with_ffmpeg=False
 openimageio:with_freetype=False
 openimageio:with_giflib=False
 openimageio:with_hdf5=False
-openimageio:with_libheif=False
+openimageio:with_libheif=True
 # Setting this causes
 # ERROR: At least two recipes provides the same functionality:
 # - 'libjpeg' provided by 'libjpeg/9d', 'libjpeg-turbo/2.1.2'
@@ -35,3 +35,7 @@ libjpeg-turbo:libjpeg8_compatibility=True
 libjpeg-turbo:java=False
 libjpeg-turbo:turbojpeg=True
 *:with_jpeg=libjpeg-turbo
+
+libheif:with_x265=False
+libheif:with_libaomav1=False
+libheif:with_dav1d=False
