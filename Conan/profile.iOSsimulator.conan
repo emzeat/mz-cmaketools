@@ -19,7 +19,7 @@ arch_build=x86_64
 [options]
 ios-cmake:toolchain_target=SIMULATOR64
 ios-cmake:enable_bitcode=True
-ios-cmake:enable_visibility=True
+ios-cmake:enable_visibility=False
 libgit2:with_iconv=True
 libjpeg-turbo:SIMD=False
 qt:opengl=es2
