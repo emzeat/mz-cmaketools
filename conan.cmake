@@ -81,16 +81,48 @@ endif()
 
 # will process all conan dependencies and install them
 if(_MZ_CONAN_FILE)
-    mz_conan_message("Processing profile: ${_MZ_CONAN_PROFILE}")
+    include(${_MZ_CONAN_DIR}/conan.cmake)
+
+    set(MZ_CONAN_REMOTE_NAME emzeat)
+    if(DEFINED ENV{CONAN_REMOTE_NAME})
+        set(MZ_CONAN_REMOTE_NAME $ENV{CONAN_REMOTE_NAME})
+    endif()
+    set(MZ_CONAN_REMOTE_URL https://mirrors.emzeat.de/repository/conan/)
+    if(DEFINED ENV{CONAN_REMOTE_URL})
+        set(MZ_CONAN_REMOTE_URL $ENV{CONAN_REMOTE_URL})
+    endif()
+
+    execute_process(COMMAND conan remote list
+        OUTPUT_VARIABLE _MZ_CONAN_REMOTES
+        ERROR_QUIET
+    )
+    if(_MZ_CONAN_REMOTES MATCHES "${MZ_CONAN_REMOTE_NAME}: ")
+        mz_conan_message("Using remote '${MZ_CONAN_REMOTE_NAME}'")
+    else()
+        conan_add_remote(NAME ${MZ_CONAN_REMOTE_NAME}
+            URL ${MZ_CONAN_REMOTE_URL}
+            VERIFY_SSL True
+        )
+    endif()
+
+    mz_conan_message("Processing profile '${_MZ_CONAN_PROFILE}'")
     list(APPEND MZ_CONAN_ENV CFLAGS="${MZ_3RDPARTY_C_FLAGS}")
     list(APPEND MZ_CONAN_ENV CXXFLAGS="${MZ_3RDPARTY_CXX_FLAGS}")
     list(JOIN MZ_CONAN_ENV "\n" MZ_CONAN_ENV_ITEMS)
     configure_file(${_MZ_CONAN_PROFILE} ${CMAKE_BINARY_DIR}/profile.conan)
 
-    include(${_MZ_CONAN_DIR}/conan.cmake)
+    option(CONAN_BUILD_MISSING "Automatically build package binaries not on the remote" OFF)
+    if(CONAN_BUILD_MISSING)
+        mz_conan_message("Will build missing binary packages")
+        set(_MZ_CONAN_BUILD missing)
+    else()
+        set(_MZ_CONAN_BUILD never)
+    endif()
+
     conan_cmake_install(
         PATH_OR_REFERENCE ${_MZ_CONAN_FILE}
-        BUILD missing
+        BUILD ${_MZ_CONAN_BUILD}
+        REMOTE ${MZ_CONAN_REMOTE_NAME}
         PROFILE ${CMAKE_BINARY_DIR}/profile.conan
     )
     # when 'cmake' generator is used, automatically import it
