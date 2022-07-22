@@ -60,6 +60,8 @@ elseif(MZ_IOS)
     elseif (IOS_PLATFORM STREQUAL "SIMULATOR64")
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOSsimulator.conan)
     endif()
+elseif(MZ_LINUX)
+    set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.linux.conan)
 endif()
 
 # gather all conan option profiles
