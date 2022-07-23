@@ -23,12 +23,15 @@
 #
 #   BUILD/CONAN.CMAKE
 #
-#   Wrapper macros to transparently integrate conan with
-#   the cmake build system such that individual targets
-#   or submodules can declare their own dependencies and
-#   the resulting global conan dependencies get aggregated
-#   and installed automatically
+#   Automatically installs any conan packages when a conanfile.txt
+#   or conanfile.py is found in the project root.
 #
+#   Will automatically add a remote to enable download of emzeat
+#   specific conan packages. This can be overwritten with the following
+#   env variables:
+#       - MZ_CONAN_REMOTE_URL The url to a conan repository holding the packages
+#       - MZ_CONAN_REMOTE_NAME The name to use for creating the remote
+#       - MZ_CONAN_REMOTE_INDEX The index at which the remote will be added
 
 # if global.cmake was not included yet, report it
 if (NOT HAS_MZ_GLOBAL)
@@ -76,7 +79,8 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/conanfile.txt)
     configure_file(${CMAKE_SOURCE_DIR}/conanfile.txt ${CMAKE_BINARY_DIR}/conanfile.txt)
     set(_MZ_CONAN_FILE ${CMAKE_BINARY_DIR}/conanfile.txt)
 elseif(EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
-    set(_MZ_CONAN_FILE ${CMAKE_SOURCE_DIR}/conanfile.py)
+    configure_file(${CMAKE_SOURCE_DIR}/conanfile.py ${CMAKE_BINARY_DIR}/conanfile.py)
+    set(_MZ_CONAN_FILE ${CMAKE_BINARY_DIR}/conanfile.py)
 else()
     mz_conan_warning("No conanfile.(txt|py) - skipping install")
 endif()
@@ -86,12 +90,17 @@ if(_MZ_CONAN_FILE)
     include(${_MZ_CONAN_DIR}/conan.cmake)
 
     set(MZ_CONAN_REMOTE_NAME emzeat)
-    if(DEFINED ENV{CONAN_REMOTE_NAME})
-        set(MZ_CONAN_REMOTE_NAME $ENV{CONAN_REMOTE_NAME})
+    if(DEFINED ENV{MZ_CONAN_REMOTE_NAME})
+        set(MZ_CONAN_REMOTE_NAME $ENV{MZ_CONAN_REMOTE_NAME})
     endif()
     set(MZ_CONAN_REMOTE_URL https://mirrors.emzeat.de/repository/conan/)
-    if(DEFINED ENV{CONAN_REMOTE_URL})
-        set(MZ_CONAN_REMOTE_URL $ENV{CONAN_REMOTE_URL})
+    if(DEFINED ENV{MZ_CONAN_REMOTE_URL})
+        set(MZ_CONAN_REMOTE_URL $ENV{MZ_CONAN_REMOTE_URL})
+    endif()
+    if(DEFINED ENV{MZ_CONAN_REMOTE_INDEX})
+        set(_MZ_CONAN_REMOTE_ARGS 
+            INDEX $ENV{MZ_CONAN_REMOTE_INDEX}
+        )
     endif()
 
     execute_process(COMMAND conan remote list
@@ -99,10 +108,11 @@ if(_MZ_CONAN_FILE)
         ERROR_QUIET
     )
     if(_MZ_CONAN_REMOTES MATCHES "${MZ_CONAN_REMOTE_NAME}: ")
-        mz_conan_message("Using remote '${MZ_CONAN_REMOTE_NAME}'")
+        mz_conan_message("Using existing '${MZ_CONAN_REMOTE_NAME}'")
     else()
         conan_add_remote(NAME ${MZ_CONAN_REMOTE_NAME}
             URL ${MZ_CONAN_REMOTE_URL}
+            ${_MZ_CONAN_REMOTE_ARGS}
             VERIFY_SSL True
         )
     endif()
@@ -124,7 +134,6 @@ if(_MZ_CONAN_FILE)
     conan_cmake_install(
         PATH_OR_REFERENCE ${_MZ_CONAN_FILE}
         BUILD ${_MZ_CONAN_BUILD}
-        REMOTE ${MZ_CONAN_REMOTE_NAME}
         PROFILE ${CMAKE_BINARY_DIR}/profile.conan
     )
     # when 'cmake' generator is used, automatically import it
