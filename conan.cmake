@@ -64,7 +64,11 @@ elseif(MZ_IOS)
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOSsimulator.conan)
     endif()
 elseif(MZ_LINUX)
-    set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.linux.conan)
+    if(MZ_IS_CLANG)
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.linux_clang.conan)
+    else()
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.linux_gcc.conan)
+    endif()
 endif()
 
 # gather all conan option profiles
