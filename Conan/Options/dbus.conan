@@ -1,0 +1,5 @@
+[options]
+dbus:with_glib=True
+
+glib:shared=True
+glib:static=False
