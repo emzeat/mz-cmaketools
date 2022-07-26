@@ -109,8 +109,7 @@ function get_compiler {
                 -DENABLE_VISIBILITY=1 \
                 -DENABLE_BITCODE=1 \
                 -DIOS_DEPLOYMENT_TARGET=9.0 \
-                -DIOS_ARCH=armv7 \
-                -DMZ_CONAN_PROFILE=${my_script_dir}/mz-ios.conan"
+                -DIOS_ARCH=armv7"
             # force, the others do not work right now
             my_c_generator="Unix Makefiles"
             ;;
@@ -131,15 +130,11 @@ function get_compiler {
         clang)
             my_cc=clang
             my_cxx=clang++
-            my_args="${my_args} \
-                -DMZ_CONAN_PROFILE=${my_script_dir}/mz-default.conan"
             ;;
         *)
             my_cc=gcc
             my_cxx=g++
             my_compiler=gcc
-            my_args="${my_args} \
-                -DMZ_CONAN_PROFILE=${my_script_dir}/mz-default.conan"
             ;;
     esac
 }
