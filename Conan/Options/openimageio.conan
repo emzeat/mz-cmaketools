@@ -18,10 +18,14 @@ openimageio:with_openvdb=False
 openimageio:with_ptex=False
 openimageio:with_raw=True
 openimageio:with_tbb=False
+openimageio:static=False
+openimageio:shared=True
 
 libraw:with_jasper=False
 libraw:with_jpeg=libjpeg-turbo
 libraw:with_lcms=True
+libraw:static=False
+libraw:shared=True
 
 libtiff:jpeg=libjpeg-turbo
 libtiff:jbig=False

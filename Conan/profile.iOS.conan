@@ -26,6 +26,10 @@ qt:config=-sdk iphoneos -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TAR
 qt:shared=False
 *:shared=False
 *:static=True
+libraw:static=True
+libraw:shared=False
+openimageio:static=True
+openimageio:shared=False
 
 [env]
 *: CFLAGS="-fembed-bitcode"
