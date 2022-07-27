@@ -17,6 +17,4 @@ CXXFLAGS=
 CPPFLAGS=
 
 [options]
-*:shared=False
-*:static=True
 qt:with_dbus=True
