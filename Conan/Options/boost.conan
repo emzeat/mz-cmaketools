@@ -5,6 +5,8 @@ boost:zlib=True
 boost:bzip2=True
 boost:lzma=True
 boost:zstd=True
+boost:visibility=global
+boost:system_use_utf8=True
 
 boost:without_python=True
 boost:without_mpi=True
