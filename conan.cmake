@@ -69,6 +69,13 @@ elseif(MZ_LINUX)
     else()
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.linux_gcc.conan)
     endif()
+elseif(MZ_WINDOWS)
+    if(MZ_IS_VS)
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.win32_msvc.conan)
+    endif()
+endif()
+if(NOT _MZ_CONAN_PROFILE)
+    mz_fatal_message("No CONAN profile on this platform")
 endif()
 
 # gather all conan option profiles
@@ -148,4 +155,8 @@ if(_MZ_CONAN_FILE)
     endif()
     # when 'cmake_find_package' generator is used, support it as well
     set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+    # also make sure to import any binaries from packages to the path
+    if(MZ_WINDOWS)
+        set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
+    endif()
 endif()
