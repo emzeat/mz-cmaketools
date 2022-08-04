@@ -153,8 +153,13 @@ if(_MZ_CONAN_FILE)
         conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
         mz_conan_debug("Imported Targets: ${CONAN_TARGETS}")
     endif()
-    # when 'cmake_find_package' generator is used, support it as well
-    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+    # when 'cmake_paths' generator is used, automatically import it
+    if(EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
+        include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+    # elsewise add the module path to support the 'cmake_find_package' generator
+    else()
+        set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+    endif()
     # also make sure to import any binaries from packages to the path
     if(MZ_WINDOWS)
         set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
