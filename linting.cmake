@@ -30,6 +30,9 @@
 #   to pick up the paths of the tools:
 #     CLAZY, CLANG_FORMAT, CLANG_TIDY
 #
+#   Alternatively an attempt will be made to find the
+#   package clang-tools-extra
+#
 #
 # PROVIDED MACROS
 # -----------------------
@@ -47,6 +50,17 @@
 ########################################################################
 
 find_package(Git)
+
+# try to gather the executables first
+if( NOT CLANG_TIDY AND NOT CLANG_FORMAT )
+    find_package(clang-tools-extra)
+    if(TARGET clang-tools-extra::clang-tidy)
+      get_property(CLANG_TIDY TARGET clang-tools-extra::clang-tidy PROPERTY IMPORTED_LOCATION)
+    endif()
+    if(TARGET clang-tools-extra::clang-format)
+      get_property(CLANG_FORMAT TARGET clang-tools-extra::clang-format PROPERTY IMPORTED_LOCATION)
+    endif()
+endif()
 
 # optimize release builds to only lint files changed in the last commit
 if( MZ_IS_RELEASE AND GIT_FOUND )
