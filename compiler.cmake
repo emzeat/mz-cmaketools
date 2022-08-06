@@ -41,6 +41,8 @@
 # MZ_HAS_CXX0X see MZ_HAS_CXX11
 # MZ_HAS_CXX11 true when the compiler supports at least a
 #              (subset) of the upcoming C++11 standard
+# MZ_HAS_CXX14 true when the compiler supports at least a
+#              (subset) of the upcoming C++14 standard
 # MZ_MACOS true when building on macOS
 # MZ_IOS true when building for iOS
 # MZ_WINDOWS true when building on Windows
@@ -343,21 +345,6 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
         endif()
         mz_message("compiler version ${COMPILER_VERSION}")
 
-        if(NOT MZ_IS_CLANG AND COMPILER_VERSION STRGREATER "45")
-            mz_message("C++11 support detected")
-            set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
-            set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
-        elseif(NOT MZ_IS_CLANG AND COMPILER_VERSION STRGREATER "44")
-            mz_message("experimental C++0x support detected")
-            set(MZ_HAS_EXPERIMENTAL_CXX0X TRUE CACHE BOOL MZ_HAS_EXPERIMENTAL_CXX0X)
-            set(MZ_HAS_CXX0X TRUE CACHE BOOL MZ_HAS_CXX0X)
-            set(MZ_HAS_CXX11 TRUE CACHE BOOL MZ_HAS_CXX11)
-        elseif(MZ_IS_CLANG AND COMPILER_VERSION GREATER "29")
-            mz_message("clang 3.1+ with C++11 support detected")
-            set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
-            set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
-        endif()
-
         set(MZ_COMPILER_VERSION ${COMPILER_VERSION} CACHE INTERNAL MZ_COMPILER_VERSION)
         set(MZ_COMPILER_TEST_HAS_RUN TRUE CACHE INTERNAL MZ_COMPILER_TEST_HAS_RUN)
 
@@ -422,10 +409,11 @@ if(NOT MZ_IS_RELEASE)
 endif()
 
 # optional C++0x/c++11 features on gcc (on vs2010 this is enabled by default)
-if(MZ_IS_GCC AND MZ_HAS_CXX0X) # AND NOT DARWIN)
-    mz_add_cxx_flag(GCC -std=c++11 -fgnu-keywords)
-    mz_message("forcing C++11 support on this platform")
-endif()
+set(CMAKE_CXX_STANDARD 14)
+mz_message("Forcing C++14 support on this platform")
+set(MZ_HAS_CXX0X TRUE CACHE INTERNAL MZ_HAS_CXX0X)
+set(MZ_HAS_CXX11 TRUE CACHE INTERNAL MZ_HAS_CXX11)
+set(MZ_HAS_CXX14 TRUE CACHE INTERNAL MZ_HAS_CXX11)
 
 # compiler flags
 mz_add_flag(GCC -Wall -Werror -Wno-unused-function)
