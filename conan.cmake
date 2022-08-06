@@ -139,7 +139,7 @@ if(_MZ_CONAN_FILE)
         mz_conan_message("Will build missing binary packages")
         set(_MZ_CONAN_BUILD missing)
     else()
-        set(_MZ_CONAN_BUILD never)
+        set(_MZ_CONAN_BUILD never OUTPUT_QUIET)
     endif()
 
     conan_cmake_install(
