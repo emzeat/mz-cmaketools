@@ -74,6 +74,8 @@
 #
 ########################################################################
 
+include_guard(GLOBAL)
+
 # if global.cmake was not included yet, report it
 if (NOT HAS_MZ_GLOBAL)
     message(FATAL_ERROR "!! include global.cmake before including this file !!")

@@ -49,6 +49,7 @@
 ## no need to change anything beyond here
 ########################################################################
 
+include_guard(GLOBAL)
 find_package(Git)
 
 # try to gather the executables first
