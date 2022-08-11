@@ -2,10 +2,8 @@ ${_MZ_CONAN_PROFILE_INCLUDES}
 include(${_MZ_CONAN_DIR}/profile.unix.conan)
 
 [settings]
-os=Linux
-os_build=Linux
+os=Linuxx
 arch=x86_64
-arch_build=x86_64
 compiler=gcc
 compiler.version=7
 compiler.libcxx=libstdc++11

@@ -59,9 +59,13 @@ if(MZ_MACOS)
     set(CONAN_DISABLE_CHECK_COMPILER ON)
 elseif(MZ_IOS)
     if (IOS_PLATFORM STREQUAL "OS64")
+        set(CMAKE_CROSSCOMPILING ON)
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOS.conan)
+        set(_MZ_CONAN_BUILD_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
     elseif (IOS_PLATFORM STREQUAL "SIMULATOR64")
+        set(CMAKE_CROSSCOMPILING ON)
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.iOSsimulator.conan)
+        set(_MZ_CONAN_BUILD_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
     endif()
 elseif(MZ_LINUX)
     if(MZ_IS_CLANG)
@@ -133,6 +137,17 @@ if(_MZ_CONAN_FILE)
     list(APPEND MZ_CONAN_ENV CXXFLAGS="${MZ_3RDPARTY_CXX_FLAGS}")
     list(JOIN MZ_CONAN_ENV "\n" MZ_CONAN_ENV_ITEMS)
     configure_file(${_MZ_CONAN_PROFILE} ${CMAKE_BINARY_DIR}/profile.conan)
+    if(_MZ_CONAN_BUILD_PROFILE)
+        configure_file(${_MZ_CONAN_BUILD_PROFILE} ${CMAKE_BINARY_DIR}/build_profile.conan)
+        set(_MZ_CONAN_INSTALL_ARGS 
+            PROFILE_HOST ${CMAKE_BINARY_DIR}/profile.conan
+            PROFILE_BUILD ${CMAKE_BINARY_DIR}/build_profile.conan
+        )
+    else()
+        set(_MZ_CONAN_INSTALL_ARGS 
+            PROFILE ${CMAKE_BINARY_DIR}/profile.conan
+        )
+    endif()
 
     option(CONAN_BUILD_MISSING "Automatically build package binaries not on the remote" OFF)
     if(CONAN_BUILD_MISSING)
@@ -142,26 +157,44 @@ if(_MZ_CONAN_FILE)
         set(_MZ_CONAN_BUILD never OUTPUT_QUIET)
     endif()
 
+    set(_MZ_CONAN_INSTALL_DIR ${CMAKE_BINARY_DIR}/conan)
+
     conan_cmake_install(
         PATH_OR_REFERENCE ${_MZ_CONAN_FILE}
+        INSTALL_FOLDER ${_MZ_CONAN_INSTALL_DIR}
         BUILD ${_MZ_CONAN_BUILD}
-        PROFILE ${CMAKE_BINARY_DIR}/profile.conan
+        ${_MZ_CONAN_INSTALL_ARGS}
     )
     # when 'cmake' generator is used, automatically import it
-    if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-        include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    if(EXISTS ${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
+        include(${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
         conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
         mz_conan_debug("Imported Targets: ${CONAN_TARGETS}")
     endif()
     # when 'cmake_paths' generator is used, automatically import it
-    if(EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
-        include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+    if(EXISTS ${_MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
+        include(${_MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
     # elsewise add the module path to support the 'cmake_find_package' generator
     else()
-        set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+        set(CMAKE_MODULE_PATH ${_MZ_CONAN_INSTALL_DIR} ${CMAKE_MODULE_PATH})
     endif()
     # also make sure to import any binaries from packages to the path
-    if(MZ_WINDOWS)
-        set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
+    # by parsing the JSON info available
+    if(EXISTS ${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json)
+        file(READ ${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json _MZ_CONAN_BUILD_INFO_JSON)
+        string(JSON _MZ_CONAN_PATH GET "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH)
+        string(REGEX REPLACE "\",[\r\n ]+\"" ":" _MZ_CONAN_PATH ${_MZ_CONAN_PATH})
+        string(REGEX REPLACE "\[[\r\n ]+\"" "" _MZ_CONAN_PATH ${_MZ_CONAN_PATH})
+        string(REGEX REPLACE "\"[\r\n ]+\]" "" _MZ_CONAN_PATH ${_MZ_CONAN_PATH})
+        if(MZ_WINDOWS)
+            set(ENV{PATH} "${_MZ_CONAN_PATH};${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
+        else()
+            set(ENV{PATH} "${_MZ_CONAN_PATH}:$ENV{PATH}")
+        endif()
+    else()
+        mz_conan_warning("Please enable the 'json' generator")
+        if(MZ_WINDOWS)
+            set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
+        endif()
     endif()
 endif()

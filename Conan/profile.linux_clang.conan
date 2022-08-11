@@ -3,9 +3,7 @@ include(${_MZ_CONAN_DIR}/profile.unix.conan)
 
 [settings]
 os=Linux
-os_build=Linux
 arch=x86_64
-arch_build=x86_64
 compiler=clang
 compiler.version=6.0
 compiler.libcxx=libstdc++11
