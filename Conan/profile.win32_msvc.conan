@@ -11,5 +11,6 @@ build_type=Release
 [options]
 *:shared=True
 *:static=False
+perfetto:shared=False
 
 [env]

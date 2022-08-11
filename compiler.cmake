@@ -417,7 +417,7 @@ set(MZ_HAS_CXX14 TRUE CACHE INTERNAL MZ_HAS_CXX11)
 
 # compiler flags
 mz_add_flag(GCC -Wall -Werror -Wno-unused-function)
-mz_add_flag(VS /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
+mz_add_flag(VS /W3 /WX /D_CRT_SECURE_NO_WARNINGS /permissive-)
 if(MZ_WINDOWS)
     mz_add_definition(MZ_WINDOWS=1)
 elseif(MZ_IOS)
