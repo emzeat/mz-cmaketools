@@ -11,6 +11,7 @@ build_type=Release
 [options]
 *:shared=True
 *:static=False
+capnproto:shared=False
 perfetto:shared=False
 
 [env]
