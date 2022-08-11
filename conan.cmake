@@ -1,5 +1,5 @@
 #
-# 3rdparty.cmake
+# conan.cmake
 #
 # Copyright (c) 2019 - 2022 Marius Zwicker
 # All rights reserved.
@@ -113,7 +113,7 @@ if(_MZ_CONAN_FILE)
         set(MZ_CONAN_REMOTE_URL $ENV{MZ_CONAN_REMOTE_URL})
     endif()
     if(DEFINED ENV{MZ_CONAN_REMOTE_INDEX})
-        set(_MZ_CONAN_REMOTE_ARGS 
+        set(_MZ_CONAN_REMOTE_ARGS
             INDEX $ENV{MZ_CONAN_REMOTE_INDEX}
         )
     endif()
@@ -139,12 +139,12 @@ if(_MZ_CONAN_FILE)
     configure_file(${_MZ_CONAN_PROFILE} ${CMAKE_BINARY_DIR}/profile.conan)
     if(_MZ_CONAN_BUILD_PROFILE)
         configure_file(${_MZ_CONAN_BUILD_PROFILE} ${CMAKE_BINARY_DIR}/build_profile.conan)
-        set(_MZ_CONAN_INSTALL_ARGS 
+        set(_MZ_CONAN_INSTALL_ARGS
             PROFILE_HOST ${CMAKE_BINARY_DIR}/profile.conan
             PROFILE_BUILD ${CMAKE_BINARY_DIR}/build_profile.conan
         )
     else()
-        set(_MZ_CONAN_INSTALL_ARGS 
+        set(_MZ_CONAN_INSTALL_ARGS
             PROFILE ${CMAKE_BINARY_DIR}/profile.conan
         )
     endif()
