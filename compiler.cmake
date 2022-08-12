@@ -291,7 +291,7 @@ function(__MZ_COMPILER_IS_CLANG _OUTPUT _OUTPUT_VERSION)
 endfunction()
 
 # we only run the very first time
-if(NOT MZ_COMPILER_TEST_HAS_RUN)
+if(TRUE OR NOT MZ_COMPILER_TEST_HAS_RUN)
 
     message("-- running mz compiler detection tools")
 
@@ -304,7 +304,7 @@ if(NOT MZ_COMPILER_TEST_HAS_RUN)
     set(MZ_CXX_DEFAULT_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE INTERNAL MZ_CXX_DEFAULT_RELEASE)
 
     # compiler settings and defines depending on platform
-    if(IOS_PLATFORM)
+    if(IOS_PLATFORM OR IOS)
         set(MZ_IOS TRUE CACHE INTERNAL MZ_IOS)
         mz_message("dectected toolchain for iOS")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

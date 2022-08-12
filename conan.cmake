@@ -83,7 +83,7 @@ elseif(MZ_WINDOWS)
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.win32_msvc.conan)
     endif()
 endif()
-if(NOT _MZ_CONAN_PROFILE)
+if(NOT _MZ_CONAN_PROFILE AND NOT CONAN_EXPORTED)
     mz_fatal_message("No CONAN profile on this platform")
 endif()
 
