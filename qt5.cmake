@@ -69,7 +69,7 @@ set(QT_MOC_EXECUTABLE "${Qt5_PREFIX}/bin/moc${CMAKE_EXECUTABLE_SUFFIX}" CACHE IN
 set(QT_MAC_DEPLOY_QT  "${Qt5_PREFIX}/bin/macdeployqt${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_MAC_DEPLOY_QT FORCE)
 set(QT_RCC_EXECUTABLE "${Qt5_PREFIX}/bin/rcc${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_RCC_EXECUTABLE FORCE)
 set(QT_UIC_EXECUTABLE "${Qt5_PREFIX}/bin/uic${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_UIC_EXECUTABLE FORCE)
-set(QT_QUICK_COMPILER "${Qt5_PREFIX}/bin/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}s" CACHE INTERNAL QT_QUICK_COMPILER FORCE)
+set(QT_QUICK_COMPILER "${Qt5_PREFIX}/bin/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_QUICK_COMPILER FORCE)
 
 # Workaround as in the conan package the double-conversion and pcre dlls are not in the path by default
 if(WIN32)
@@ -87,11 +87,11 @@ if(NOT QTQUICK_COMPILER_ADD_RESOURCES)
 endif()
 
 # Status reporting
-mz_message("   qmake  '${QT_QMAKE_EXECUTABLE}'")
-mz_message("   moc    '${QT_MOC_EXECUTABLE}'")
-mz_message("   rcc    '${QT_RCC_EXECUTABLE}'")
-mz_message("   uic    '${QT_UIC_EXECUTABLE}'")
-mz_message("   quickc '${Qt5QuickCompiler_DIR}'")
+mz_message("Qt5::qmake  '${QT_QMAKE_EXECUTABLE}'")
+mz_message("Qt5::moc    '${QT_MOC_EXECUTABLE}'")
+mz_message("Qt5::rcc    '${QT_RCC_EXECUTABLE}'")
+mz_message("Qt5::uic    '${QT_UIC_EXECUTABLE}'")
+mz_message("Qt5::quickc '${QT_QUICK_COMPILER}'")
 
 # Extra macros
 macro(__mz_extract_files _qt_files)
