@@ -31,7 +31,7 @@ function(QTQUICK_COMPILER_ADD_RESOURCES outfiles)
 
     find_package(Qt5 COMPONENTS Qml Core)
 
-    set(compiler_path "${_qt5Core_install_prefix}/bin/qmlcachegen")
+    set(compiler_path "${_qt5Core_install_prefix}/bin/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}")
     if(NOT EXISTS "${compiler_path}" )
         message(FATAL_ERROR "The package \"Qt5QuickCompilerConfig\" references the file
    \"${compiler_path}\"
