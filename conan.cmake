@@ -32,6 +32,11 @@
 #       - MZ_CONAN_REMOTE_URL The url to a conan repository holding the packages
 #       - MZ_CONAN_REMOTE_NAME The name to use for creating the remote
 #       - MZ_CONAN_REMOTE_INDEX The index at which the remote will be added
+#
+#   MZ_CONAN_INSTALL_DIR specify this to override the directory used for
+#   importing dependencies when CONAN_EXPORT is defined, i.e. configuring
+#   within a conan package.
+#
 
 # if global.cmake was not included yet, report it
 if (NOT HAS_MZ_GLOBAL)
@@ -101,7 +106,7 @@ else()
 endif()
 
 # will process all conan dependencies and install them
-if(_MZ_CONAN_FILE)
+if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     include(${_MZ_CONAN_DIR}/conan.cmake)
 
     set(MZ_CONAN_REMOTE_NAME emzeat)
@@ -157,50 +162,60 @@ if(_MZ_CONAN_FILE)
         set(_MZ_CONAN_BUILD never OUTPUT_QUIET)
     endif()
 
-    set(_MZ_CONAN_INSTALL_DIR ${CMAKE_BINARY_DIR}/conan)
+    set(MZ_CONAN_INSTALL_DIR ${CMAKE_BINARY_DIR}/conan)
 
     conan_cmake_install(
         PATH_OR_REFERENCE ${_MZ_CONAN_FILE}
-        INSTALL_FOLDER ${_MZ_CONAN_INSTALL_DIR}
+        INSTALL_FOLDER ${MZ_CONAN_INSTALL_DIR}
         BUILD ${_MZ_CONAN_BUILD}
         ${_MZ_CONAN_INSTALL_ARGS}
     )
-    # when 'cmake' generator is used, automatically import it
-    if(EXISTS ${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
-        include(${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
-        conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
-        mz_conan_debug("Imported Targets: ${CONAN_TARGETS}")
+
+else()
+    if(NOT MZ_CONAN_INSTALL_DIR)
+        set(MZ_CONAN_INSTALL_DIR ${CMAKE_BINARY_DIR})
     endif()
-    # when 'cmake_paths' generator is used, automatically import it
-    if(EXISTS ${_MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
-        include(${_MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
-    # elsewise add the module path to support the 'cmake_find_package' generator
-    else()
-        set(CMAKE_MODULE_PATH ${_MZ_CONAN_INSTALL_DIR} ${CMAKE_MODULE_PATH})
-    endif()
-    # fixup the env to parse reliably
+    mz_conan_message("Using existing conan environment below '${MZ_CONAN_INSTALL_DIR}'")
+endif()
+
+# reduce the verbosity when finding packages
+set(CONAN_CMAKE_SILENT_OUTPUT ON)
+
+# when 'cmake' generator is used, automatically import it
+if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
+    include(${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+    mz_conan_debug("Imported Targets: ${CONAN_TARGETS}")
+endif()
+# when 'cmake_paths' generator is used, automatically import it
+if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
+    include(${MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
+# elsewise add the module path to support the 'cmake_find_package' generator
+else()
+    set(CMAKE_MODULE_PATH ${MZ_CONAN_INSTALL_DIR} ${CMAKE_MODULE_PATH})
+endif()
+# fixup the env to parse reliably
+if(MZ_WINDOWS)
+    string(REPLACE "\\" "/" _MZ_PATH "$ENV{PATH}")
+endif()
+# also make sure to import any binaries from packages to the path
+# by parsing the JSON info available
+if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json)
     if(MZ_WINDOWS)
-        string(REPLACE "\\" "/" _MZ_PATH "$ENV{PATH}")
-    endif()
-    # also make sure to import any binaries from packages to the path
-    # by parsing the JSON info available
-    if(EXISTS ${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json)
-        if(MZ_WINDOWS)
-            set(_MZ_PATH_SEP ";")
-        else()
-            set(_MZ_PATH_SEP ":")
-        endif()
-        file(READ ${_MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json _MZ_CONAN_BUILD_INFO_JSON)
-        string(JSON _MZ_CONAN_PATH GET "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH)
-        string(REPLACE "\\\\" "/" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
-        string(REGEX REPLACE "\",[\r\n ]+\"" "${_MZ_PATH_SEP}" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
-        string(REGEX REPLACE "\[[\r\n ]+\"" "" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
-        string(REGEX REPLACE "\"[\r\n ]+\]" "" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
-        set(ENV{PATH} "${_MZ_CONAN_PATH}${_MZ_PATH_SEP}$ENV{PATH}")
+        set(_MZ_PATH_SEP ";")
     else()
-        mz_conan_warning("Please enable the 'json' generator")
-        if(MZ_WINDOWS)
-            set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
-        endif()
+        set(_MZ_PATH_SEP ":")
+    endif()
+    file(READ ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json _MZ_CONAN_BUILD_INFO_JSON)
+    string(JSON _MZ_CONAN_PATH GET "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH)
+    string(REPLACE "\\\\" "/" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
+    string(REGEX REPLACE "\",[\r\n ]+\"" "${_MZ_PATH_SEP}" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
+    string(REGEX REPLACE "\[[\r\n ]+\"" "" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
+    string(REGEX REPLACE "\"[\r\n ]+\]" "" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
+    set(ENV{PATH} "${_MZ_CONAN_PATH}${_MZ_PATH_SEP}$ENV{PATH}")
+else()
+    mz_conan_warning("Please enable the 'json' generator")
+    if(MZ_WINDOWS)
+        set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
     endif()
 endif()
