@@ -59,6 +59,8 @@ target_link_libraries(Qt5::Gui INTERFACE
     ${METAL}
 )
 
+
+# Track paths
 set(MZ_HAS_QT5 TRUE  CACHE INTERNAL MZ_HAS_QT5 FORCE)
 string(REPLACE "/lib" "" _qt5Core_install_prefix ${Qt5_Core_LIB_DIRS})
 set(Qt5_PREFIX "${_qt5Core_install_prefix}" CACHE PATH "Directory containing the Qt5 installation" FORCE )
@@ -68,14 +70,30 @@ set(QT_MAC_DEPLOY_QT  "${Qt5_PREFIX}/bin/macdeployqt" CACHE INTERNAL QT_MAC_DEPL
 set(QT_RCC_EXECUTABLE "${Qt5_PREFIX}/bin/rcc" CACHE INTERNAL QT_RCC_EXECUTABLE FORCE)
 set(QT_UIC_EXECUTABLE "${Qt5_PREFIX}/bin/uic" CACHE INTERNAL QT_UIC_EXECUTABLE FORCE)
 set(QT_QUICK_COMPILER "${Qt5_PREFIX}/bin/qmlcachegen" CACHE INTERNAL QT_QUICK_COMPILER FORCE)
-include(build/Conan/Qt5QuickCompilerConfig.cmake)
 
+# Workaround as in the conan package the double-conversion and pcre dlls are not in the path by default
+if(WIN32)
+    if(EXISTS ${CONAN_DOUBLE-CONVERSION_ROOT}/bin/double-conversion.dll)
+        file(COPY ${CONAN_DOUBLE-CONVERSION_ROOT}/bin/double-conversion.dll DESTINATION "${Qt5_PREFIX}/bin")
+    endif()
+    if(EXISTS ${CONAN_DOUBLE-CONVERSION_ROOT}/bin/double-conversion.dll)
+        file(COPY ${CONAN_PCRE2_ROOT}/bin/pcre2-16.dll DESTINATION "${Qt5_PREFIX}/bin")
+    endif()
+endif()
+
+# Support QtQuickCompiler even on the Conan package
+if(NOT QTQUICK_COMPILER_ADD_RESOURCES)
+    include(build/Conan/Qt5QuickCompilerConfig.cmake)
+endif()
+
+# Status reporting
 mz_message("   qmake  '${QT_QMAKE_EXECUTABLE}'")
 mz_message("   moc    '${QT_MOC_EXECUTABLE}'")
 mz_message("   rcc    '${QT_RCC_EXECUTABLE}'")
 mz_message("   uic    '${QT_UIC_EXECUTABLE}'")
 mz_message("   quickc '${Qt5QuickCompiler_DIR}'")
 
+# Extra macros
 macro(__mz_extract_files _qt_files)
     set(${_qt_files})
     foreach(_current ${ARGN})
