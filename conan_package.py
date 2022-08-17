@@ -44,7 +44,7 @@ CMAKE = 'cmake'
 REMOTE = os.environ.get('MZ_CONAN_REMOTE_NAME', 'emzeat')
 # tracks verbosity settings
 VERBOSE_ENV = 'VERBOSE'
-VERBOSE = os.environ.get(VERBOSE_ENV, True)
+VERBOSE = os.environ.get(VERBOSE_ENV, False)
 # working directory assuming this gets invoked from within ./build
 DEFAULT_WKDIR = Path(__file__).parent.parent
 # default recipe
@@ -82,7 +82,7 @@ def invoke_conan(with_args, cwd=DEFAULT_WKDIR) -> None:
     with_args = [str(arg) for arg in with_args]
     log_debug(f"Invoking {CONAN} with args={with_args}")
     try:
-        subprocess.check_call([CONAN] + with_args, encoding='utf8', cwd=cwd)
+        subprocess.check_call([CONAN] + with_args, encoding='utf8', cwd=cwd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
         log_fatal(f"conan failed: {error}")
     except FileNotFoundError as error:
@@ -94,7 +94,7 @@ def invoke_cmake(with_args, cwd=DEFAULT_WKDIR) -> None:
 
     log_debug(f"Invoking {CMAKE} with args={with_args}")
     try:
-        subprocess.check_call([CMAKE] + with_args, encoding='utf8', cwd=cwd)
+        subprocess.check_call([CMAKE] + with_args, encoding='utf8', cwd=cwd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
         log_fatal(f"cmake failed: {error}")
     except FileNotFoundError as error:
