@@ -33,11 +33,14 @@
 # PROVIDED MACROS
 # -----------------------
 #
-# mz_determine_sem_ver(PREFIX)
+# mz_determine_sem_ver(PREFIX <prefix> [USE_CWD])
 #       Determines the semantic version using git tag information
 #       and stores the output as
-#           <PREFIX>_VERSION
-#           <PREFIX>_VERSION_SHORT
+#           <prefix>_VERSION
+#           <prefix>_VERSION_SHORT
+#
+#       By default the prefix will be determined using CMAKE_CURRENT_LIST_DIR.
+#       Pass the USE_CWD option to use the current working directory instead.
 #
 #       If the variables are defined before calling the macro
 #       they will be respected
@@ -51,18 +54,44 @@
 
 include_guard(GLOBAL)
 
-find_package(Git)
+find_package(Git REQUIRED)
 
-macro(mz_determine_sem_ver PREFIX)
+macro(mz_determine_sem_ver)
+    # see https://cmake.org/cmake/help/v3.18/command/cmake_parse_arguments.html#command:cmake_parse_arguments
+    set(_mz_semver_options
+        USE_CWD
+    )
+    set(_mz_semver_oneValueArgs
+        PREFIX
+    )
+    set(_mz_semver_multiValueArgs
+    )
+    cmake_parse_arguments(_mz_semver
+        "${_mz_semver_options}"
+        "${_mz_semver_oneValueArgs}"
+        "${_mz_semver_multiValueArgs}"
+        ${ARGN}
+    )
+    if(_mz_semver_UNPARSED_ARGUMENTS)
+        mz_fatal_message("No such option: ${_mz_semver_UNPARSED_ARGUMENTS}")
+    endif()
+    if(NOT _mz_semver_PREFIX)
+        mz_fatal_message("PREFIX is a required argument")
+    endif()
 
-    if(${PREFIX}_VERSION)
-        message("-- semver: Version defined from outside '${${PREFIX}_VERSION}'")
+    if(${_mz_semver_PREFIX}_VERSION)
+        message("-- semver: Version defined from outside '${${_mz_semver_PREFIX}_VERSION}'")
 
     elseif(GIT_FOUND)
+
+        if(NOT _mz_semver_USE_CWD)
+            set(_WC_WKDIR WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+        endif()
+
         # we use a short hash
         execute_process(
             COMMAND ${GIT_EXECUTABLE} describe --tags --long --dirty
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            ${_WC_WKDIR}
             OUTPUT_VARIABLE _WC_TAG
             OUTPUT_STRIP_TRAILING_WHITESPACE
             ERROR_QUIET
@@ -87,7 +116,7 @@ macro(mz_determine_sem_ver PREFIX)
         else()
             execute_process(
                 COMMAND ${GIT_EXECUTABLE} log --pretty=format:%h -n 1
-                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                ${_WC_WKDIR}
                 OUTPUT_VARIABLE _WC_REVISION
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 ERROR_QUIET
@@ -97,13 +126,13 @@ macro(mz_determine_sem_ver PREFIX)
         endif()
     endif()
 
-    set(${PREFIX}_VERSION ${_WC_TAG})
-    set(${PREFIX}_VERSION_SHORT ${_WC_VER})
+    set(${_mz_semver_PREFIX}_VERSION ${_WC_TAG})
+    set(${_mz_semver_PREFIX}_VERSION_SHORT ${_WC_VER})
 
 endmacro()
 
 if(MZ_SEMVER_TO_FILE)
-    mz_determine_sem_ver(SCRIPTED)
+    mz_determine_sem_ver(PREFIX "SCRIPTED" USE_CWD)
     message("-- semver: Writing '${SCRIPTED_VERSION}' to '${MZ_SEMVER_TO_FILE}")
     file(WRITE ${MZ_SEMVER_TO_FILE} ${SCRIPTED_VERSION})
 endif()

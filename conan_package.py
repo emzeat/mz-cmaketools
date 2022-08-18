@@ -80,7 +80,7 @@ def invoke_conan(with_args, cwd=DEFAULT_WKDIR) -> None:
     '''Invokes conan using the given arguments'''
 
     with_args = [str(arg) for arg in with_args]
-    log_debug(f"Invoking {CONAN} with args={with_args}")
+    log_debug(f"Invoking {CONAN} with args={with_args} cwd={cwd}")
     try:
         subprocess.check_call([CONAN] + with_args, encoding='utf8', cwd=cwd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
@@ -92,7 +92,7 @@ def invoke_conan(with_args, cwd=DEFAULT_WKDIR) -> None:
 def invoke_cmake(with_args, cwd=DEFAULT_WKDIR) -> None:
     '''Invokes cmake using the given arguments'''
 
-    log_debug(f"Invoking {CMAKE} with args={with_args}")
+    log_debug(f"Invoking {CMAKE} with args={with_args} cwd={cwd}")
     try:
         subprocess.check_call([CMAKE] + with_args, encoding='utf8', cwd=cwd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
