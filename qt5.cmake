@@ -41,7 +41,7 @@
 
 include_guard(GLOBAL)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickControls2 Network Positioning Location)
 if( MZ_IOS )
     find_library(FOUNDATION Foundation REQUIRED)
     find_library(SECURITY Security REQUIRED)
@@ -51,13 +51,14 @@ if( MZ_IOS )
     find_library(COREGRAPHICS CoreGraphics REQUIRED)
     find_library(SYSTEMCONFIGURATION SystemConfiguration REQUIRED)
     find_library(METAL Metal REQUIRED)
+
+    target_link_libraries(Qt5::Core INTERFACE
+        ${SECURITY} ${FOUNDATION} ${CORESERVICES} ${UIKIT} ${CORETEXT} ${COREGRAPHICS} ${SYSTEMCONFIGURATION}
+    )
+    target_link_libraries(Qt5::Gui INTERFACE
+        ${METAL}
+    )
 endif()
-target_link_libraries(Qt5::Core INTERFACE
-    ${SECURITY} ${FOUNDATION} ${CORESERVICES} ${UIKIT} ${CORETEXT} ${COREGRAPHICS} ${SYSTEMCONFIGURATION}
-)
-target_link_libraries(Qt5::Gui INTERFACE
-    ${METAL}
-)
 
 
 # Track paths
