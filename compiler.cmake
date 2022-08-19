@@ -116,6 +116,10 @@
 #       iOS environment.  Thanks to the android-cmake project for providing the
 #       command.
 #
+# mz_include_guard
+#       Similar to the native include_guard but works with add_subdirectory
+#       and is always using GLOBAL scope
+#
 # ENABLED COMPILER DEFINITIONS/OPTIONS
 # -----------------------
 # On all compilers supporting it, the option to treat warnings
@@ -164,6 +168,27 @@ endmacro()
 macro(mz_fatal_message MSG)
     message(FATAL_ERROR "!! ${MSG}")
     return()
+endmacro()
+
+macro(mz_include_guard)
+    # derive a property name using the name of the current file
+    # but excluding the path so it is detected when included
+    # from multiple locations
+    get_filename_component(_GUARD_PROP "${CMAKE_CURRENT_LIST_FILE}" NAME)
+    string(REPLACE "/" "_" _GUARD_PROP "${_GUARD_PROP}")
+    string(REPLACE "." "_" _GUARD_PROP "${_GUARD_PROP}")
+    set(_GUARD_PROP "_mz_incl__${_GUARD_PROP}")
+
+    # test if a global prop has already been set which
+    # would indicate this was included before
+    get_property(_GUARD_PROP_VAL GLOBAL PROPERTY ${_GUARD_PROP})
+    if(_GUARD_PROP_VAL)
+        mz_debug_message("Skip '${CMAKE_CURRENT_LIST_FILE}' - guarded and included before")
+        return()
+    endif()
+
+    # mark as included elsewise
+    set_property(GLOBAL PROPERTY ${_GUARD_PROP} TRUE)
 endmacro()
 
 macro(mz_add_definition)

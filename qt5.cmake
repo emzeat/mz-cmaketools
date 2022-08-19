@@ -39,7 +39,7 @@
 #
 ########################################################################
 
-include_guard(GLOBAL)
+mz_include_guard(GLOBAL)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickControls2 Network Positioning Location)
 if( MZ_IOS )

@@ -70,7 +70,7 @@
 #
 ########################################################################
 
-include_guard(GLOBAL)
+mz_include_guard(GLOBAL)
 
 macro(mz_s3_message MSG)
     message("--   S3: ${MSG}")

@@ -74,7 +74,7 @@
 #
 ########################################################################
 
-include_guard(GLOBAL)
+mz_include_guard(GLOBAL)
 
 # if global.cmake was not included yet, report it
 if (NOT HAS_MZ_GLOBAL)
