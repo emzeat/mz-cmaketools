@@ -71,6 +71,15 @@ set(QT_MAC_DEPLOY_QT  "${Qt5_PREFIX}/bin/macdeployqt${CMAKE_EXECUTABLE_SUFFIX}" 
 set(QT_RCC_EXECUTABLE "${Qt5_PREFIX}/bin/rcc${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_RCC_EXECUTABLE FORCE)
 set(QT_UIC_EXECUTABLE "${Qt5_PREFIX}/bin/uic${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_UIC_EXECUTABLE FORCE)
 set(QT_QUICK_COMPILER "${Qt5_PREFIX}/bin/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_QUICK_COMPILER FORCE)
+if(EXISTS "${Qt5_PREFIX}/bin/archdatadir") # check if this is a conan install
+    set(QT_PLUGINS_DIR "${Qt5_PREFIX}/bin/archdatadir/plugins" CACHE INTERNAL QT_PLUGINS_DIR FORCE)
+    set(QT_TRANSLATIONS_DIR "${Qt5_PREFIX}/bin/datadir/translations" CACHE INTERNAL QT_TRANSLATIONS_DIR FORCE)
+    set(QT_QUICK_DIR "${Qt5_PREFIX}/bin/archdatadir/qml" CACHE INTERNAL QT_QUICK FORCE)
+else()
+    set(QT_PLUGINS_DIR "${Qt5_PREFIX}/plugins" CACHE INTERNAL QT_PLUGINS_DIR FORCE)
+    set(QT_TRANSLATIONS_DIR "${Qt5_PREFIX}/translations" CACHE INTERNAL QT_TRANSLATIONS_DIR FORCE)
+    set(QT_QUICK_DIR "${Qt5_PREFIX}/qml" CACHE INTERNAL QT_QUICK FORCE)
+endif()
 
 # Workaround as in the conan package the double-conversion and pcre dlls are not in the path by default
 if(WIN32)
