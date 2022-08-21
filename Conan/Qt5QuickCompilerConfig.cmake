@@ -58,14 +58,11 @@ but not all the files it references.
         set(new_resource_file ${CMAKE_CURRENT_BINARY_DIR}/${resource_base}_qmlcache.qrc)
 
         get_filename_component(input_resource ${_resource} ABSOLUTE)
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${input_resource}")
 
-        execute_process(COMMAND ${compiler_path} -filter-resource-file ${input_resource} -o ${new_resource_file} OUTPUT_VARIABLE remaining_files)
-        if(remaining_files)
-            list(APPEND filtered_rcc_files ${new_resource_file})
-            list(APPEND loader_flags "--resource-file-mapping=${_resource}=${new_resource_file}")
-        else()
-            list(APPEND loader_flags "--resource-file-mapping=${_resource}")
-        endif()
+        execute_process(COMMAND ${compiler_path} --filter-resource-file ${input_resource} -o ${new_resource_file} OUTPUT_VARIABLE remaining_files)
+        list(APPEND filtered_rcc_files ${new_resource_file})
+        list(APPEND loader_flags "--resource-file-mapping=${_resource}=${new_resource_file}")
 
         set(rcc_file_with_compilation_units)
 
@@ -76,7 +73,10 @@ but not all the files it references.
                 get_filename_component(extension ${it} EXT)
                 if(extension STREQUAL ".qml" OR extension STREQUAL ".js" OR extension STREQUAL ".ui.qml" OR extension STREQUAL ".mjs")
                     qtquick_compiler_determine_output_filename(output_file ${it})
-                    add_custom_command(OUTPUT ${output_file} COMMAND ${compiler_path} ARGS --resource=${input_resource} ${it} -o ${output_file} DEPENDS ${it})
+                    add_custom_command(OUTPUT ${output_file}
+                                       COMMAND ${compiler_path}
+                                       ARGS --resource=${input_resource} ${it} -o ${output_file}
+                                       DEPENDS ${it} ${input_resource})
                     list(APPEND compiler_output ${output_file})
                     set(rcc_file_with_compilation_units ${input_resource})
                 endif()
@@ -94,6 +94,6 @@ but not all the files it references.
         list(APPEND compiler_output ${loader_source})
     endif()
 
-    qt5_add_resources(output_resources ${filtered_rcc_files} OPTIONS ${options})
+    qt5_add_resources(output_resources ${filtered_rcc_files} OPTIONS ${rcc_options})
     set(${outfiles} ${output_resources} ${compiler_output} PARENT_SCOPE)
 endfunction()
