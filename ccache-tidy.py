@@ -95,7 +95,7 @@ def invoke_clang_tidy(with_args, capture_output=False) -> int:
 
 def invoke_ccache(with_args, with_env) -> int:
     '''Invokes ccache using the given arguments and env'''
-    with_args = [CCACHE_TIDY_SELF] + with_args
+    with_args = [sys.executable, CCACHE_TIDY_SELF] + with_args
     log_debug(f"Invoking {CCACHE} with args={with_args} env={with_env}")
     try:
         patched_env = os.environ.copy()

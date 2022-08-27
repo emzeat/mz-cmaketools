@@ -99,7 +99,7 @@ if( CLANG_TIDY )
     mz_message("Linting (C++) will be accelerated using ccache")
     set(MZ_CLANG_TIDY
       ${CMAKE_COMMAND} -E env CLANG_TIDY=${CLANG_TIDY} CCACHE=${CCACHE}
-      ${CMAKE_SOURCE_DIR}/build/ccache-tidy.py
+      ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/ccache-tidy.py
     )
   else()
     set(MZ_CLANG_TIDY
