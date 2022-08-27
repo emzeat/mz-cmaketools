@@ -103,6 +103,12 @@ mz_message("Qt5::rcc    '${QT_RCC_EXECUTABLE}'")
 mz_message("Qt5::uic    '${QT_UIC_EXECUTABLE}'")
 mz_message("Qt5::quickc '${QT_QUICK_COMPILER}'")
 
+# Make sure discovery of plugings and the like works
+file(COPY ${Qt5_PREFIX}/bin/qt.conf DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+file(APPEND ${EXECUTABLE_OUTPUT_PATH}/qt.conf "
+Prefix = ${Qt5_PREFIX}
+")
+
 # Extra macros
 macro(__mz_extract_files _qt_files)
     set(${_qt_files})
