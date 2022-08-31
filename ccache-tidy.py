@@ -95,11 +95,12 @@ def invoke_clang_tidy(with_args, capture_output=False) -> int:
 
 def invoke_ccache(with_args, with_env) -> int:
     '''Invokes ccache using the given arguments and env'''
-    with_args = [sys.executable, CCACHE_TIDY_SELF] + with_args
+    with_args = [CCACHE_TIDY_SELF] + with_args
     log_debug(f"Invoking {CCACHE} with args={with_args} env={with_env}")
     try:
         patched_env = os.environ.copy()
         patched_env.update(with_env)
+        patched_env['CCACHE_PREFIX'] = sys.executable
         subprocess.check_call([CCACHE] + with_args, env=patched_env)
         return 0
     except subprocess.CalledProcessError as error:
