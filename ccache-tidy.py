@@ -22,16 +22,17 @@
 
 import subprocess
 import sys
+from shutil import which
 from pathlib import Path
 import json
 import os
 
 # the ccache executable, override using the CCACHE env
 CCACHE_ENV = 'CCACHE'
-CCACHE = os.environ.get(CCACHE_ENV, 'ccache')
+CCACHE = os.environ.get(CCACHE_ENV, None) or which('ccache')
 # the clang-tidy executable, override using the CLANG_TIDY env
 CLANG_TIDY_ENV = 'CLANG_TIDY'
-CLANG_TIDY = os.environ.get(CLANG_TIDY_ENV, 'clang-tidy')
+CLANG_TIDY = os.environ.get(CLANG_TIDY_ENV, None) or which('clang-tidy')
 # tracks the clang-tidy invocation arguments passed initially
 CCACHE_TIDY_ARGS_ENV = 'CCACHE_TIDY_ARGS'
 CCACHE_TIDY_ARGS = os.environ.get(CCACHE_TIDY_ARGS_ENV, None)
@@ -72,6 +73,10 @@ def invoke_clang_tidy(with_args, capture_output=False) -> int:
         '''
         return '\n'.join([line for line in output.split('\n') if 'warnings generated.' not in line])
 
+    if CLANG_TIDY is None:
+        log_info("clang-tidy not found. Put on path or define CLANG_TIDY env variable")
+        sys.exit(1)
+
     log_debug(f"Invoking {CLANG_TIDY} with args={with_args}")
     try:
         ct_output = subprocess.check_output([CLANG_TIDY] + with_args, stderr=subprocess.STDOUT, encoding='utf8')
@@ -95,6 +100,11 @@ def invoke_clang_tidy(with_args, capture_output=False) -> int:
 
 def invoke_ccache(with_args, with_env) -> int:
     '''Invokes ccache using the given arguments and env'''
+
+    if CCACHE is None:
+        log_info("ccache not found. Put on path or define CCACHE env variable")
+        sys.exit(1)
+
     with_args = [CCACHE_TIDY_SELF] + with_args
     log_debug(f"Invoking {CCACHE} with args={with_args} env={with_env}")
     try:
@@ -272,7 +282,7 @@ for sourcefile in args.sources:
     # and hence will not track any changes to the clang-tidy binary
     # itself. Manually inject it to the xtra files in case we know the
     # full path
-    if os.path.exists(CLANG_TIDY):
+    if CLANG_TIDY and os.path.exists(CLANG_TIDY):
         extrafiles.append(CLANG_TIDY)
 
     if extrafiles:
