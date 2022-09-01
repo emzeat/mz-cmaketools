@@ -36,9 +36,6 @@ CLANG_TIDY = os.environ.get(CLANG_TIDY_ENV, None) or which('clang-tidy')
 # tracks the clang-tidy invocation arguments passed initially
 CCACHE_TIDY_ARGS_ENV = 'CCACHE_TIDY_ARGS'
 CCACHE_TIDY_ARGS = os.environ.get(CCACHE_TIDY_ARGS_ENV, None)
-# limits clang-tidy execution to files changed in the diff
-CCACHE_TIDY_DIFF_GIT_ENV = 'CCACHE_TIDY_DIFF'
-CCACHE_TIDY_DIFF_GIT = os.environ.get(CCACHE_TIDY_DIFF_GIT_ENV, None)
 # tracks logging settings
 CCACHE_TIDY_LOGFILE_ENV = 'CCACHE_TIDY_LOGFILE'
 CCACHE_TIDY_LOGFILE = os.environ.get(CCACHE_TIDY_LOGFILE_ENV, None)
@@ -124,26 +121,6 @@ def invoke_ccache(with_args, with_env) -> int:
         return 1
 
 
-def is_file_unchanged(file: Path) -> bool:
-    '''Uses git to test if the given file has been changed'''
-
-    if CCACHE_TIDY_DIFF_GIT is None:
-        log_debug(f"Assuming '{file.name}' has changed - No diff reference provided")
-        return False
-
-    git_args = ['git', 'diff', CCACHE_TIDY_DIFF_GIT, '--exit-code', str(file)]
-    log_debug(f"Testing '{file.name}' for changes: {git_args}")
-    try:
-        subprocess.check_output(git_args, cwd=file.parent, stderr=subprocess.STDOUT, encoding='utf8')
-        # exit code zero means no changes
-        return True
-    except subprocess.CalledProcessError:
-        return False
-    except FileNotFoundError as error:
-        log_info(f"Assuming '{file.name}' has changed - Failed to invoke git: {error}")
-        return False
-
-
 def show_help() -> int:
     '''Prints a usage help for this and clang-tidy and quits'''
     print(f"""
@@ -153,9 +130,6 @@ def show_help() -> int:
         Environment variables supported for configuration:
             {CLANG_TIDY_ENV}: Sets the clang-tidy executable.
             {CCACHE_ENV}: Sets the ccache executable.
-            {CCACHE_TIDY_DIFF_GIT_ENV}: Sets the git reference against which files will be diffed.
-                Only files changed since that reference be linted using clang-tidy.
-                Other files will be accepted as-is to speed up the linting process.
             {CCACHE_TIDY_VERBOSE_ENV}: Enables debug messages.
             {CCACHE_TIDY_LOGFILE_ENV}: Logs to the given file (implies {CCACHE_TIDY_VERBOSE_ENV})
     """)
@@ -284,12 +258,6 @@ for sourcefile in args.sources:
         extrafiles = extrafiles.split(SEP)
     else:
         extrafiles = []
-
-    # when git diff was specified determine if the file
-    # has been changed or should simply be skipped
-    if CCACHE_TIDY_DIFF_GIT and is_file_unchanged(sourcefile):
-        log_debug(f"Skipping '{sourcefile.name}' - no changes since {CCACHE_TIDY_DIFF_GIT}")
-        continue
 
     # forward the initial args to clang-tidy
     objectfile = sourcefile.with_suffix('.ccache-tidy')

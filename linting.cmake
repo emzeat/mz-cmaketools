@@ -51,6 +51,7 @@
 
 mz_include_guard(GLOBAL)
 find_package(Git)
+find_program(PYTHON3 python3 REQUIRED)
 
 # try to gather the executables first
 if( NOT CLANG_TIDY AND NOT CLANG_FORMAT )
@@ -65,13 +66,22 @@ if( NOT CLANG_TIDY AND NOT CLANG_FORMAT )
       get_property(CLANG_FORMAT TARGET clang-tools-extra::clang-format PROPERTY IMPORTED_LOCATION)
     endif()
 endif()
+set(RUN_IF ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/run-if.py)
 
-# optimize release builds to only lint files changed in the last commit
+# allow to only lint files changed in the last commit
 if( GIT_FOUND )
-    option(MZ_DO_CPPLINT_DIFF "Run linting on files changed in last commit only" ON)
+    set(MZ_DO_CPPLINT_DIFF_DEFAULT ON)
 else()
-    option(MZ_DO_CPPLINT_DIFF "Run linting on files changed in last commit only" OFF)
+    set(MZ_DO_CPPLINT_DIFF_DEFAULT OFF)
 endif()
+option(MZ_DO_CPPLINT_DIFF "Run linting on files with changes only" ${MZ_DO_CPPLINT_DIFF_DEFAULT})
+
+# determine the branch or reference to diff against
+set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT origin/master)
+if(DEFINED ENV{DRONE_COMMIT_BEFORE})
+    set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT $ENV{DRONE_COMMIT_BEFORE})
+endif()
+set(MZ_DO_CPPLINT_DIFF_REFERENCE ${MZ_CPPLINT_DIFF_REFERENCE_DEFAULT} CACHE STRING "The git reference to compare against for determining changes")
 
 if( CLANG_TIDY )
     option(MZ_DO_CPPLINT "Enable to run clang-tidy on configured targets" ON)
@@ -80,36 +90,30 @@ endif()
 if( CLANG_FORMAT OR CLAZY )
     # default to off in release builds so that we do not alter the code anymore
     if( MZ_IS_RELEASE )
-        option(MZ_DO_AUTO_FORMAT "Enable to run clang-format on configured targets" OFF)
+        set(MZ_DO_AUTO_FORMAT_DEFAULT OFF)
     else()
-        option(MZ_DO_AUTO_FORMAT "Enable to run clang-format on configured targets" ON)
+        set(MZ_DO_AUTO_FORMAT_DEFAULT ON)
     endif()
+    option(MZ_DO_AUTO_FORMAT "Enable to run clang-format on configured targets" ${MZ_DO_AUTO_FORMAT_DEFAULT})
 endif()
 
 if( MZ_DO_CPPLINT_DIFF )
-  # determine the branch or reference to diff against
-  set(_MZ_CPPLINT_DIFF origin/master)
-  if(DEFINED ENV{DRONE_REPO_BRANCH})
-      set(_MZ_CPPLINT_DIFF $ENV{DRONE_REPO_BRANCH})
-  endif()
-
-  mz_message("Linting will only consider files changed since '${_MZ_CPPLINT_DIFF}'")
-  set(CCACHE_TIDY_DIFF "CCACHE_TIDY_DIFF=${_MZ_CPPLINT_DIFF}")
+  mz_message("Linting will only consider files changed since '${MZ_DO_CPPLINT_DIFF_REFERENCE}'")
 endif()
 
 if( CLANG_TIDY )
+  set(RUN_IF_ARGS ${RUN_IF_ARGS} --env CLANG_TIDY=${CLANG_TIDY})
   if( MZ_DO_CPPLINT )
     mz_message("Linting (C++) is enabled")
   else()
     mz_warning_message("Linting (C++) is disabled, this is not recommended")
   endif()
 
-  find_program(PYTHON3 python3)
   find_program(CCACHE ccache)
-  if(PYTHON3 AND CCACHE)
+  if(CCACHE)
+    set(RUN_IF_ARGS ${RUN_IF_ARGS} --env CCACHE=${CCACHE})
     mz_message("Linting (C++) will be accelerated using ccache")
     set(MZ_CLANG_TIDY
-      ${CMAKE_COMMAND} -E env CLANG_TIDY=${CLANG_TIDY} CCACHE=${CCACHE} ${CCACHE_TIDY_DIFF}
       ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/ccache-tidy.py
     )
   else()
@@ -136,6 +140,7 @@ if( QML_LINT )
   endif()
 endif()
 
+
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
   list(LENGTH _sources arg_count)
@@ -150,6 +155,7 @@ macro(mz_auto_format _TARGET)
     get_filename_component(abs_file ${file} ABSOLUTE)
     string(REPLACE "${CMAKE_SOURCE_DIR}/" "" rel_file "${abs_file}")
     set(lint_file ${CMAKE_BINARY_DIR}/${rel_file})
+    set(RUN_IF_ARGS_file ${RUN_IF_ARGS} --diff "${abs_file}:${MZ_DO_CPPLINT_DIFF_REFERENCE}")
 
     if( NOT ${file} MATCHES "(ui_|moc_|qrc_|lemon_).+" AND NOT "${file}" MATCHES "${CMAKE_BINARY_DIR}" )
 
@@ -157,7 +163,9 @@ macro(mz_auto_format _TARGET)
         if( CLANG_TIDY AND MZ_DO_CPPLINT )
           set(lint_output ${lint_file}.clang-tidy)
           add_custom_command(OUTPUT ${lint_output}
-            COMMAND ${MZ_CLANG_TIDY}
+            COMMAND
+              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${MZ_CLANG_TIDY}
               ${CLANG_TIDY_EXTRA_ARGS}
               -p ${CMAKE_BINARY_DIR}
               --checks=-clang-diagnostic-unused-command-line-argument
@@ -179,7 +187,9 @@ macro(mz_auto_format _TARGET)
         if( QML_LINT AND MZ_DO_CPPLINT )
           set(lint_output ${lint_file}.qmllint)
           add_custom_command(OUTPUT ${lint_output}
-            COMMAND ${QML_LINT}
+            COMMAND
+              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${QML_LINT}
               ${abs_file}
             COMMAND ${CMAKE_COMMAND} -E touch ${lint_output}
             DEPENDS ${abs_file}
@@ -197,7 +207,9 @@ macro(mz_auto_format _TARGET)
         set(format_output ${lint_file}.clang-format)
         if( CLANG_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
-            COMMAND ${CLANG_FORMAT}
+            COMMAND
+              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${CLANG_FORMAT}
               -i
               ${abs_file}
             COMMAND ${CMAKE_COMMAND} -E touch ${format_output}
@@ -216,7 +228,9 @@ macro(mz_auto_format _TARGET)
         set(format_output ${lint_file}.qmlformat)
         if( QML_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
-            COMMAND ${QML_FORMAT}
+            COMMAND
+              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${QML_FORMAT}
               -n -i
               ${abs_file}
             COMMAND ${CMAKE_COMMAND} -E touch ${format_output}
