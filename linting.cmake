@@ -67,7 +67,7 @@ if( NOT CLANG_TIDY AND NOT CLANG_FORMAT )
 endif()
 
 # optimize release builds to only lint files changed in the last commit
-if( MZ_IS_RELEASE AND GIT_FOUND )
+if( GIT_FOUND )
     option(MZ_DO_CPPLINT_DIFF "Run linting on files changed in last commit only" ON)
 else()
     option(MZ_DO_CPPLINT_DIFF "Run linting on files changed in last commit only" OFF)
@@ -86,6 +86,17 @@ if( CLANG_FORMAT OR CLAZY )
     endif()
 endif()
 
+if( MZ_DO_CPPLINT_DIFF )
+  # determine the branch or reference to diff against
+  set(_MZ_CPPLINT_DIFF origin/master)
+  if(DEFINED ENV{DRONE_REPO_BRANCH})
+      set(_MZ_CPPLINT_DIFF $ENV{DRONE_REPO_BRANCH})
+  endif()
+
+  mz_message("Linting will only consider files changed since '${_MZ_CPPLINT_DIFF}'")
+  set(CCACHE_TIDY_DIFF "CCACHE_TIDY_DIFF=${_MZ_CPPLINT_DIFF}")
+endif()
+
 if( CLANG_TIDY )
   if( MZ_DO_CPPLINT )
     mz_message("Linting (C++) is enabled")
@@ -98,7 +109,7 @@ if( CLANG_TIDY )
   if(PYTHON3 AND CCACHE)
     mz_message("Linting (C++) will be accelerated using ccache")
     set(MZ_CLANG_TIDY
-      ${CMAKE_COMMAND} -E env CLANG_TIDY=${CLANG_TIDY} CCACHE=${CCACHE}
+      ${CMAKE_COMMAND} -E env CLANG_TIDY=${CLANG_TIDY} CCACHE=${CCACHE} ${CCACHE_TIDY_DIFF}
       ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/ccache-tidy.py
     )
   else()
@@ -125,20 +136,6 @@ if( QML_LINT )
   endif()
 endif()
 
-if( MZ_DO_CPPLINT_DIFF )
-  mz_message("Linting will run on changed files only")
-  # collect the name of the files changed in the last commit
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} diff HEAD^ --name-only
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE lint_changed_files
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  # make the output into CMake list
-  string(REPLACE "\n" ";" lint_changed_files ${lint_changed_files})
-endif()
-
-
 macro(mz_auto_format _TARGET)
   set(_sources ${ARGN})
   list(LENGTH _sources arg_count)
@@ -153,17 +150,6 @@ macro(mz_auto_format _TARGET)
     get_filename_component(abs_file ${file} ABSOLUTE)
     string(REPLACE "${CMAKE_SOURCE_DIR}/" "" rel_file "${abs_file}")
     set(lint_file ${CMAKE_BINARY_DIR}/${rel_file})
-
-    # test if file was changed in last commit
-    if( MZ_DO_CPPLINT_DIFF )
-      cmake_policy(SET CMP0057 NEW)
-      if( rel_file IN_LIST lint_changed_files )
-        mz_debug_message("  Linting changed file ${rel_file}")
-      else()
-        continue()
-      endif()
-    endif()
-
 
     if( NOT ${file} MATCHES "(ui_|moc_|qrc_|lemon_).+" AND NOT "${file}" MATCHES "${CMAKE_BINARY_DIR}" )
 
