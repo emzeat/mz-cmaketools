@@ -78,8 +78,20 @@ option(MZ_DO_CPPLINT_DIFF "Run linting on files with changes only" ${MZ_DO_CPPLI
 
 # determine the branch or reference to diff against
 set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT origin/master)
-if(DEFINED ENV{DRONE_COMMIT_BEFORE})
-    set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT $ENV{DRONE_COMMIT_BEFORE})
+if(DEFINED ENV{DRONE_SOURCE_BRANCH} AND DEFINED ENV{DRONE_TARGET_BRANCH})
+    # determining what to diff against automatically when on a CI is non trivial
+    # as the CI cannot always know the exact number of changes which are new.
+    #
+    # Compromise is as follows:
+    #   - When source and target branches are different, i.e. doing a PR
+    #     we diff all changes submitted as part of the PR
+    #   - When doing a regular branch build we fall back to testing
+    #     the last commit only
+    if($ENV{DRONE_SOURCE_BRANCH} STREQUAL $ENV{DRONE_TARGET_BRANCH})
+        set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT HEAD^)
+    else()
+        set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT $ENV{DRONE_TARGET_BRANCH})
+    endif()
 endif()
 set(MZ_DO_CPPLINT_DIFF_REFERENCE ${MZ_CPPLINT_DIFF_REFERENCE_DEFAULT} CACHE STRING "The git reference to compare against for determining changes")
 

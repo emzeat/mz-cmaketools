@@ -61,7 +61,7 @@ def is_file_unchanged(file: Path, reference: str) -> bool:
         log_info(f"Failed to test '{file.name}' for changes - File does not exist")
         sys.exit(1)
 
-    git_args = ['git', 'diff', reference, '--exit-code', str(file)]
+    git_args = ['git', 'diff', reference, '--exit-code', '--', str(file)]
     log_debug(f"Testing '{file.name}' for changes: {git_args}")
     try:
         subprocess.check_output(git_args, cwd=file.parent, stderr=subprocess.STDOUT, encoding='utf8')
