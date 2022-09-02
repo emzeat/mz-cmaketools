@@ -103,22 +103,31 @@ parser.add_argument('--env', default=[], type=str,
                     help='Modifications to the environment used for invoking cmd.', action='append')
 parser.add_argument('--diff', metavar='FILE:REFERENCE', default=None, type=str,
                     help='A file and git reference such as "origin/master" to diff against. The cmd will only be invoked when a change to file since the reference was detected.')
+parser.add_argument('--touch', metavar='FILE', default=None, type=Path,
+                    help='A file to touch upon successful completion of cmd. Parent paths must exist.')
 parser.add_argument('cmd', metavar='CMD', type=str, help='The command to be invoked.', nargs=1)
 parser.add_argument('args', metavar='ARGS', type=str,
                     help='Any command  arguments to be passed.', nargs=argparse.REMAINDER)
 args = parser.parse_args()
 
+skip_cmd = False  # pylint: disable=invalid-name
 if args.diff:
     diff_file, diff_reference = args.diff.rsplit(':', maxsplit=1)
     diff_file = Path(diff_file).absolute()
     if is_file_unchanged(diff_file, diff_reference):
         log_debug(f"Skipping '{diff_file.name}' - no changes since {diff_reference}")
-        sys.exit(0)
+        skip_cmd = True  # pylint: disable=invalid-name
 
-env = {}
-for var in args.env:
-    key, value = var.split('=', maxsplit=1)
-    env[key] = value
+if skip_cmd:
+    ret = 0  # pylint: disable=invalid-name
 
-ret = invoke(args.cmd[0], args.args, env)
+else:
+    env = {}
+    for var in args.env:
+        key, value = var.split('=', maxsplit=1)
+        env[key] = value
+    ret = invoke(args.cmd[0], args.args, env)
+
+if args.touch and ret == 0:
+    args.touch.touch()
 sys.exit(ret)

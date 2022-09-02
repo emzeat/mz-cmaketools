@@ -164,14 +164,13 @@ macro(mz_auto_format _TARGET)
           set(lint_output ${lint_file}.clang-tidy)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${lint_output}
               ${MZ_CLANG_TIDY}
               ${CLANG_TIDY_EXTRA_ARGS}
               -p ${CMAKE_BINARY_DIR}
               --checks=-clang-diagnostic-unused-command-line-argument
               --quiet
               ${abs_file}
-            COMMAND ${CMAKE_COMMAND} -E touch ${lint_output}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-tidy ${abs_file}
             COMMAND_EXPAND_LISTS
             COMMENT "Linting (C++) ${rel_file}"
@@ -188,10 +187,9 @@ macro(mz_auto_format _TARGET)
           set(lint_output ${lint_file}.qmllint)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${lint_output}
               ${QML_LINT}
               ${abs_file}
-            COMMAND ${CMAKE_COMMAND} -E touch ${lint_output}
             DEPENDS ${abs_file}
             COMMAND_EXPAND_LISTS
             COMMENT "Linting (QML) ${rel_file}"
@@ -208,11 +206,10 @@ macro(mz_auto_format _TARGET)
         if( CLANG_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${format_output}
               ${CLANG_FORMAT}
               -i
               ${abs_file}
-            COMMAND ${CMAKE_COMMAND} -E touch ${format_output}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-format ${abs_file}
             COMMAND_EXPAND_LISTS
             COMMENT "Formatting ${rel_file}"
@@ -229,11 +226,10 @@ macro(mz_auto_format _TARGET)
         if( QML_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file}
+              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${format_output}
               ${QML_FORMAT}
               -n -i
               ${abs_file}
-            COMMAND ${CMAKE_COMMAND} -E touch ${format_output}
             DEPENDS ${abs_file}
             COMMAND_EXPAND_LISTS
             COMMENT "Formatting ${rel_file}"
