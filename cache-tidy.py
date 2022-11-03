@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- ccache-tidy.py
+ cache-tidy.py
 
  Copyright (c) 2022 Marius Zwicker
  All rights reserved.
@@ -34,13 +34,13 @@ CCACHE = os.environ.get(CCACHE_ENV, None) or which('ccache')
 CLANG_TIDY_ENV = 'CLANG_TIDY'
 CLANG_TIDY = os.environ.get(CLANG_TIDY_ENV, None) or which('clang-tidy')
 # tracks the clang-tidy invocation arguments passed initially
-CCACHE_TIDY_ARGS_ENV = 'CCACHE_TIDY_ARGS'
+CCACHE_TIDY_ARGS_ENV = 'CACHE_TIDY_ARGS'
 CCACHE_TIDY_ARGS = os.environ.get(CCACHE_TIDY_ARGS_ENV, None)
 # tracks logging settings
-CCACHE_TIDY_LOGFILE_ENV = 'CCACHE_TIDY_LOGFILE'
+CCACHE_TIDY_LOGFILE_ENV = 'CACHE_TIDY_LOGFILE'
 CCACHE_TIDY_LOGFILE = os.environ.get(CCACHE_TIDY_LOGFILE_ENV, None)
 # tracks verbosity settings
-CCACHE_TIDY_VERBOSE_ENV = 'CCACHE_TIDY_VERBOSE'
+CCACHE_TIDY_VERBOSE_ENV = 'CACHE_TIDY_VERBOSE'
 CCACHE_TIDY_VERBOSE = (CCACHE_TIDY_VERBOSE_ENV in os.environ) or (CCACHE_TIDY_LOGFILE is not None)
 # the name by which self can be invoked
 CCACHE_TIDY_SELF = sys.argv[0]
@@ -48,10 +48,10 @@ CCACHE_TIDY_SELF = sys.argv[0]
 
 def log_info(msg: str) -> None:
     '''Helper to log a message'''
-    sys.stderr.write(f'ccache-tidy: {msg}\n')
+    sys.stderr.write(f'cache-tidy: {msg}\n')
     if CCACHE_TIDY_LOGFILE:
         with open(CCACHE_TIDY_LOGFILE, 'a', encoding='utf8') as logfile:
-            logfile.write(f'ccache-tidy: {msg}\n')
+            logfile.write(f'cache-tidy: {msg}\n')
 
 
 def log_debug(msg: str) -> None:
@@ -260,7 +260,7 @@ for sourcefile in args.sources:
         extrafiles = []
 
     # forward the initial args to clang-tidy
-    objectfile = sourcefile.with_suffix('.ccache-tidy')
+    objectfile = sourcefile.with_suffix('.cache-tidy')
     fwd_args = {
         'src': str(sourcefile),
         'obj': str(objectfile),
