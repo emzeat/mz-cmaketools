@@ -89,6 +89,9 @@ if(DEFINED ENV{DRONE_SOURCE_BRANCH} AND DEFINED ENV{DRONE_TARGET_BRANCH})
     #     the last commit only
     if($ENV{DRONE_SOURCE_BRANCH} STREQUAL $ENV{DRONE_TARGET_BRANCH})
         set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT HEAD^)
+    elseif("" STREQUAL $ENV{DRONE_TARGET_BRANCH})
+        # tag event, nothing to diff - we would not be here if there was a failure
+        set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT HEAD)
     else()
         set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT $ENV{DRONE_TARGET_BRANCH})
     endif()
