@@ -76,7 +76,7 @@ def log_debug(msg: str) -> None:
         log_info(msg)
 
 
-def invoke_conan(with_args, cwd=DEFAULT_WKDIR) -> None:
+def invoke_conan(with_args, cwd=DEFAULT_WKDIR, failure_ok=False) -> None:
     '''Invokes conan using the given arguments'''
 
     with_args = [str(arg) for arg in with_args]
@@ -84,7 +84,10 @@ def invoke_conan(with_args, cwd=DEFAULT_WKDIR) -> None:
     try:
         subprocess.check_call([CONAN] + with_args, encoding='utf8', cwd=cwd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as error:
-        log_fatal(f"conan failed: {error}")
+        if failure_ok:
+            log_info(f"conan failed but not fatal: {error}")
+        else:
+            log_fatal(f"conan failed: {error}")
     except FileNotFoundError as error:
         log_fatal(f"Failed to invoke conan: {error}")
 
@@ -103,10 +106,14 @@ def invoke_cmake(with_args, cwd=DEFAULT_WKDIR) -> None:
 
 parser = argparse.ArgumentParser(description='Helper to test and deploy conan packages')
 parser.add_argument('--test', default=False, help='Test the conan recipe step-by-step', action='store_true')
-parser.add_argument('--create', default=False, help='Create the conan package', action='store_true')
+parser.add_argument('--create', default=False,
+                    help='Create the conan package including a build for the given profile.', action='store_true')
+parser.add_argument('--build', default=False,
+                    help='Create a build for the given profile using the previously created package.', action='store_true')
 parser.add_argument('--upload', default=False, help='Upload the conan package', action='store_true')
 parser.add_argument('--verbose', default=VERBOSE, help='Enable verbose logging', action='store_true')
-parser.add_argument('--recipe', default=DEFAULT_RECIPE, help='Specifies conan recipe to be processed', type=Path)
+parser.add_argument('--recipe', default=DEFAULT_RECIPE,
+                    help=f'Specifies conan recipe to be processed Default: {DEFAULT_RECIPE}', type=Path)
 parser.add_argument('--profile', default=DEFAULT_PROFILE,
                     help=f'Configures the conan profile to be used. Default: {DEFAULT_PROFILE}', type=Path)
 parser.add_argument('--build-profile', default=DEFAULT_BUILD_PROFILE,
@@ -164,6 +171,9 @@ elif args.create:
     if not test_package.exists():
         log_fatal(f"Missing 'test_package' dir at '{test_package}' - cannot verify recipe so aborting")
 
+    log_info("Cleaning local cache")
+    invoke_conan(['remove', '--force', reference], failure_ok=True)
+
     log_info(f"Creating package as '{reference}'")
     if args.build_profile:
         invoke_conan(['create', '-tbf', args.test_dir, '-pr:h', args.profile,
@@ -175,8 +185,26 @@ elif args.create:
         log_info(f"Uploading to '{REMOTE}'")
         invoke_conan(['upload', '-r', REMOTE, '--all', '--check', '--confirm', reference])
 
+elif args.build:
+    reference = f'{args.name}/{args.version}@{DEFAULT_CHANNEL}'
+    out_dir = args.test_dir / 'out'
+    out_dir.mkdir(parents=True, exist_ok=True)
+    install_dir = args.test_dir / 'install'
+    install_dir.mkdir(parents=True, exist_ok=True)
+
     log_info("Cleaning local cache")
-    invoke_conan(['remove', '--force', reference])
+    invoke_conan(['remove', '--force', reference], failure_ok=True)
+
+    log_info(f"Building package '{reference}'")
+    if args.build_profile:
+        invoke_conan(['install', '-if', install_dir, '-of', out_dir, '-pr:h', args.profile,
+                     '-pr:b', args.build_profile, '-b', args.name, reference])
+    else:
+        invoke_conan(['install', '-if', install_dir, '-of', out_dir, '-pr', args.profile, '-b', args.name, reference])
+
+    if args.upload:
+        log_info(f"Uploading to '{REMOTE}'")
+        invoke_conan(['upload', '-r', REMOTE, '--all', '--check', '--confirm', reference])
 
 else:
-    log_fatal("Please pass --test or --create")
+    log_fatal("Please pass --test, --create or --build")
