@@ -32,6 +32,8 @@
 #       - MZ_CONAN_REMOTE_URL The url to a conan repository holding the packages
 #       - MZ_CONAN_REMOTE_NAME The name to use for creating the remote
 #       - MZ_CONAN_REMOTE_INDEX The index at which the remote will be added
+#       - MZ_CONAN_ALLOW_ANY_REMOTE If all remotes shall be used during package
+#                         install, not only the emzeat specific one
 #
 #   MZ_CONAN_INSTALL_DIR specify this to override the directory used for
 #   importing dependencies when CONAN_EXPORT is defined, i.e. configuring
@@ -130,13 +132,25 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
         ERROR_QUIET
     )
     if(_MZ_CONAN_REMOTES MATCHES "${MZ_CONAN_REMOTE_NAME}: ")
-        mz_conan_message("Using existing '${MZ_CONAN_REMOTE_NAME}'")
+        mz_conan_message("Found existing remote '${MZ_CONAN_REMOTE_NAME}'")
     else()
         conan_add_remote(NAME ${MZ_CONAN_REMOTE_NAME}
             URL ${MZ_CONAN_REMOTE_URL}
             ${_MZ_CONAN_REMOTE_ARGS}
             VERIFY_SSL True
         )
+    endif()
+
+    if(DEFINED ENV{MZ_CONAN_ALLOW_ANY_REMOTE})
+        set(MZ_CONAN_ALLOW_ANY_REMOTE TRUE)
+    endif()
+    if(NOT MZ_CONAN_ALLOW_ANY_REMOTE)
+        mz_conan_message("Forcing use of remote '${MZ_CONAN_REMOTE_NAME}'")
+        set(_MZ_CONAN_INSTALL_ARGS ${_MZ_CONAN_INSTALL_ARGS}
+            REMOTE ${MZ_CONAN_REMOTE_NAME}
+        )
+    else()
+        mz_conan_message("Will use packages from any remote")
     endif()
 
     mz_conan_message("Processing profile '${_MZ_CONAN_PROFILE}'")
@@ -146,12 +160,12 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     configure_file(${_MZ_CONAN_PROFILE} ${CMAKE_BINARY_DIR}/profile.conan)
     if(_MZ_CONAN_BUILD_PROFILE)
         configure_file(${_MZ_CONAN_BUILD_PROFILE} ${CMAKE_BINARY_DIR}/build_profile.conan)
-        set(_MZ_CONAN_INSTALL_ARGS
+        set(_MZ_CONAN_INSTALL_ARGS ${_MZ_CONAN_INSTALL_ARGS}
             PROFILE_HOST ${CMAKE_BINARY_DIR}/profile.conan
             PROFILE_BUILD ${CMAKE_BINARY_DIR}/build_profile.conan
         )
     else()
-        set(_MZ_CONAN_INSTALL_ARGS
+        set(_MZ_CONAN_INSTALL_ARGS ${_MZ_CONAN_INSTALL_ARGS}
             PROFILE ${CMAKE_BINARY_DIR}/profile.conan
         )
     endif()
