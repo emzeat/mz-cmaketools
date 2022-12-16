@@ -39,3 +39,4 @@ CXX=clang++
 
 [options]
 qt:with_dbus=True
+dbus:system_socket=/var/run/dbus/system_bus_socket
