@@ -110,6 +110,7 @@ macro(mz_determine_sem_ver)
             if(_WC_EXTRA)
                 list(JOIN _WC_EXTRA "." _WC_EXTRA)
                 set(_WC_TAG "${_WC_VER}+${_WC_EXTRA}")
+                set(_WC_DIRTY TRUE)
             else()
                 set(_WC_TAG "${_WC_VER}")
             endif()
@@ -128,6 +129,7 @@ macro(mz_determine_sem_ver)
 
     set(${_mz_semver_PREFIX}_VERSION ${_WC_TAG})
     set(${_mz_semver_PREFIX}_VERSION_SHORT ${_WC_VER})
+    set(${_mz_semver_PREFIX}_VERSION_DIRTY ${_WC_DIRTY})
 
 endmacro()
 
