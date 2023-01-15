@@ -1,7 +1,7 @@
 #
 # semver.cmake
 #
-# Copyright (c) 2019 - 2022 Marius Zwicker
+# Copyright (c) 2019 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -28,7 +28,14 @@
 #
 #   This is assuming git tags are of the form "v0.0.0"
 #
-#   See https://semver.org/ on semantic versioning
+#   See https://semver.org/ on semantic versioning.
+#
+#   Some example version strings:
+#    - no tags, commit only: "0.0.0+sha.a1b2d3c4"
+#    - git tag v2.1.0: "2.1.0"
+#    - git tag with 3 commits on top: "2.1.0+3.sha.a1b2d3c4"
+#    - git tag with uncommited local changes: "2.1.0+dirty"
+#    - git tag, 3 commits, local changes : "2.1.0+3.sha.a1b2d3c4.dirty"
 #
 # PROVIDED MACROS
 # -----------------------
@@ -122,8 +129,8 @@ macro(mz_determine_sem_ver)
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 ERROR_QUIET
             )
-            set(_WC_VER "0.0")
-            set(_WC_TAG "0.0+sha.${_WC_REVISION}")
+            set(_WC_VER "0.0.0")
+            set(_WC_TAG "0.0.0+sha.${_WC_REVISION}")
         endif()
     endif()
 
