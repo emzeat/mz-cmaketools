@@ -2,7 +2,7 @@
 """
  cache-tidy.py
 
- Copyright (c) 2022 Marius Zwicker
+ Copyright (c) 2022 - 2023 Marius Zwicker
  All rights reserved.
 
  SPDX-License-Identifier: Apache-2.0
@@ -57,7 +57,11 @@ def log_info(msg: str) -> None:
 def log_debug(msg: str) -> None:
     '''Helper to log a debug message'''
     if CCACHE_TIDY_VERBOSE:
-        log_info(msg)
+        if CCACHE_TIDY_LOGFILE:
+            with open(CCACHE_TIDY_LOGFILE, 'a', encoding='utf8') as logfile:
+                logfile.write(f'cache-tidy: {msg}\n')
+        else:
+            log_info(msg)
 
 
 def invoke_clang_tidy(with_args, capture_output=False) -> int:
@@ -216,6 +220,20 @@ log_debug(f"Invoked as {sys.argv}")
 if CCACHE_TIDY_ARGS:
     fwd = json.loads(CCACHE_TIDY_ARGS)
     if '-E' in sys.argv:
+        # some versions of ccache request an output for
+        # the preprocessed data and do not simply use stdout
+        j = 1
+        PREPROC_OUTPUT = None
+        while j < len(sys.argv):
+            argp = sys.argv[j]
+            if argp.startswith('-o='):
+                PREPROC_OUTPUT = argp[3:]
+                break
+            if argp.startswith('-o'):
+                PREPROC_OUTPUT = sys.argv[j+1]
+                break
+            j += 1
+
         # ccache wants to get the preproc output
         # we create this from
         #   a) the source
@@ -225,11 +243,17 @@ if CCACHE_TIDY_ARGS:
         FLAGS = filter_compdb(fwd['db'], sourcefile)
         SOURCE = sourcefile.read_text(encoding='utf8')
         ret, CONFIG = invoke_clang_tidy(['--dump-config'] + fwd['args'], capture_output=True)
-        log_debug(f"Preprocessing '{sourcefile}':\n{SOURCE}\n{fwd['args']}\n{FLAGS}\n{CONFIG}")
+        log_debug(f"Preprocessing '{sourcefile}' to {PREPROC_OUTPUT}:\n{SOURCE}\n{fwd['args']}\n{FLAGS}\n{CONFIG}")
         if ret == 0:
-            sys.stdout.write(SOURCE)
-            sys.stdout.write(CONFIG)
-            sys.stdout.write(FLAGS)
+            if PREPROC_OUTPUT:
+                with open(PREPROC_OUTPUT, 'w', encoding='utf-8') as sink:
+                    sink.write(SOURCE)
+                    sink.write(CONFIG)
+                    sink.write(FLAGS)
+            else:
+                sys.stdout.write(SOURCE)
+                sys.stdout.write(CONFIG)
+                sys.stdout.write(FLAGS)
         sys.exit(ret)
     else:
         # ccache is doing the actual run
