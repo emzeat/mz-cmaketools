@@ -24,6 +24,7 @@ import subprocess
 import sys
 from shutil import which
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 import json
 import os
 
@@ -81,7 +82,7 @@ def invoke_clang_tidy(with_args, capture_output=False) -> int:
         log_info("clang-tidy not found. Put on path or define CLANG_TIDY env variable")
         sys.exit(1)
 
-    log_debug(f"Invoking {CLANG_TIDY} with args={with_args}")
+    log_debug(f"Invoking {CLANG_TIDY} with\n    args={with_args}")
     try:
         ct_output = subprocess.check_output([CLANG_TIDY] + with_args, stderr=subprocess.STDOUT, encoding='utf8')
         ct_output = filter_clang_tidy(ct_output)
@@ -110,7 +111,7 @@ def invoke_ccache(with_args, with_env) -> int:
         sys.exit(1)
 
     with_args = [CCACHE_TIDY_SELF] + with_args
-    log_debug(f"Invoking {CCACHE} with args={with_args} env={with_env}")
+    log_debug(f"Invoking {CCACHE} with\n    args={with_args}\n    env={json.dumps(with_env, indent=8)}")
     try:
         patched_env = os.environ.copy()
         patched_env.update(with_env)
@@ -239,7 +240,8 @@ log_debug(f"Invoked as {sys.argv}")
 # if CCACHE_TIDY_ARGS_ENV was set we have been invoked through ccache
 # and should simply run clang-tidy now
 if CCACHE_TIDY_ARGS:
-    fwd = json.loads(CCACHE_TIDY_ARGS)
+    with open(CCACHE_TIDY_ARGS, encoding='utf8', mode='r') as args_file:
+        fwd = json.loads(args_file.read())
     if '-E' in sys.argv:
         # some versions of ccache request an output for
         # the preprocessed data and do not simply use stdout
@@ -316,40 +318,49 @@ for sourcefile in args.sources:
         'db': str(args.compdb),
         'args': args.tidyargs
     }
-    cc_env[CCACHE_TIDY_ARGS_ENV] = json.dumps(fwd_args)
-    cc_env[CLANG_TIDY_ENV] = CLANG_TIDY
 
-    # clang-tidy works like clang, force it
-    cc_env['CCACHE_COMPILERTYPE'] = 'clang'
+    with NamedTemporaryFile(mode='w', encoding='utf-8', prefix='cache-tidy', delete=False) as args_file:
+        fwd_args = json.dumps(fwd_args)
+        args_file.write(fwd_args)
+        args_file.close()
 
-    # in order to work reliably we force the plain preprocessor
-    # mode as this is the most efficient due to our lack of actual
-    # compiler flags and includes
-    cc_env['CCACHE_NODEPEND'] = '1'
-    cc_env['CCACHE_NODIRECT'] = '1'
+        cc_env[CCACHE_TIDY_ARGS_ENV] = args_file.name
+        cc_env[CLANG_TIDY_ENV] = CLANG_TIDY
 
-    # ccache is considering this script as the compiler to be invoked
-    # and hence will not track any changes to the clang-tidy binary
-    # itself. Manually inject it to the xtra files in case we know the
-    # full path
-    if CLANG_TIDY and os.path.exists(CLANG_TIDY):
-        extrafiles.append(CLANG_TIDY)
+        # clang-tidy works like clang, force it
+        cc_env['CCACHE_COMPILERTYPE'] = 'clang'
 
-    if extrafiles:
-        cc_env['CCACHE_EXTRAFILES'] = SEP.join(extrafiles)
+        # in order to work reliably we force the plain preprocessor
+        # mode as this is the most efficient due to our lack of actual
+        # compiler flags and includes
+        cc_env['CCACHE_NODEPEND'] = '1'
+        cc_env['CCACHE_NODIRECT'] = '1'
 
-    # ccache expects a regular compiler call here which is somewhat different
-    # so we fake it and use a throw-away output. The actual arguments to clang-tidy
-    # will be restored later when ccache is invoking us again in turn
-    cc_args = ['-o', str(objectfile), '-c', str(sourcefile)]
-    ret = invoke_ccache(cc_args, cc_env)
+        # ccache is considering this script as the compiler to be invoked
+        # and hence will not track any changes to the clang-tidy binary
+        # itself. Manually inject it to the xtra files in case we know the
+        # full path
+        if CLANG_TIDY and os.path.exists(CLANG_TIDY):
+            extrafiles.append(CLANG_TIDY)
 
-    # ccache forced us to generate an objectfile which we immediately remove again
-    if args.objectfile is None or ret != 0:
-        objectfile.unlink(missing_ok=True)
+        if extrafiles:
+            cc_env['CCACHE_EXTRAFILES'] = SEP.join(extrafiles)
 
-    # bail out on the first error
-    if ret != 0:
-        sys.exit(ret)
+        # ccache expects a regular compiler call here which is somewhat different
+        # so we fake it and use a throw-away output. The actual arguments to clang-tidy
+        # will be restored later when ccache is invoking us again in turn
+        cc_args = ['-o', str(objectfile), '-c', str(sourcefile)]
+        try:
+            ret = invoke_ccache(cc_args, cc_env)
+        finally:
+            os.unlink(args_file.name)
+
+        # ccache forced us to generate an objectfile which we immediately remove again
+        if args.objectfile is None or ret != 0:
+            objectfile.unlink(missing_ok=True)
+
+        # bail out on the first error
+        if ret != 0:
+            sys.exit(ret)
 
 sys.exit(0)
