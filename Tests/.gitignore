@@ -1,3 +1,3 @@
 *.log
-*.ccache-*
+/debug
 compile_commands.json

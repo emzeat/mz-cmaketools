@@ -33,17 +33,17 @@ cat <<EOF >compile_commands.json
 [
 {
   "directory": "$(pwd)",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -I$(pwd)/include -DDEBUG=1 -Wall -Werror -Wno-unused-function -ggdb -O0 -fno-inline -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -mmacosx-version-min=10.13 -fPIC -std=gnu++14 -o foo.o -c $(pwd)/foo.cpp",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -I$(pwd)/include -DDEBUG=1 -Wall -Werror -Wno-unused-function -ggdb -O0 -fno-inline -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -mmacosx-version-min=10.13 -fPIC -std=gnu++14 -o debug/foo.o -c $(pwd)/foo.cpp",
   "file": "$(pwd)/foo.cpp"
 },
 {
   "directory": "$(pwd)",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -I$(pwd)/include -DDEBUG=1 -Wall -Werror -Wno-unused-function -ggdb -O0 -fno-inline -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -mmacosx-version-min=10.13 -fPIC -std=gnu++14 -o bar.o -c $(pwd)/bar.cpp",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -I$(pwd)/include -DDEBUG=1 -Wall -Werror -Wno-unused-function -ggdb -O0 -fno-inline -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -mmacosx-version-min=10.13 -fPIC -std=gnu++14 -o debug/bar.o -c $(pwd)/bar.cpp",
   "file": "$(pwd)/bar.cpp"
 },
 {
   "directory": "$(pwd)",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -I$(pwd)/include -DDEBUG=1 -Wall -Werror -Wno-unused-function -ggdb -O0 -fno-inline -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -mmacosx-version-min=10.13 -fPIC -std=gnu++14 -o batz.o -c $(pwd)/batz.cpp",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -I$(pwd)/include -DDEBUG=1 -Wall -Werror -Wno-unused-function -ggdb -O0 -fno-inline -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -mmacosx-version-min=10.13 -fPIC -std=gnu++14 -o debug/batz.o -c $(pwd)/batz.cpp",
   "file": "$(pwd)/batz.cpp"
 }
 ]
@@ -51,8 +51,10 @@ EOF
 
 rm $CACHE_TIDY_LOGFILE
 rm -rf $CCACHE_DEBUGDIR
+mkdir -p debug
 python3 ../cache-tidy.py \
     -p . \
     --quiet \
     --extra-arg=-DLINTING=1 \
+    --cache-tidy-o=$(pwd)/debug/foo.obj \
     foo.cpp

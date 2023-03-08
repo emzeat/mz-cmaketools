@@ -136,6 +136,11 @@ def show_help() -> int:
             {CCACHE_ENV}: Sets the ccache executable.
             {CCACHE_TIDY_VERBOSE_ENV}: Enables debug messages.
             {CCACHE_TIDY_LOGFILE_ENV}: Logs to the given file (implies {CCACHE_TIDY_VERBOSE_ENV})
+
+        Special flags supported to override configuration:
+            --cache-tidy-o=<location of a stamp file to be touched on success>
+            --cache-tidy-{CCACHE_ENV}=<location of the ccache executable>
+            --cache-tidy-{CLANG_TIDY_ENV}=<location of the clang-tidy executable>
     """)
     return invoke_clang_tidy(['-h'])
 
@@ -153,6 +158,7 @@ def parse_arguments(argv=None):
             self.compdb = None
             self.sources = []
             self.tidyargs = []
+            self.objectfile = None
 
         def __str__(self):
             return str(dict(help=self.help, compdb=self.compdb, sources=self.sources, tidyargs=self.tidyargs))
@@ -183,6 +189,21 @@ def parse_arguments(argv=None):
             # are special params taking a path we must not mix up with sources below
             i += 1
             parsed_args.tidyargs.append(sys.argv[i])
+        elif arg.startswith('--cache-tidy'):
+            # special cache-tidy option
+            parsed_args.tidyargs.pop()
+            arg = arg[12:]
+            if arg.startswith('-o='):
+                # output was explicitly given
+                parsed_args.objectfile = arg[3:]
+            elif arg.startswith(f'-{CCACHE_ENV}='):
+                # ccache binary was overridden
+                global CCACHE  # pylint: disable=global-statement
+                CCACHE = arg[len(CCACHE_ENV)+2:]
+            elif arg.startswith(f'-{CLANG_TIDY_ENV}='):
+                # clang-tidy binary was overridden
+                global CLANG_TIDY  # pylint: disable=global-statement
+                CLANG_TIDY = arg[len(CLANG_TIDY_ENV)+2:]
         elif arg.startswith("-"):
             # skip any args identified by a -dash
             pass
@@ -261,6 +282,7 @@ if CCACHE_TIDY_ARGS:
         if ret == 0:
             objectfile = Path(fwd['obj'])
             objectfile.write_text('Success', encoding='utf8')
+            log_debug(f"Wrote result to {objectfile}")
         sys.exit(ret)
 
 # else determine the compile_db and any sources before running them through ccache
@@ -284,7 +306,10 @@ for sourcefile in args.sources:
         extrafiles = []
 
     # forward the initial args to clang-tidy
-    objectfile = sourcefile.with_suffix('.cache-tidy')
+    if args.objectfile is None:
+        objectfile = sourcefile.with_suffix('.cache-tidy')
+    else:
+        objectfile = Path(args.objectfile)
     fwd_args = {
         'src': str(sourcefile),
         'obj': str(objectfile),
@@ -292,6 +317,7 @@ for sourcefile in args.sources:
         'args': args.tidyargs
     }
     cc_env[CCACHE_TIDY_ARGS_ENV] = json.dumps(fwd_args)
+    cc_env[CLANG_TIDY_ENV] = CLANG_TIDY
 
     # clang-tidy works like clang, force it
     cc_env['CCACHE_COMPILERTYPE'] = 'clang'
@@ -315,11 +341,12 @@ for sourcefile in args.sources:
     # ccache expects a regular compiler call here which is somewhat different
     # so we fake it and use a throw-away output. The actual arguments to clang-tidy
     # will be restored later when ccache is invoking us again in turn
-    cc_args = ['-c', '-o', str(objectfile), str(sourcefile)]
+    cc_args = ['-o', str(objectfile), '-c', str(sourcefile)]
     ret = invoke_ccache(cc_args, cc_env)
 
     # ccache forced us to generate an objectfile which we immediately remove again
-    objectfile.unlink(missing_ok=True)
+    if args.objectfile is None or ret != 0:
+        objectfile.unlink(missing_ok=True)
 
     # bail out on the first error
     if ret != 0:
