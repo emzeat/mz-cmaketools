@@ -1,7 +1,7 @@
 #
 # compiler.cmake
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -524,14 +524,26 @@ if(MZ_IS_GCC)
     endif()
 
 elseif(MZ_IS_VS)
-    string(REPLACE "/MDd" " " CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
-    string(REPLACE "/MDd" " " CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-    string(REPLACE "/W3" " " CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
-    string(REPLACE "/W3" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-    string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-    string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-    string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-    string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+    if(CMAKE_C_FLAGS)
+        string(REPLACE "/W3" " " CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+    endif()
+    if(CMAKE_C_FLAGS_DEBUG)
+        string(REPLACE "/MDd" " " CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+        string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+    endif()
+    if(CMAKE_C_FLAGS_RELEASE)
+        string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+    endif()
+    if(CMAKE_CXX_FLAGS)
+        string(REPLACE "/W3" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    endif()
+    if(CMAKE_CXX_FLAGS_DEBUG)
+        string(REPLACE "/MDd" " " CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+        string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+    endif()
+    if(CMAKE_CXX_FLAGS_RELEASE)
+        string(REGEX REPLACE "/RTC(su|[1su])" " " CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    endif()
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MP /MD /D DEBUG /D WIN32_VS=1")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MP /MD /D WIN32_VS=1 /O2")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /MD /D DEBUG /D WIN32_VS=1")
