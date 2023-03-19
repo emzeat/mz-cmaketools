@@ -1,7 +1,7 @@
 #
 # linting.cmake
 #
-# Copyright (c) 2013 - 2022 Marius Zwicker
+# Copyright (c) 2013 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -54,16 +54,26 @@ find_package(Git)
 find_program(PYTHON3 python3 REQUIRED)
 
 # try to gather the executables first
-if( NOT CLANG_TIDY AND NOT CLANG_FORMAT )
+if( NOT CLANG_TIDY )
     find_package(clang-tools-extra QUIET)
-    if(NOT clang-tools-extra_FOUND )
-      mz_warning_message("clang-tools-extra package is unavailable on this platform - linting will be skipped")
-    endif()
     if(TARGET clang-tools-extra::clang-tidy)
       get_property(CLANG_TIDY TARGET clang-tools-extra::clang-tidy PROPERTY IMPORTED_LOCATION)
+    else()
+      find_program(CLANG_TIDY clang-tidy QUIET)
     endif()
+    if(NOT CLANG_TIDY)
+      mz_warning_message("clang-tools-extra package and clang-tidy is unavailable on this platform - linting will be skipped")
+    endif()
+endif()
+if( NOT CLANG_FORMAT )
+    find_package(clang-tools-extra QUIET)
     if(TARGET clang-tools-extra::clang-format)
       get_property(CLANG_FORMAT TARGET clang-tools-extra::clang-format PROPERTY IMPORTED_LOCATION)
+    else()
+      find_program(CLANG_FORMAT clang-format QUIET)
+    endif()
+    if(NOT CLANG_FORMAT)
+      mz_warning_message("clang-tools-extra package and clang-format is unavailable on this platform - formatting will be skipped")
     endif()
 endif()
 set(RUN_IF ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/run-if.py)
