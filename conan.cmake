@@ -265,3 +265,5 @@ else()
         set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
     endif()
 endif()
+
+include(${MZ_TOOLS_PATH}/presets.cmake)

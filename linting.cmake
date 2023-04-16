@@ -78,11 +78,6 @@ if( NOT CLANG_FORMAT )
 endif()
 set(RUN_IF ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/run-if.py)
 
-# make sure to retain PATH from configure to run time
-# requiring some trickery to carry the windows path sep
-string(REPLACE ";" "$<SEMICOLON>" PATH "$ENV{PATH}")
-set(RUN_IF_ARGS ${RUN_IF_ARGS} --env "PATH=${PATH}")
-
 # allow to only lint files changed in the last commit
 if( GIT_FOUND )
     set(MZ_DO_CPPLINT_DIFF_DEFAULT ON)
