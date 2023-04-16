@@ -233,6 +233,13 @@ function detect_dir {
 
 }
 
+# switch to batch file if on Windows
+if [[ "$(uname)" == CYGWIN* || "$(uname)" == MINGW* ]] ; then
+    my_script_dir=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
+    my_script_dir=`dirname "${my_script_dir}"`
+    exec $my_script_dir/generator.bat "$@"
+fi
+
 # default to using env variables
 my_generator=$MZ_CMAKETOOLS_generator
 my_compiler=$MZ_CMAKETOOLS_compiler

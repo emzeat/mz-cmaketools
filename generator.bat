@@ -61,27 +61,19 @@ GOTO:EOF
     echo.-- Using Visual Studio at %MY_VCINSTALLDIR%
 
     if "%GENERATOR%" == "vs2019" (
-        if not defined DevEnvDir (
-            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
-        )
+        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
         set MY_GENERATOR="Visual Studio 16 2019" -A x86
     )
     if "%GENERATOR%" == "vs2019_64" (
-        if not defined DevEnvDir (
-            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
-        )
+        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
         set MY_GENERATOR="Visual Studio 16 2019" -A x64
     )
     if "%GENERATOR%" == "ninja" (
-        if not defined DevEnvDir (
-            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
-        )
+        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x86
         set MY_GENERATOR="Ninja"
     )
     if "%GENERATOR%" == "ninja_64" (
-        if not defined DevEnvDir (
-            call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
-        )
+        call "%MY_VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" x64
         set MY_GENERATOR=Ninja
     )
 

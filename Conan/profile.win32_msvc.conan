@@ -35,4 +35,7 @@ build_type=Release
 capnproto:shared=False
 perfetto:shared=False
 
+[conf]
+tools.microsoft.msbuild:vs_version = 16
+
 [env]
