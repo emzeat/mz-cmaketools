@@ -1,7 +1,7 @@
 #
 # conan.cmake
 #
-# Copyright (c) 2019 - 2022 Marius Zwicker
+# Copyright (c) 2019 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -225,23 +225,29 @@ if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json)
     file(READ ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json _MZ_CONAN_BUILD_INFO_JSON)
     # pull deps_env_info/PATH
     string(JSON _MZ_CONAN_DEPS_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH)
-    foreach(_MZ_PATH_INDEX RANGE 1 ${_MZ_CONAN_DEPS_COUNT})
-        math(EXPR _MZ_PATH_INDEX "${_MZ_PATH_INDEX} - 1")
-        string(JSON _MZ_CONAN_PATH_ENTRY GET "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH ${_MZ_PATH_INDEX})
-        list(APPEND _MZ_CONAN_PATH "${_MZ_CONAN_PATH_ENTRY}")
-    endforeach()
+    if(_MZ_CONAN_DEPS_COUNT GREATER 0)
+        foreach(_MZ_PATH_INDEX RANGE 1 ${_MZ_CONAN_DEPS_COUNT})
+            math(EXPR _MZ_PATH_INDEX "${_MZ_PATH_INDEX} - 1")
+            string(JSON _MZ_CONAN_PATH_ENTRY GET "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH ${_MZ_PATH_INDEX})
+            list(APPEND _MZ_CONAN_PATH "${_MZ_CONAN_PATH_ENTRY}")
+        endforeach()
+    endif()
     # pull the contents of all dependencies/*/bin_paths as well because consuming only
     # deps_env_info/PATHS is not transitive for subdependencies
     string(JSON _MZ_CONAN_DEPS_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies)
-    foreach(_MZ_DEP_INDEX RANGE 1 ${_MZ_CONAN_DEPS_COUNT})
-        math(EXPR _MZ_DEP_INDEX "${_MZ_DEP_INDEX} - 1")
-        string(JSON _MZ_CONAN_PATH_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies ${_MZ_DEP_INDEX} bin_paths)
-        foreach(_MZ_PATH_INDEX RANGE 1 ${_MZ_CONAN_PATH_COUNT})
-            math(EXPR _MZ_PATH_INDEX "${_MZ_PATH_INDEX} - 1")
-            string(JSON _MZ_CONAN_PATH_ENTRY GET "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies ${_MZ_DEP_INDEX} bin_paths ${_MZ_PATH_INDEX})
-            list(APPEND _MZ_CONAN_PATH "${_MZ_CONAN_PATH_ENTRY}")
+    if(_MZ_CONAN_DEPS_COUNT GREATER 0)
+        foreach(_MZ_DEP_INDEX RANGE 1 ${_MZ_CONAN_DEPS_COUNT})
+            math(EXPR _MZ_DEP_INDEX "${_MZ_DEP_INDEX} - 1")
+            string(JSON _MZ_CONAN_PATH_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies ${_MZ_DEP_INDEX} bin_paths)
+            if(_MZ_CONAN_PATH_COUNT GREATER 0)
+                foreach(_MZ_PATH_INDEX RANGE 1 ${_MZ_CONAN_PATH_COUNT})
+                    math(EXPR _MZ_PATH_INDEX "${_MZ_PATH_INDEX} - 1")
+                    string(JSON _MZ_CONAN_PATH_ENTRY GET "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies ${_MZ_DEP_INDEX} bin_paths ${_MZ_PATH_INDEX})
+                    list(APPEND _MZ_CONAN_PATH "${_MZ_CONAN_PATH_ENTRY}")
+                endforeach()
+            endif()
         endforeach()
-    endforeach()
+    endif()
     # convert backslashes to all forward slashes
     list(REMOVE_DUPLICATES _MZ_CONAN_PATH)
     list(TRANSFORM _MZ_CONAN_PATH REPLACE "\\\\" "/")

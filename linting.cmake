@@ -78,6 +78,11 @@ if( NOT CLANG_FORMAT )
 endif()
 set(RUN_IF ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/run-if.py)
 
+# make sure to retain PATH from configure to run time
+# requiring some trickery to carry the windows path sep
+string(REPLACE ";" "$<SEMICOLON>" PATH "$ENV{PATH}")
+set(RUN_IF_ARGS ${RUN_IF_ARGS} --env "PATH=${PATH}")
+
 # allow to only lint files changed in the last commit
 if( GIT_FOUND )
     set(MZ_DO_CPPLINT_DIFF_DEFAULT ON)
@@ -197,7 +202,6 @@ macro(mz_auto_format _TARGET)
               --quiet
               ${abs_file}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-tidy ${abs_file}
-            COMMAND_EXPAND_LISTS
             COMMENT "Linting (C++) ${rel_file}"
             VERBATIM
           )
@@ -216,7 +220,6 @@ macro(mz_auto_format _TARGET)
               ${QML_LINT}
               ${abs_file}
             DEPENDS ${abs_file}
-            COMMAND_EXPAND_LISTS
             COMMENT "Linting (QML) ${rel_file}"
             VERBATIM
           )
@@ -236,7 +239,6 @@ macro(mz_auto_format _TARGET)
               -i
               ${abs_file}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-format ${abs_file}
-            COMMAND_EXPAND_LISTS
             COMMENT "Formatting ${rel_file}"
             VERBATIM
           )
@@ -256,7 +258,6 @@ macro(mz_auto_format _TARGET)
               -n -i
               ${abs_file}
             DEPENDS ${abs_file}
-            COMMAND_EXPAND_LISTS
             COMMENT "Formatting ${rel_file}"
             VERBATIM
           )
