@@ -135,11 +135,13 @@ if( CLANG_TIDY )
   endif()
 
   find_program(CCACHE ccache)
-  if(CCACHE)
-    set(RUN_IF_ARGS ${RUN_IF_ARGS} --env CCACHE=${CCACHE})
+  find_program(LINTER_CACHE linter-cache)
+  if(CCACHE AND LINTER_CACHE)
     mz_message("Linting (C++) will be accelerated using ccache")
     set(MZ_CLANG_TIDY
-      ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/cache-tidy.py
+      ${LINTER_CACHE}
+        --linter-cache-ccache ${CCACHE}
+        --linter-cache-clang-tidy ${CLANG_TIDY}
     )
   else()
     set(MZ_CLANG_TIDY
