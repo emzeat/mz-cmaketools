@@ -1,7 +1,7 @@
 #
 # profile.macOS.conan
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -24,7 +24,7 @@ include(${_MZ_CONAN_DIR}/profile.unix.conan)
 
 [settings]
 os=Macos
-os.version=${CMAKE_OSX_DEPLOYMENT_TARGET}
+os.version=10.13
 arch=x86_64
 arch_build=x86_64
 compiler=apple-clang
