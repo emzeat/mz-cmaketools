@@ -2,7 +2,7 @@
 #
 # generator.sh
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -96,8 +96,6 @@ function get_compiler {
                 -DENABLE_VISIBILITY=1 \
                 -DENABLE_BITCODE=1 \
                 -DIOS_DEPLOYMENT_TARGET=13.0"
-            # force, the others do not work right now
-            my_c_generator="Unix Makefiles"
             ;;
         ios_legacy)
             my_cc=clang
@@ -110,8 +108,6 @@ function get_compiler {
                 -DENABLE_BITCODE=1 \
                 -DIOS_DEPLOYMENT_TARGET=9.0 \
                 -DIOS_ARCH=armv7"
-            # force, the others do not work right now
-            my_c_generator="Unix Makefiles"
             ;;
         ios)
             my_cc=clang
