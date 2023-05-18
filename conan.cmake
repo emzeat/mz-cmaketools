@@ -39,6 +39,10 @@
 #   importing dependencies when CONAN_EXPORT is defined, i.e. configuring
 #   within a conan package.
 #
+#   CONAN_BUILD_MISSING set to true to build all missing packages
+#   CONAN_BUILD_MISSING_RECIPES use this to define a list of selected packages
+#                               to be built when missing
+#
 
 mz_include_guard(GLOBAL)
 
@@ -174,6 +178,9 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     if(CONAN_BUILD_MISSING)
         mz_conan_message("Will build missing binary packages")
         set(_MZ_CONAN_BUILD missing)
+    elseif(CONAN_BUILD_MISSING_RECIPES)
+        mz_conan_message("Will build missing binary packages for ${CONAN_BUILD_MISSING_RECIPES}")
+        set(_MZ_CONAN_BUILD ${CONAN_BUILD_MISSING_RECIPES})
     else()
         set(_MZ_CONAN_BUILD never OUTPUT_QUIET)
     endif()
