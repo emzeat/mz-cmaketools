@@ -2,7 +2,7 @@
 """
  conan_package.py
 
- Copyright (c) 2022 Marius Zwicker
+ Copyright (c) 2022 - 2023 Marius Zwicker
  All rights reserved.
 
  SPDX-License-Identifier: Apache-2.0
@@ -118,6 +118,8 @@ parser.add_argument('--profile', default=DEFAULT_PROFILE,
                     help=f'Configures the conan profile to be used. Default: {DEFAULT_PROFILE}', type=Path)
 parser.add_argument('--build-profile', default=DEFAULT_BUILD_PROFILE,
                     help=f'Configures the conan build profile to be used for cross building. Default: {DEFAULT_BUILD_PROFILE}', type=Path)
+parser.add_argument('-o', '--option', default=[], nargs='*',
+                    help="Override an option in the conan recipe ot be processed, e.g. backend_qt5=False")
 parser.add_argument('--test-dir', default=DEFAULT_TEST_DIR,
                     help=f'Specifies the directory to test the package in. Default: {DEFAULT_TEST_DIR}', type=Path)
 parser.add_argument('--version', default=None,
@@ -147,6 +149,12 @@ if args.version is None:
     args.version = version_txt.read_text().strip()
 log_info(f"Package version '{args.version}'")
 
+if args.build_profile:
+    options = ['-pr:h', args.profile, '-pr:b', args.build_profile]
+else:
+    options = ['-pr', args.profile]
+for opt in args.option:
+    options += ['-o:b' if args.build_profile else '-o', opt]
 
 if args.test:
     source_dir = args.test_dir / 'source'
@@ -158,10 +166,7 @@ if args.test:
     package_dir = args.test_dir / 'package'
     package_dir.mkdir(parents=True, exist_ok=True)
     invoke_conan(['source', '-sf', source_dir, args.recipe])
-    if args.build_profile:
-        invoke_conan(['install', '-if', install_dir, '-pr:h', args.profile, '-pr:b', args.build_profile, args.recipe])
-    else:
-        invoke_conan(['install', '-if', install_dir, '-pr', args.profile, args.recipe])
+    invoke_conan(['install', '-if', install_dir] + options + [args.recipe])
     invoke_conan(['build', '-bf', build_dir, '-if', install_dir, '-pf', package_dir, '-sf', source_dir, args.recipe])
     invoke_conan(['package', '-bf', build_dir, '-if', install_dir, '-pf', package_dir, '-sf', source_dir, args.recipe])
 
@@ -175,11 +180,7 @@ elif args.create:
     invoke_conan(['remove', '--force', reference], failure_ok=True)
 
     log_info(f"Creating package as '{reference}'")
-    if args.build_profile:
-        invoke_conan(['create', '-tbf', args.test_dir, '-pr:h', args.profile,
-                     '-pr:b', args.build_profile, args.recipe, reference])
-    else:
-        invoke_conan(['create', '-tbf', args.test_dir, '-pr', args.profile, args.recipe, reference])
+    invoke_conan(['create', '-tbf', args.test_dir] + options + [args.recipe, reference])
 
     if args.upload:
         log_info(f"Uploading to '{REMOTE}'")
@@ -196,11 +197,7 @@ elif args.build:
     invoke_conan(['remove', '--force', reference], failure_ok=True)
 
     log_info(f"Building package '{reference}'")
-    if args.build_profile:
-        invoke_conan(['install', '-if', install_dir, '-of', out_dir, '-pr:h', args.profile,
-                     '-pr:b', args.build_profile, '-b', args.name, reference])
-    else:
-        invoke_conan(['install', '-if', install_dir, '-of', out_dir, '-pr', args.profile, '-b', args.name, reference])
+    invoke_conan(['install', '-if', install_dir, '-of', out_dir] + options + ['-b', args.name, reference])
 
     if args.upload:
         log_info(f"Uploading to '{REMOTE}'")
