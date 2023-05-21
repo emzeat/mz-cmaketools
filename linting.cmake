@@ -79,15 +79,9 @@ endif()
 set(RUN_IF ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/run-if.py)
 
 # allow to only lint files changed in the last commit
-if( GIT_FOUND )
-    set(MZ_DO_CPPLINT_DIFF_DEFAULT ON)
-else()
-    set(MZ_DO_CPPLINT_DIFF_DEFAULT OFF)
-endif()
-option(MZ_DO_CPPLINT_DIFF "Run linting on files with changes only" ${MZ_DO_CPPLINT_DIFF_DEFAULT})
-
 # determine the branch or reference to diff against
-set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT origin/master)
+set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT origin/dev)
+set(MZ_DO_CPPLINT_DIFF_DEFAULT OFF)
 if(DEFINED ENV{DRONE_SOURCE_BRANCH} AND DEFINED ENV{DRONE_TARGET_BRANCH})
     # determining what to diff against automatically when on a CI is non trivial
     # as the CI cannot always know the exact number of changes which are new.
@@ -105,8 +99,12 @@ if(DEFINED ENV{DRONE_SOURCE_BRANCH} AND DEFINED ENV{DRONE_TARGET_BRANCH})
     else()
         set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT $ENV{DRONE_TARGET_BRANCH})
     endif()
+    if( GIT_FOUND )
+        set(MZ_DO_CPPLINT_DIFF_DEFAULT ON)
+    endif()
 endif()
 set(MZ_DO_CPPLINT_DIFF_REFERENCE ${MZ_CPPLINT_DIFF_REFERENCE_DEFAULT} CACHE STRING "The git reference to compare against for determining changes")
+option(MZ_DO_CPPLINT_DIFF "Run linting on files with changes only" ${MZ_DO_CPPLINT_DIFF_DEFAULT})
 
 if( CLANG_TIDY )
     option(MZ_DO_CPPLINT "Enable to run clang-tidy on configured targets" ON)
