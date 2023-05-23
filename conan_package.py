@@ -154,7 +154,7 @@ if args.build_profile:
 else:
     options = ['-pr', args.profile]
 for opt in args.option:
-    options += ['-o:b' if args.build_profile else '-o', opt]
+    options += ['-o:h' if args.build_profile else '-o', opt]
 
 if args.test:
     source_dir = args.test_dir / 'source'
