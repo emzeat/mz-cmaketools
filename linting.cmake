@@ -180,7 +180,9 @@ macro(mz_auto_format _TARGET)
     get_filename_component(abs_file ${file} ABSOLUTE)
     string(REPLACE "${CMAKE_SOURCE_DIR}/" "" rel_file "${abs_file}")
     set(lint_file ${CMAKE_BINARY_DIR}/${rel_file})
-    set(RUN_IF_ARGS_file ${RUN_IF_ARGS} --diff "${abs_file}:${MZ_DO_CPPLINT_DIFF_REFERENCE}")
+    if( MZ_DO_CPPLINT_DIFF )
+        set(RUN_IF_ARGS_file ${RUN_IF_ARGS} --diff "${abs_file}:${MZ_DO_CPPLINT_DIFF_REFERENCE}")
+    endif()
 
     if( NOT ${file} MATCHES "(ui_|moc_|qrc_|lemon_).+" AND NOT "${file}" MATCHES "${CMAKE_BINARY_DIR}" )
 
