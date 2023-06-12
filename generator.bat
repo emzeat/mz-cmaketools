@@ -88,9 +88,9 @@ GOTO:EOF
     cd ..
     set "BASE_DIR=%CD%"
 
-    set "BUILD_DIR=%BASE_DIR%_win32-%GENERATOR%-%BUILD_MODE%"
+    set "BUILD_DIR=%BASE_DIR%_msvc-%GENERATOR%-%BUILD_MODE%"
     if "%LOCATION%" == "inside" (
-        set "BUILD_DIR=%BASE_DIR%\build\win32-%GENERATOR%-%BUILD_MODE%"
+        set "BUILD_DIR=%BASE_DIR%\build\msvc-%GENERATOR%-%BUILD_MODE%"
     )
 
     cd build

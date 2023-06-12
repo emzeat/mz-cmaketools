@@ -32,8 +32,8 @@ cmake using a predefined directory naming scheme
 Valid arguments:
     'help' show this list
     'mode=(release|reldbg|debug)' to control build configuration
-    'compiler=(clang|gcc|ios|ios_legacy|ios_simulator)' to select compiler
-    'generator=(ninja|makefiles|sublime|xcode)'
+    'compiler=(clang|gcc|ios|ios_legacy|ios_simulator|msvc)' to select compiler
+    'generator=(ninja|ninja_64|makefiles|sublime|xcode)'
     'name=".."' custom name prefix
     'location=(inside|outside)' configures location of build files
     '-DFOO=BAR' additional args to pass to cmake
@@ -229,13 +229,6 @@ function detect_dir {
 
 }
 
-# switch to batch file if on Windows
-if [[ "$(uname)" == CYGWIN* || "$(uname)" == MINGW* ]] ; then
-    my_script_dir=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
-    my_script_dir=`dirname "${my_script_dir}"`
-    exec $my_script_dir/generator.bat "$@"
-fi
-
 # default to using env variables
 my_generator=$MZ_CMAKETOOLS_generator
 my_compiler=$MZ_CMAKETOOLS_compiler
@@ -272,6 +265,12 @@ do
     esac
 done
 
+# switch to batch file if picking MSVC
+if [[ "msvc" == $my_compiler ]] ; then
+    my_script_dir=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
+    my_script_dir=`dirname "${my_script_dir}"`
+    exec $my_script_dir/generator.bat $my_mode $my_generator $my_location $my_args
+fi
 
 # get the working directory
 detect_dir
