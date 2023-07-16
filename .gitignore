@@ -1,5 +1,6 @@
 clang-*
 gcc-*
+msvc-*
 vs*
 mingw*
 win32-*
