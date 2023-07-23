@@ -41,6 +41,18 @@ else()
     set(_MZ_PATH_SEP ":")
 endif()
 
+# helper to only write a file when changed
+function(mz_write_if_changed FILENAME CONTENT)
+    if(EXISTS ${FILENAME})
+        file(READ ${FILENAME} _before)
+    endif()
+    if(_before STREQUAL CONTENT)
+        message(DEBUG "No change in ${FILENAME}")
+    else()
+        file(WRITE ${FILENAME} ${CONTENT})
+    endif()
+endfunction()
+
 # collect other presets included previously
 if(EXISTS ${CMAKE_SOURCE_DIR}/CMakePresets.json)
     file(READ ${CMAKE_SOURCE_DIR}/CMakePresets.json _PRESET_JSON)
@@ -116,7 +128,7 @@ list(REMOVE_DUPLICATES PRESET_INCLUDES)
 list(JOIN PRESET_INCLUDES ",\n        " PRESET_INCLUDES)
 
 # write the binary dir specific presets
-file(WRITE ${PRESET_JSON}
+mz_write_if_changed(${PRESET_JSON}
 "{
     \"version\": 6,
     \"cmakeMinimumRequired\": {
@@ -158,7 +170,7 @@ file(WRITE ${PRESET_JSON}
 )
 
 # make sure the presets get included from the toplevel
-file(WRITE ${CMAKE_SOURCE_DIR}/CMakePresets.json
+mz_write_if_changed(${CMAKE_SOURCE_DIR}/CMakePresets.json
 "{
     \"version\": 6,
     \"cmakeMinimumRequired\": {
