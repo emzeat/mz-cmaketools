@@ -1,7 +1,7 @@
 #
 # profile.linux_gcc.conan
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -26,7 +26,7 @@ include(${_MZ_CONAN_DIR}/profile.unix.conan)
 os=Linux
 arch=x86_64
 compiler=gcc
-compiler.version=7
+compiler.version=9
 compiler.libcxx=libstdc++11
 build_type=Release
 
