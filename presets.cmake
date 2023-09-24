@@ -61,7 +61,9 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/CMakePresets.json)
         foreach(_PRESET_INCLUDE_INDEX RANGE 1 ${_PRESET_INCLUDE_LEN})
             math(EXPR _PRESET_INCLUDE_INDEX "${_PRESET_INCLUDE_INDEX} - 1")
             string(JSON _PRESET_INCLUDE GET "${_PRESET_JSON}" include ${_PRESET_INCLUDE_INDEX})
-            list(APPEND PRESET_INCLUDES "\"${_PRESET_INCLUDE}\"")
+            if(EXISTS "${_PRESET_INCLUDE}")
+                list(APPEND PRESET_INCLUDES "\"${_PRESET_INCLUDE}\"")
+            endif()
         endforeach()
     endif()
 endif()
@@ -91,7 +93,7 @@ presetEnvAdd(VS160COMNTOOLS)
 presetEnvAdd(VSCMD_ARG_app_plat)
 presetEnvAdd(VSCMD_ARG_HOST_ARCH)
 presetEnvAdd(VSCMD_ARG_TGT_ARCH)
-presetEnvAdd(VSCMD_VER=16.11.21)
+presetEnvAdd(VSCMD_VER)
 presetEnvAdd(VSINSTALLDIR)
 presetEnvAdd(windir)
 presetEnvAdd(WindowsLibPath)
@@ -170,7 +172,8 @@ mz_write_if_changed(${PRESET_JSON}
 )
 
 # make sure the presets get included from the toplevel
-mz_write_if_changed(${CMAKE_SOURCE_DIR}/CMakePresets.json
+file(REMOVE ${CMAKE_SOURCE_DIR}/CMakePresets.json)
+mz_write_if_changed(${CMAKE_SOURCE_DIR}/CMakeUserPresets.json
 "{
     \"version\": 6,
     \"cmakeMinimumRequired\": {
