@@ -194,6 +194,22 @@ function run_cmake {
             ${my_base_dir}/
 }
 
+function run_conan {
+    cd "${my_script_dir}"
+    if [ ! -r ${my_build_dir} ] ; then
+        mkdir -p ${my_build_dir}
+    fi
+
+    conan_version=2.0.11
+    cd ${my_build_dir}
+    if ! conan --version | grep -q ${conan_version}; then
+        echo "-- need to upgrade Conan"
+        pip3 install --disable-pip-version-check conan==${conan_version}
+    fi
+
+    echo "-- running $(conan --version)"
+}
+
 function debug_hint {
     echo
     echo -e "IMPORTANT HINT:\tWhen using this script to generate projects with build"
@@ -300,6 +316,7 @@ fi
 
 # finally execute the cmake generation
 validate_config
+run_conan
 run_cmake
 
 echo

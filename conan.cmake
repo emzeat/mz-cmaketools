@@ -92,6 +92,9 @@ elseif(MZ_WINDOWS)
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.win32_msvc.conan)
     endif()
 endif()
+if(_MZ_CONAN_PROFILE AND NOT _MZ_CONAN_BUILD_PROFILE)
+    set(_MZ_CONAN_BUILD_PROFILE ${_MZ_CONAN_PROFILE})
+endif()
 if(NOT _MZ_CONAN_PROFILE AND NOT CONAN_EXPORTED)
     mz_fatal_message("No CONAN profile on this platform")
 endif()
@@ -105,19 +108,15 @@ list(JOIN _MZ_CONAN_PROFILE_INCLUDES "\n" _MZ_CONAN_PROFILE_INCLUDES)
 
 # test for the conanfile variant
 if(EXISTS ${CMAKE_SOURCE_DIR}/conanfile.txt)
-    configure_file(${CMAKE_SOURCE_DIR}/conanfile.txt ${CMAKE_BINARY_DIR}/conanfile.txt)
-    set(_MZ_CONAN_FILE ${CMAKE_BINARY_DIR}/conanfile.txt)
+    set(_MZ_CONAN_FILE ${CMAKE_SOURCE_DIR}/conanfile.txt)
 elseif(EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
-    configure_file(${CMAKE_SOURCE_DIR}/conanfile.py ${CMAKE_BINARY_DIR}/conanfile.py)
-    set(_MZ_CONAN_FILE ${CMAKE_BINARY_DIR}/conanfile.py)
+    set(_MZ_CONAN_FILE ${CMAKE_SOURCE_DIR}/conanfile.py)
 else()
     mz_conan_warning("No conanfile.(txt|py) - skipping install")
 endif()
 
 # will process all conan dependencies and install them
 if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
-    include(${_MZ_CONAN_DIR}/conan.cmake)
-
     set(MZ_CONAN_REMOTE_NAME emzeat)
     if(DEFINED ENV{MZ_CONAN_REMOTE_NAME})
         set(MZ_CONAN_REMOTE_NAME $ENV{MZ_CONAN_REMOTE_NAME})
@@ -127,8 +126,8 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
         set(MZ_CONAN_REMOTE_URL $ENV{MZ_CONAN_REMOTE_URL})
     endif()
     if(DEFINED ENV{MZ_CONAN_REMOTE_INDEX})
-        set(_MZ_CONAN_REMOTE_ARGS
-            INDEX $ENV{MZ_CONAN_REMOTE_INDEX}
+        list(APPEND _MZ_CONAN_REMOTE_ARGS
+            --index=$ENV{MZ_CONAN_REMOTE_INDEX}
         )
     endif()
 
@@ -139,10 +138,9 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     if(_MZ_CONAN_REMOTES MATCHES "${MZ_CONAN_REMOTE_NAME}: ")
         mz_conan_message("Found existing remote '${MZ_CONAN_REMOTE_NAME}'")
     else()
-        conan_add_remote(NAME ${MZ_CONAN_REMOTE_NAME}
-            URL ${MZ_CONAN_REMOTE_URL}
-            ${_MZ_CONAN_REMOTE_ARGS}
-            VERIFY_SSL True
+        execute_process(
+            COMMAND conan remote add ${_MZ_CONAN_REMOTE_ARGS} ${MZ_CONAN_REMOTE_NAME} ${MZ_CONAN_REMOTE_URL}
+            COMMAND_ERROR_IS_FATAL ANY
         )
     endif()
 
@@ -151,8 +149,8 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     endif()
     if(NOT MZ_CONAN_ALLOW_ANY_REMOTE)
         mz_conan_message("Forcing use of remote '${MZ_CONAN_REMOTE_NAME}'")
-        set(_MZ_CONAN_INSTALL_ARGS ${_MZ_CONAN_INSTALL_ARGS}
-            REMOTE ${MZ_CONAN_REMOTE_NAME}
+        list(APPEND _MZ_CONAN_INSTALL_ARGS
+            --remote=${MZ_CONAN_REMOTE_NAME}
         )
     else()
         mz_conan_message("Will use packages from any remote")
@@ -163,36 +161,37 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     list(APPEND MZ_CONAN_ENV CXXFLAGS="${MZ_3RDPARTY_CXX_FLAGS}")
     list(JOIN MZ_CONAN_ENV "\n" MZ_CONAN_ENV_ITEMS)
     configure_file(${_MZ_CONAN_PROFILE} ${CMAKE_BINARY_DIR}/profile.conan)
-    if(_MZ_CONAN_BUILD_PROFILE)
-        configure_file(${_MZ_CONAN_BUILD_PROFILE} ${CMAKE_BINARY_DIR}/build_profile.conan)
-        set(_MZ_CONAN_INSTALL_ARGS ${_MZ_CONAN_INSTALL_ARGS}
-            PROFILE_HOST ${CMAKE_BINARY_DIR}/profile.conan
-            PROFILE_BUILD ${CMAKE_BINARY_DIR}/build_profile.conan
-        )
-    else()
-        set(_MZ_CONAN_INSTALL_ARGS ${_MZ_CONAN_INSTALL_ARGS}
-            PROFILE ${CMAKE_BINARY_DIR}/profile.conan
-        )
-    endif()
+    configure_file(${_MZ_CONAN_BUILD_PROFILE} ${CMAKE_BINARY_DIR}/build_profile.conan)
+    list(APPEND _MZ_CONAN_INSTALL_ARGS
+        --profile:host ${CMAKE_BINARY_DIR}/profile.conan
+        --profile:build ${CMAKE_BINARY_DIR}/build_profile.conan
+    )
 
     option(CONAN_BUILD_MISSING "Automatically build package binaries not on the remote" OFF)
     if(CONAN_BUILD_MISSING)
         mz_conan_message("Will build missing binary packages")
-        set(_MZ_CONAN_BUILD missing)
+        list(APPEND _MZ_CONAN_INSTALL_ARGS
+            --build=missing
+        )
     elseif(CONAN_BUILD_MISSING_RECIPES)
         mz_conan_message("Will build missing binary packages for ${CONAN_BUILD_MISSING_RECIPES}")
-        set(_MZ_CONAN_BUILD ${CONAN_BUILD_MISSING_RECIPES})
+        list(APPEND _MZ_CONAN_INSTALL_ARGS
+            --build=${CONAN_BUILD_MISSING_RECIPES}
+        )
     else()
-        set(_MZ_CONAN_BUILD never OUTPUT_QUIET)
+        list(APPEND _MZ_CONAN_INSTALL_ARGS
+            --build=never
+        )
     endif()
 
     set(MZ_CONAN_INSTALL_DIR ${CMAKE_BINARY_DIR}/conan)
-
-    conan_cmake_install(
-        PATH_OR_REFERENCE ${_MZ_CONAN_FILE}
-        INSTALL_FOLDER ${MZ_CONAN_INSTALL_DIR}
-        BUILD ${_MZ_CONAN_BUILD}
-        ${_MZ_CONAN_INSTALL_ARGS}
+    list(APPEND _MZ_CONAN_INSTALL_ARGS
+        --output-folder=${MZ_CONAN_INSTALL_DIR}
+    )
+    execute_process(
+        COMMAND conan install ${_MZ_CONAN_INSTALL_ARGS} ${CMAKE_SOURCE_DIR}
+        COMMAND_ECHO STDOUT
+        COMMAND_ERROR_IS_FATAL ANY
     )
 
 else()
@@ -202,21 +201,14 @@ else()
     mz_conan_message("Using existing conan environment below '${MZ_CONAN_INSTALL_DIR}'")
 endif()
 
-# reduce the verbosity when finding packages
-set(CONAN_CMAKE_SILENT_OUTPUT ON)
-
-# when 'cmake' generator is used, automatically import it
-if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
-    include(${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
-    mz_conan_debug("Imported Targets: ${CONAN_TARGETS}")
-endif()
-# when 'cmake_paths' generator is used, automatically import it
-if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
-    include(${MZ_CONAN_INSTALL_DIR}/conan_paths.cmake)
-# elsewise add the module path to support the 'cmake_find_package' generator
+# when 'CMakeToolchain' generator is used, automatically import it
+if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conan_toolchain.cmake)
+    include(${MZ_CONAN_INSTALL_DIR}/conan_toolchain.cmake)
+# add the module path to support the 'CMakeDeps' generator
 else()
-    set(CMAKE_MODULE_PATH ${MZ_CONAN_INSTALL_DIR} ${CMAKE_MODULE_PATH})
+    mz_conan_message("Searching modules in ${MZ_CONAN_INSTALL_DIR}")
+    list(PREPEND CMAKE_MODULE_PATH ${MZ_CONAN_INSTALL_DIR})
+    list(PREPEND CMAKE_PREFIX_PATH ${MZ_CONAN_INSTALL_DIR})
 endif()
 # fixup the env to parse reliably
 if(MZ_WINDOWS)
