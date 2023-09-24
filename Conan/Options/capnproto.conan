@@ -20,4 +20,4 @@
 #
 
 [options]
-capnproto:build_tools=True
+capnproto/*:build_tools=True

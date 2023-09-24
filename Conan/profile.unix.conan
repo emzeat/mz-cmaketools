@@ -21,7 +21,7 @@
 
 [settings]
 
-[env]
+[buildenv]
 CXXFLAGS=-D_FORTIFY_SOURCE=1
 CPPFLAGS=-D_FORTIFY_SOURCE=1
 

@@ -31,29 +31,27 @@ compiler.version=13.1
 compiler.libcxx=libc++
 build_type=Release
 arch=x86_64
-os_build=Macos
-arch_build=x86_64
 
 [build_requires]
 *: ios-cmake/4.2.0
 
 [options]
-ios-cmake:toolchain_target=SIMULATOR64
-ios-cmake:enable_bitcode=True
-ios-cmake:enable_visibility=False
-libgit2:with_iconv=True
-libjpeg-turbo:SIMD=False
-qt:opengl=es2
-qt:config=-sdk iphonesimulator -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
-qt:shared=False
+ios-cmake/*:toolchain_target=SIMULATOR64
+ios-cmake/*:enable_bitcode=True
+ios-cmake/*:enable_visibility=False
+libgit2/*:with_iconv=True
+libjpeg-turbo/*:SIMD=False
+qt/*:opengl=es2
+qt/*:config=-sdk iphonesimulator -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+qt/*:shared=False
 *:shared=False
 *:static=True
-libraw:static=True
-libraw:shared=False
-openimageio:static=True
-openimageio:shared=False
+libraw/*:static=True
+libraw/*:shared=False
+openimageio/*:static=True
+openimageio/*:shared=False
 
-[env]
+[buildenv]
 *: CFLAGS="-fembed-bitcode"
 *: CXXFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 *: CPPFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"

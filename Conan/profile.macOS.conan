@@ -26,16 +26,15 @@ include(${_MZ_CONAN_DIR}/profile.unix.conan)
 os=Macos
 os.version=10.13
 arch=x86_64
-arch_build=x86_64
 compiler=apple-clang
 compiler.version=13.1
 compiler.libcxx=libc++
 build_type=Release
 
-[env]
+[buildenv]
 CONAN_CMAKE_DISABLE_CHECK_COMPILER=ON
 MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
 
 [options]
-libgit2:with_iconv=True
-qt:config=-device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+libgit2/*:with_iconv=True
+qt/*:config=-device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}

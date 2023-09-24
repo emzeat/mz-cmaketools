@@ -30,11 +30,11 @@ compiler.version=9
 compiler.libcxx=libstdc++11
 build_type=Release
 
-[env]
+[buildenv]
 # FORTIFY_SOURCE is already set by the packages
 CXXFLAGS=
 CPPFLAGS=
 
 [options]
-qt:with_dbus=True
-dbus:system_socket=/var/run/dbus/system_bus_socket
+qt/*:with_dbus=True
+dbus/*:system_socket=/var/run/dbus/system_bus_socket

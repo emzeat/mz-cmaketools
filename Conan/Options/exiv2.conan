@@ -20,6 +20,6 @@
 #
 
 [options]
-exiv2:with_xmp=bundled
-exiv2:with_png=True
-exiv2:with_curl=False
+exiv2/*:with_xmp=bundled
+exiv2/*:with_png=True
+exiv2/*:with_curl=False

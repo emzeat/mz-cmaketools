@@ -36,22 +36,22 @@ arch=armv8
 *: ios-cmake/4.2.0
 
 [options]
-ios-cmake:toolchain_target=OS64
-ios-cmake:enable_bitcode=True
-ios-cmake:enable_visibility=True
-libgit2:with_iconv=True
-qt:opengl=es2
-qt:config=-sdk iphoneos -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
-qt:shared=False
+ios-cmake/*:toolchain_target=OS64
+ios-cmake/*:enable_bitcode=True
+ios-cmake/*:enable_visibility=True
+libgit2/*:with_iconv=True
+qt/*:opengl=es2
+qt/*:config=-sdk iphoneos -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+qt/*:shared=False
 *:shared=False
 *:static=True
-libraw:static=True
-libraw:shared=False
-openimageio:static=True
-openimageio:shared=False
-capnproto:build_tools=True
+libraw/*:static=True
+libraw/*:shared=False
+openimageio/*:static=True
+openimageio/*:shared=False
+capnproto/*:build_tools=True
 
-[env]
+[buildenv]
 *: CFLAGS="-fembed-bitcode"
 *: CXXFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 *: CPPFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"

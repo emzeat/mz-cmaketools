@@ -20,47 +20,47 @@
 #
 
 [options]
-openimageio:with_dicom=False
-openimageio:with_ffmpeg=False
-openimageio:with_freetype=False
-openimageio:with_giflib=False
-openimageio:with_hdf5=False
-openimageio:with_libheif=True
+openimageio/*:with_dicom=False
+openimageio/*:with_ffmpeg=False
+openimageio/*:with_freetype=False
+openimageio/*:with_giflib=False
+openimageio/*:with_hdf5=False
+openimageio/*:with_libheif=True
 # Setting this causes
 # ERROR: At least two recipes provides the same functionality:
 # - 'libjpeg' provided by 'libjpeg/9d', 'libjpeg-turbo/2.1.2'
-openimageio:with_libjpeg=libjpeg-turbo
-openimageio:with_libpng=True
-openimageio:with_libwebp=False
-openimageio:with_opencolorio=False
-openimageio:with_opencv=False
-openimageio:with_openjpeg=False
-openimageio:with_openvdb=False
-openimageio:with_ptex=False
-openimageio:with_raw=True
-openimageio:with_tbb=False
-openimageio:static=False
-openimageio:shared=True
+openimageio/*:with_libjpeg=libjpeg-turbo
+openimageio/*:with_libpng=True
+openimageio/*:with_libwebp=False
+openimageio/*:with_opencolorio=False
+openimageio/*:with_opencv=False
+openimageio/*:with_openjpeg=False
+openimageio/*:with_openvdb=False
+openimageio/*:with_ptex=False
+openimageio/*:with_raw=True
+openimageio/*:with_tbb=False
+openimageio/*:static=False
+openimageio/*:shared=True
 
-libraw:with_jasper=False
-libraw:with_jpeg=libjpeg-turbo
-libraw:with_lcms=True
-libraw:static=False
-libraw:shared=True
+libraw/*:with_jasper=False
+libraw/*:with_jpeg=libjpeg-turbo
+libraw/*:with_lcms=True
+libraw/*:static=False
+libraw/*:shared=True
 
-libtiff:jpeg=libjpeg-turbo
-libtiff:jbig=False
-libtiff:zstd=False
-libtiff:webp=False
-libtiff:libdeflate=False
+libtiff/*:jpeg=libjpeg-turbo
+libtiff/*:jbig=False
+libtiff/*:zstd=False
+libtiff/*:webp=False
+libtiff/*:libdeflate=False
 
-libjpeg-turbo:SIMD=True
-libjpeg-turbo:libjpeg7_compatibility=True
-libjpeg-turbo:libjpeg8_compatibility=True
-libjpeg-turbo:java=False
-libjpeg-turbo:turbojpeg=True
+libjpeg-turbo/*:SIMD=True
+libjpeg-turbo/*:libjpeg7_compatibility=True
+libjpeg-turbo/*:libjpeg8_compatibility=True
+libjpeg-turbo/*:java=False
+libjpeg-turbo/*:turbojpeg=True
 *:with_jpeg=libjpeg-turbo
 
-libheif:with_x265=False
-libheif:with_libaomav1=False
-libheif:with_dav1d=False
+libheif/*:with_x265=False
+libheif/*:with_libaomav1=False
+libheif/*:with_dav1d=False

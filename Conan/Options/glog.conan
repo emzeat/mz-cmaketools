@@ -20,5 +20,5 @@
 #
 
 [options]
-glog:with_gflags=False
-glog:with_threads=True
+glog/*:with_gflags=False
+glog/*:with_threads=True

@@ -20,5 +20,5 @@
 #
 
 [options]
-gtest:build_gmock=True
-gtest:no_main=False
+gtest/*:build_gmock=True
+gtest/*:no_main=False

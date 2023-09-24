@@ -20,6 +20,6 @@
 #
 
 [options]
-sqlite3:build_executable=False
-sqlite3:enable_fts3=True
-sqlite3:enable_fts3_parenthesis=True
+sqlite3/*:build_executable=False
+sqlite3/*:enable_fts3=True
+sqlite3/*:enable_fts3_parenthesis=True
