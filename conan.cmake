@@ -202,7 +202,8 @@ else()
 endif()
 
 # when 'CMakeToolchain' generator is used, automatically import it
-if(EXISTS ${MZ_CONAN_INSTALL_DIR}/conan_toolchain.cmake)
+# FIXME(zwicker): conan_toolchain.cmake is setting bad sysroot when only included now
+if(FALSE AND EXISTS ${MZ_CONAN_INSTALL_DIR}/conan_toolchain.cmake)
     include(${MZ_CONAN_INSTALL_DIR}/conan_toolchain.cmake)
 # add the module path to support the 'CMakeDeps' generator
 else()
@@ -214,56 +215,33 @@ endif()
 if(MZ_WINDOWS)
     string(REPLACE "\\" "/" _MZ_PATH "$ENV{PATH}")
 endif()
-# also make sure to import any binaries from packages to the path
-# by parsing the JSON info available
-set(MZ_CONAN_BUILD_INFO ${MZ_CONAN_INSTALL_DIR}/conanbuildinfo.json)
-if(NOT EXISTS ${MZ_CONAN_BUILD_INFO})
-    set(MZ_CONAN_BUILD_INFO ${CMAKE_BINARY_DIR}/conanbuildinfo.json)
-endif()
-if(EXISTS ${MZ_CONAN_BUILD_INFO})
-    if(MZ_WINDOWS)
-        set(_MZ_PATH_SEP ";")
-    else()
-        set(_MZ_PATH_SEP ":")
+# also make sure to include the env to import any binaries
+if(MZ_WINDOWS)
+    set(_MZ_PATH_SEP ";")
+    set(MZ_CONAN_BUILD_ENV ${MZ_CONAN_INSTALL_DIR}/conanbuild.bat)
+    if(EXISTS ${MZ_CONAN_BUILD_ENV})
+        execute_process(
+            COMMAND bash -c "call ${MZ_CONAN_BUILD_ENV}; echo %PATH%"
+            OUTPUT_VARIABLE MZ_CONAN_BUILD_ENV_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
     endif()
-    file(READ ${MZ_CONAN_BUILD_INFO} _MZ_CONAN_BUILD_INFO_JSON)
-    # pull deps_env_info/PATH
-    string(JSON _MZ_CONAN_DEPS_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH)
-    if(_MZ_CONAN_DEPS_COUNT GREATER 0)
-        foreach(_MZ_PATH_INDEX RANGE 1 ${_MZ_CONAN_DEPS_COUNT})
-            math(EXPR _MZ_PATH_INDEX "${_MZ_PATH_INDEX} - 1")
-            string(JSON _MZ_CONAN_PATH_ENTRY GET "${_MZ_CONAN_BUILD_INFO_JSON}" deps_env_info PATH ${_MZ_PATH_INDEX})
-            list(APPEND _MZ_CONAN_PATH "${_MZ_CONAN_PATH_ENTRY}")
-        endforeach()
-    endif()
-    # pull the contents of all dependencies/*/bin_paths as well because consuming only
-    # deps_env_info/PATHS is not transitive for subdependencies
-    string(JSON _MZ_CONAN_DEPS_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies)
-    if(_MZ_CONAN_DEPS_COUNT GREATER 0)
-        foreach(_MZ_DEP_INDEX RANGE 1 ${_MZ_CONAN_DEPS_COUNT})
-            math(EXPR _MZ_DEP_INDEX "${_MZ_DEP_INDEX} - 1")
-            string(JSON _MZ_CONAN_PATH_COUNT LENGTH "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies ${_MZ_DEP_INDEX} bin_paths)
-            if(_MZ_CONAN_PATH_COUNT GREATER 0)
-                foreach(_MZ_PATH_INDEX RANGE 1 ${_MZ_CONAN_PATH_COUNT})
-                    math(EXPR _MZ_PATH_INDEX "${_MZ_PATH_INDEX} - 1")
-                    string(JSON _MZ_CONAN_PATH_ENTRY GET "${_MZ_CONAN_BUILD_INFO_JSON}" dependencies ${_MZ_DEP_INDEX} bin_paths ${_MZ_PATH_INDEX})
-                    list(APPEND _MZ_CONAN_PATH "${_MZ_CONAN_PATH_ENTRY}")
-                endforeach()
-            endif()
-        endforeach()
-    endif()
-    # convert backslashes to all forward slashes
-    list(REMOVE_DUPLICATES _MZ_CONAN_PATH)
-    list(TRANSFORM _MZ_CONAN_PATH REPLACE "\\\\" "/")
-    # join using path sep
-    list(JOIN _MZ_CONAN_PATH "${_MZ_PATH_SEP}" _MZ_CONAN_PATH)
-    # update env
-    set(ENV{PATH} "${_MZ_CONAN_PATH}${_MZ_PATH_SEP}$ENV{PATH}")
 else()
-    mz_conan_warning("Please enable the 'json' generator")
-    if(MZ_WINDOWS)
-        set(ENV{PATH} "${EXECUTABLE_OUTPUT_PATH};$ENV{PATH}")
+    set(_MZ_PATH_SEP ":")
+    set(MZ_CONAN_BUILD_ENV ${MZ_CONAN_INSTALL_DIR}/conanbuild.sh)
+    if(EXISTS ${MZ_CONAN_BUILD_ENV})
+        execute_process(
+            COMMAND bash -c "source ${MZ_CONAN_BUILD_ENV}; echo $PATH"
+            OUTPUT_VARIABLE MZ_CONAN_BUILD_ENV_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
     endif()
+endif()
+if(MZ_CONAN_BUILD_ENV_PATH)
+    # calculate the delta added by Conan for use in the presets
+    string(REPLACE "$ENV{PATH}${_MZ_PATH_SEP}" "" _MZ_CONAN_PATH "${MZ_CONAN_BUILD_ENV_PATH}")
+    # update env with the full PATH
+    set(ENV{PATH} "${MZ_CONAN_BUILD_ENV_PATH}")
 endif()
 
 include(${MZ_TOOLS_PATH}/presets.cmake)
