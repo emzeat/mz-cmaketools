@@ -50,8 +50,6 @@
 ########################################################################
 
 mz_include_guard(GLOBAL)
-find_package(Git)
-find_program(PYTHON3 python3 REQUIRED)
 
 # try to gather the executables first
 if( NOT CLANG_TIDY )
@@ -76,35 +74,6 @@ if( NOT CLANG_FORMAT )
       mz_warning_message("clang-tools-extra package and clang-format is unavailable on this platform - formatting will be skipped")
     endif()
 endif()
-set(RUN_IF ${PYTHON3} ${CMAKE_SOURCE_DIR}/build/run-if.py)
-
-# allow to only lint files changed in the last commit
-# determine the branch or reference to diff against
-set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT origin/dev)
-set(MZ_DO_CPPLINT_DIFF_DEFAULT OFF)
-if(DEFINED ENV{DRONE_SOURCE_BRANCH} AND DEFINED ENV{DRONE_TARGET_BRANCH})
-    # determining what to diff against automatically when on a CI is non trivial
-    # as the CI cannot always know the exact number of changes which are new.
-    #
-    # Compromise is as follows:
-    #   - When source and target branches are different, i.e. doing a PR
-    #     we diff all changes submitted as part of the PR
-    #   - When doing a regular branch build we fall back to testing
-    #     the last commit only
-    if("$ENV{DRONE_SOURCE_BRANCH}" STREQUAL "$ENV{DRONE_TARGET_BRANCH}")
-        set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT HEAD^)
-    elseif("" STREQUAL "$ENV{DRONE_TARGET_BRANCH}")
-        # tag event, nothing to diff - we would not be here if there was a failure
-        set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT HEAD)
-    else()
-        set(MZ_CPPLINT_DIFF_REFERENCE_DEFAULT $ENV{DRONE_TARGET_BRANCH})
-    endif()
-    if( GIT_FOUND )
-        set(MZ_DO_CPPLINT_DIFF_DEFAULT ON)
-    endif()
-endif()
-set(MZ_DO_CPPLINT_DIFF_REFERENCE ${MZ_CPPLINT_DIFF_REFERENCE_DEFAULT} CACHE STRING "The git reference to compare against for determining changes")
-option(MZ_DO_CPPLINT_DIFF "Run linting on files with changes only" ${MZ_DO_CPPLINT_DIFF_DEFAULT})
 
 if( CLANG_TIDY )
     option(MZ_DO_CPPLINT "Enable to run clang-tidy on configured targets" ON)
@@ -120,12 +89,7 @@ if( CLANG_FORMAT OR CLAZY )
     option(MZ_DO_AUTO_FORMAT "Enable to run clang-format on configured targets" ${MZ_DO_AUTO_FORMAT_DEFAULT})
 endif()
 
-if( MZ_DO_CPPLINT_DIFF )
-  mz_message("Linting will only consider files changed since '${MZ_DO_CPPLINT_DIFF_REFERENCE}'")
-endif()
-
 if( CLANG_TIDY )
-  set(RUN_IF_ARGS ${RUN_IF_ARGS} --env CLANG_TIDY=${CLANG_TIDY})
   if( MZ_DO_CPPLINT )
     mz_message("Linting (C++) is enabled")
   else()
@@ -138,8 +102,8 @@ if( CLANG_TIDY )
     mz_message("Linting (C++) will be accelerated using ccache")
     set(MZ_CLANG_TIDY
       ${LINTER_CACHE}
-        --linter-cache-ccache ${CCACHE}
-        --linter-cache-clang-tidy ${CLANG_TIDY}
+        --ccache=${CCACHE}
+        --clang-tidy=${CLANG_TIDY}
     )
   else()
     set(MZ_CLANG_TIDY
@@ -180,9 +144,6 @@ macro(mz_auto_format _TARGET)
     get_filename_component(abs_file ${file} ABSOLUTE)
     string(REPLACE "${CMAKE_SOURCE_DIR}/" "" rel_file "${abs_file}")
     set(lint_file ${CMAKE_BINARY_DIR}/${rel_file})
-    if( MZ_DO_CPPLINT_DIFF )
-        set(RUN_IF_ARGS_file ${RUN_IF_ARGS} --diff "${abs_file}:${MZ_DO_CPPLINT_DIFF_REFERENCE}")
-    endif()
 
     if( NOT ${file} MATCHES "(ui_|moc_|qrc_|lemon_).+" AND NOT "${file}" MATCHES "${CMAKE_BINARY_DIR}" )
 
@@ -191,13 +152,14 @@ macro(mz_auto_format _TARGET)
           set(lint_output ${lint_file}.clang-tidy)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${lint_output}
               ${MZ_CLANG_TIDY}
               ${CLANG_TIDY_EXTRA_ARGS}
               -p ${CMAKE_BINARY_DIR}
               --checks=-clang-diagnostic-unused-command-line-argument
               --quiet
               ${abs_file}
+            COMMAND
+              ${CMAKE_COMMAND} -E touch ${lint_output}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-tidy ${abs_file}
             COMMENT "Linting (C++) ${rel_file}"
             VERBATIM
@@ -213,9 +175,10 @@ macro(mz_auto_format _TARGET)
           set(lint_output ${lint_file}.qmllint)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${lint_output}
               ${QML_LINT}
               ${abs_file}
+            COMMAND
+              ${CMAKE_COMMAND} -E touch ${lint_output}
             DEPENDS ${abs_file}
             COMMENT "Linting (QML) ${rel_file}"
             VERBATIM
@@ -231,10 +194,11 @@ macro(mz_auto_format _TARGET)
         if( CLANG_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${format_output}
               ${CLANG_FORMAT}
               -i
               ${abs_file}
+            COMMAND
+              ${CMAKE_COMMAND} -E touch ${format_output}
             DEPENDS ${CMAKE_SOURCE_DIR}/.clang-format ${abs_file}
             COMMENT "Formatting ${rel_file}"
             VERBATIM
@@ -250,10 +214,11 @@ macro(mz_auto_format _TARGET)
         if( QML_FORMAT AND MZ_DO_AUTO_FORMAT )
           add_custom_command(OUTPUT ${format_output}
             COMMAND
-              ${RUN_IF} ${RUN_IF_ARGS_file} --touch ${format_output}
               ${QML_FORMAT}
               -n -i
               ${abs_file}
+            COMMAND
+              ${CMAKE_COMMAND} -E touch ${format_output}
             DEPENDS ${abs_file}
             COMMENT "Formatting ${rel_file}"
             VERBATIM
