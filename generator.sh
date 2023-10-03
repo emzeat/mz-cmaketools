@@ -20,6 +20,8 @@
 # limitations under the License.
 #
 
+set -e
+
 function help {
 cat <<EOF
 
@@ -139,25 +141,25 @@ function validate_config {
     if [ -z ${my_mode} ]; then
         echo "ERROR: Missing build mode"
         help
-        exit
+        exit 1
     fi
 
     if [ -z ${my_cc} ]; then
         echo "ERROR: Missing c compiler selection"
         help
-        exit
+        exit 1
     fi
 
     if [ -z ${my_cxx} ]; then
         echo "ERROR: Missing c++ compiler selection"
         help
-        exit
+        exit 1
     fi
 
     if [ -z ${my_generator} ]; then
         echo "ERROR: Missing cmake generator"
         help
-        exit
+        exit 1
     fi
 }
 
