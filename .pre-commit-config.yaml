@@ -6,7 +6,7 @@ repos:
           - id: check-hooks-apply
           - id: check-useless-excludes
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.0.1
+      rev: v4.4.0
       hooks:
           - id: trailing-whitespace
           - id: end-of-file-fixer
@@ -14,11 +14,11 @@ repos:
           - id: mixed-line-ending
             args: [--fix=lf]
     - repo: https://github.com/emzeat/mz-lictools
-      rev: v2.2
+      rev: v2.6.2
       hooks:
           - id: license-tools
     - repo: https://github.com/pre-commit/mirrors-autopep8
-      rev: 'v1.5.7'
+      rev: 'v2.0.4'
       hooks:
         - id: autopep8
           args: [--in-place, --max-line-length=120]
