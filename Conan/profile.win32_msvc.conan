@@ -1,7 +1,6 @@
-#
 # profile.win32_msvc.conan
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -17,16 +16,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ${_MZ_CONAN_PROFILE_INCLUDES}
 
 [settings]
 os=Windows
 arch=x86_64
-compiler=Visual Studio
-compiler.version=16
-compiler.runtime=MD
+compiler=msvc
+compiler.version=192
+compiler.runtime=dynamic
+compiler.runtime_type=Release
 build_type=Release
 
 [options]
