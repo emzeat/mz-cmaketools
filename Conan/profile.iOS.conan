@@ -1,7 +1,6 @@
-#
 # profile.iOS.conan
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ${_MZ_CONAN_PROFILE_INCLUDES}
 include(${_MZ_CONAN_DIR}/profile.unix.conan)
@@ -32,13 +30,7 @@ compiler.libcxx=libc++
 build_type=Release
 arch=armv8
 
-[build_requires]
-*: ios-cmake/4.2.0
-
 [options]
-ios-cmake/*:toolchain_target=OS64
-ios-cmake/*:enable_bitcode=True
-ios-cmake/*:enable_visibility=True
 libgit2/*:with_iconv=True
 qt/*:opengl=es2
 qt/*:config=-sdk iphoneos -no-framework -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
@@ -56,3 +48,6 @@ capnproto/*:build_tools=True
 *: CXXFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 *: CPPFLAGS="-D_FORTIFY_SOURCE=1 -fembed-bitcode"
 MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
+
+[conf]
+tools.apple:enable_bitcode=True
