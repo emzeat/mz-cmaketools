@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#
 # generator.sh
 #
 # Copyright (c) 2008 - 2023 Marius Zwicker
@@ -18,7 +17,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 set -e
 
@@ -194,19 +192,15 @@ function run_cmake {
             ${my_base_dir}/
 }
 
-function run_conan {
-    cd "${my_script_dir}"
-    if [ ! -r ${my_build_dir} ] ; then
-        mkdir -p ${my_build_dir}
-    fi
-
+function install_conan {
     conan_version=2.0.11
-    cd ${my_build_dir}
     if ! conan --version | grep -q ${conan_version}; then
         echo "-- need to upgrade Conan"
-        pip3 install --disable-pip-version-check conan==${conan_version}
+        python3 -m pip install --disable-pip-version-check --user conan==${conan_version}
+        export PATH="$(python3 -m site --user-base)/bin":$PATH
     fi
 
+    echo "-- $(which conan)"
     echo "-- running $(conan --version)"
 }
 
@@ -283,6 +277,9 @@ do
     esac
 done
 
+# align the conan version
+install_conan
+
 # switch to batch file if picking MSVC
 if [[ "msvc" == $my_compiler ]] ; then
     my_script_dir=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
@@ -316,7 +313,6 @@ fi
 
 # finally execute the cmake generation
 validate_config
-run_conan
 run_cmake
 
 echo
