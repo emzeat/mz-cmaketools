@@ -1,4 +1,3 @@
-#
 # conan.cmake
 #
 # Copyright (c) 2019 - 2023 Marius Zwicker
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ##################################################
 #
@@ -117,6 +115,14 @@ endif()
 
 # will process all conan dependencies and install them
 if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
+    execute_process(COMMAND conan config home
+        OUTPUT_VARIABLE _MZ_CONAN_HOME
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    string(REPLACE "\\" "/" _MZ_CONAN_HOME ${_MZ_CONAN_HOME})
+    mz_conan_message("Home at ${_MZ_CONAN_HOME}")
+
     set(MZ_CONAN_REMOTE_NAME emzeat)
     if(DEFINED ENV{MZ_CONAN_REMOTE_NAME})
         set(MZ_CONAN_REMOTE_NAME $ENV{MZ_CONAN_REMOTE_NAME})
@@ -133,11 +139,13 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
 
     execute_process(COMMAND conan remote list
         OUTPUT_VARIABLE _MZ_CONAN_REMOTES
+        OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET
     )
-    if(_MZ_CONAN_REMOTES MATCHES "${MZ_CONAN_REMOTE_NAME}: ")
-        mz_conan_message("Found existing remote '${MZ_CONAN_REMOTE_NAME}'")
+    if(_MZ_CONAN_REMOTES MATCHES "${MZ_CONAN_REMOTE_NAME}: ([^ ]+)")
+        mz_conan_message("Found existing remote '${MZ_CONAN_REMOTE_NAME}' at ${CMAKE_MATCH_1}")
     else()
+        mz_conan_message("Adding remote '${MZ_CONAN_REMOTE_NAME}' at ${MZ_CONAN_REMOTE_URL}")
         execute_process(
             COMMAND conan remote add ${_MZ_CONAN_REMOTE_ARGS} ${MZ_CONAN_REMOTE_NAME} ${MZ_CONAN_REMOTE_URL}
             COMMAND_ERROR_IS_FATAL ANY
