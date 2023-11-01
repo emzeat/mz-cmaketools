@@ -31,19 +31,18 @@ cmake using a predefined directory naming scheme
 
 Valid arguments:
     'help' show this list
-    'mode=(release|reldbg|debug)' to control build configuration
-    'compiler=(clang|gcc|ios|ios_legacy|ios_simulator|msvc)' to select compiler
-    'generator=(ninja|ninja_64|makefiles|sublime|xcode)'
-    'name=".."' custom name prefix
-    'location=(inside|outside)' configures location of build files
-    '-DFOO=BAR' additional args to pass to cmake
+    'mode=(release|reldbg|debug)' to control build configuration, default: '$MZ_CMAKETOOLS_mode'
+    'compiler=(clang|gcc|ios|ios_legacy|ios_simulator|msvc)' to select compiler, default: '$MZ_CMAKETOOLS_compiler'
+    'generator=(ninja|ninja_64|makefiles|sublime|xcode)', default: '$MZ_CMAKETOOLS_generator'
+    'location=(inside|outside)' configures location of build files, default: '$MZ_CMAKETOOLS_location'
+    '-DFOO=BAR' additional args to pass to cmake, default: '$MZ_CMAKETOOLS_args'
 
-Can also be selected using environment variables:
+Can also be preselected using environment variables:
     MZ_CMAKETOOLS_mode=..
     MZ_CMAKETOOLS_compiler=..
     MZ_CMAKETOOLS_generator=..
+    MZ_CMAKETOOLS_location=..
     MZ_CMAKETOOLS_args=..
-    MZ_CMAKETOOLS_name=..
 
 EOF
 }

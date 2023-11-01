@@ -105,7 +105,7 @@ GOTO:EOF
     cd %BUILD_DIR%
 
     echo.== configuring target system '%GENERATOR%/%BUILD_MODE%'
-    cmake -D CMAKE_BUILD_TYPE=%MY_BUILD_MODE% %EXTRA_ARGS% -G%MY_GENERATOR% "%BASE_DIR%/"
+    cmake -D CMAKE_BUILD_TYPE=%MY_BUILD_MODE% %EXTRA_ARGS% -G%MY_GENERATOR% "%BASE_DIR%/" || exit 1
 GOTO:EOF
 
 :MAIN
