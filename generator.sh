@@ -192,15 +192,10 @@ function run_cmake {
 }
 
 function install_conan {
-    conan_version=2.0.11
-    if ! conan --version | grep -q ${conan_version}; then
-        echo "-- need to upgrade Conan"
-        python3 -m pip install --disable-pip-version-check --user conan==${conan_version}
-        export PATH="$(python3 -m site --user-base)/bin":$PATH
-    fi
+    my_script_dir=`cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}"`
+    my_script_dir=`dirname "${my_script_dir}"`
 
-    echo "-- $(which conan)"
-    echo "-- running $(conan --version)"
+    source $my_script_dir/conan.sh
 }
 
 function debug_hint {
