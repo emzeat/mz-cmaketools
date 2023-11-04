@@ -1,4 +1,3 @@
-#
 # presets.cmake
 #
 # Copyright (c) 2013 - 2023 Marius Zwicker
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ##################################################
 #
@@ -53,9 +51,9 @@ function(mz_write_if_changed FILENAME CONTENT)
     endif()
 endfunction()
 
-# collect other presets included previously
-if(EXISTS ${CMAKE_SOURCE_DIR}/CMakePresets.json)
-    file(READ ${CMAKE_SOURCE_DIR}/CMakePresets.json _PRESET_JSON)
+# collect other presets
+if(EXISTS ${CMAKE_SOURCE_DIR}/CMakeUserPresets.json)
+    file(READ ${CMAKE_SOURCE_DIR}/CMakeUserPresets.json _PRESET_JSON)
     string(JSON _PRESET_INCLUDE_LEN ERROR_VARIABLE _PRESET_DISCARD LENGTH "${_PRESET_JSON}" include)
     if(_PRESET_INCLUDE_LEN GREATER 0)
         foreach(_PRESET_INCLUDE_INDEX RANGE 1 ${_PRESET_INCLUDE_LEN})
