@@ -1,7 +1,6 @@
-#
 # global.cmake
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ##################################################
 #
@@ -37,8 +35,9 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 # Set the minimum version to 10.13 on OS X
+set(MACOSX_DEPLOYMENT_TARGET 10.13)
 if(APPLE AND NOT IOS_PLATFORM)
-    set( CMAKE_OSX_DEPLOYMENT_TARGET 10.13 )
+    set( CMAKE_OSX_DEPLOYMENT_TARGET ${MACOSX_DEPLOYMENT_TARGET} )
     message("-- Setting minimum version of OS X to ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 

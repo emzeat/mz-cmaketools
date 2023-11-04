@@ -1,4 +1,3 @@
-#
 # profile.macOS.conan
 #
 # Copyright (c) 2008 - 2023 Marius Zwicker
@@ -17,14 +16,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ${_MZ_CONAN_PROFILE_INCLUDES}
 include(${_MZ_CONAN_DIR}/profile.unix.conan)
 
 [settings]
 os=Macos
-os.version=${CMAKE_OSX_DEPLOYMENT_TARGET}
+os.version=${MACOSX_DEPLOYMENT_TARGET}
 arch=x86_64
 compiler=apple-clang
 compiler.version=13.1
@@ -33,7 +31,7 @@ build_type=Release
 
 [buildenv]
 CONAN_CMAKE_DISABLE_CHECK_COMPILER=ON
-MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
 
 [options]
 libgit2/*:with_iconv=True
