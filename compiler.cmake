@@ -1,4 +1,3 @@
-#
 # compiler.cmake
 #
 # Copyright (c) 2008 - 2023 Marius Zwicker
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ##################################################
 #
@@ -495,6 +493,12 @@ if(MZ_IOS)
     set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CPPFLAGS=${IOS_BUILD_ENV})
     set(MZ_BUILD_ENV ${MZ_BUILD_ENV} LDFLAGS=${ARCH_FLAGS}\ -isysroot\ ${CMAKE_OSX_SYSROOT}\ -m${XCODE_IOS_PLATFORM}-version-min=${IOS_DEPLOYMENT_TARGET})
     set(MZ_BUILD_ENV ${MZ_BUILD_ENV} ARFLAGS=${ARCH_FLAGS}\ -isysroot\ ${CMAKE_OSX_SYSROOT}\ -m${XCODE_IOS_PLATFORM}-version-min=${IOS_DEPLOYMENT_TARGET})
+endif()
+
+# workaround for changes in XCode 15
+# https://github.com/mesonbuild/meson/issues/12282#issuecomment-1754872730
+if(MZ_IOS)
+    add_link_options(-Wl,-ld_classic)
 endif()
 
 # force -fPIC on external libs
