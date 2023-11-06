@@ -123,6 +123,18 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     string(REPLACE "\\" "/" _MZ_CONAN_HOME ${_MZ_CONAN_HOME})
     mz_conan_message("Home at ${_MZ_CONAN_HOME}")
 
+    execute_process(COMMAND conan --version
+        OUTPUT_VARIABLE _MZ_CONAN_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(_MZ_CONAN_VERSION MATCHES "Conan version 1.[0-9.]+")
+        set(_MZ_CONAN_VERSION_1 ON)
+        mz_conan_message("Detected Conan v1")
+    else()
+        set(_MZ_CONAN_VERSION_2 ON)
+        mz_conan_message("Detected Conan v2")
+    endif()
+
     set(MZ_CONAN_REMOTE_NAME emzeat)
     if(DEFINED ENV{MZ_CONAN_REMOTE_NAME})
         set(MZ_CONAN_REMOTE_NAME $ENV{MZ_CONAN_REMOTE_NAME})
@@ -132,9 +144,15 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
         set(MZ_CONAN_REMOTE_URL $ENV{MZ_CONAN_REMOTE_URL})
     endif()
     if(DEFINED ENV{MZ_CONAN_REMOTE_INDEX})
-        list(APPEND _MZ_CONAN_REMOTE_ARGS
-            --index=$ENV{MZ_CONAN_REMOTE_INDEX}
-        )
+        if(_MZ_CONAN_VERSION_1)
+            list(APPEND _MZ_CONAN_REMOTE_ARGS
+                --insert=$ENV{MZ_CONAN_REMOTE_INDEX}
+            )
+        else()
+            list(APPEND _MZ_CONAN_REMOTE_ARGS
+                --index=$ENV{MZ_CONAN_REMOTE_INDEX}
+            )
+        endif()
     endif()
 
     execute_process(COMMAND conan remote list
@@ -197,6 +215,11 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     list(APPEND _MZ_CONAN_INSTALL_ARGS
         --output-folder=${MZ_CONAN_INSTALL_DIR}
     )
+    if(_MZ_CONAN_VERSION_1)
+        list(APPEND _MZ_CONAN_INSTALL_ARGS
+            --install-folder=${MZ_CONAN_INSTALL_DIR}
+        )
+    endif()
     execute_process(
         COMMAND conan install ${_MZ_CONAN_INSTALL_ARGS} ${CMAKE_SOURCE_DIR}
         COMMAND_ECHO STDOUT

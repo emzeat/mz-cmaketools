@@ -19,5 +19,4 @@
 
 [options]
 glog/*:with_gflags=False
-glog/*:with_unwind=False
 glog/*:with_threads=True

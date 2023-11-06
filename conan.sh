@@ -20,7 +20,7 @@
 
 set -e
 
-conan_version=2.0.11
+conan_version=1.61.0
 
 echo "== configuring conan '$conan_version'"
 if ! conan --version | grep -q ${conan_version}; then
@@ -32,3 +32,4 @@ fi
 echo "-- $(which conan)"
 echo "-- running $(conan --version)"
 echo
+conan config set general.revisions_enabled=1
