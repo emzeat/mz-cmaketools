@@ -1,7 +1,6 @@
-#
 # qt5.cmake
 #
-# Copyright (c) 2019 - 2022 Marius Zwicker
+# Copyright (c) 2019 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ##################################################
 #
@@ -63,8 +61,11 @@ endif()
 
 # Track paths
 set(MZ_HAS_QT5 TRUE  CACHE INTERNAL MZ_HAS_QT5 FORCE)
-string(REPLACE "/lib" "" _qt5Core_install_prefix ${Qt5_Core_LIB_DIRS})
-set(Qt5_PREFIX "${_qt5Core_install_prefix}" CACHE PATH "Directory containing the Qt5 installation" FORCE )
+if(qt_PACKAGE_FOLDER_RELEASE)
+    set(Qt5_PREFIX "${qt_PACKAGE_FOLDER_RELEASE}" CACHE PATH "Directory containing the Qt5 installation" FORCE )
+else()
+    set(Qt5_PREFIX "${qt_PACKAGE_FOLDER_DEBUG}" CACHE PATH "Directory containing the Qt5 installation" FORCE )
+endif()
 set(QT_QMAKE_EXECUTABLE "${Qt5_PREFIX}/bin/qmake${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_QMAKE_EXECUTABLE FORCE)
 set(QT_MOC_EXECUTABLE "${Qt5_PREFIX}/bin/moc${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_MOC_EXECUTABLE FORCE)
 set(QT_MAC_DEPLOY_QT  "${Qt5_PREFIX}/bin/macdeployqt${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL QT_MAC_DEPLOY_QT FORCE)
@@ -104,8 +105,8 @@ mz_message("Qt5::uic    '${QT_UIC_EXECUTABLE}'")
 mz_message("Qt5::quickc '${QT_QUICK_COMPILER}'")
 
 # Make sure discovery of plugings and the like works
-file(COPY ${Qt5_PREFIX}/bin/qt.conf DESTINATION ${EXECUTABLE_OUTPUT_PATH})
-file(APPEND ${EXECUTABLE_OUTPUT_PATH}/qt.conf "
+file(WRITE ${EXECUTABLE_OUTPUT_PATH}/qt.conf "
+[Paths]
 Prefix = ${Qt5_PREFIX}
 ")
 

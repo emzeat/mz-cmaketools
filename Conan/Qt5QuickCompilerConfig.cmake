@@ -31,7 +31,7 @@ function(QTQUICK_COMPILER_ADD_RESOURCES outfiles)
 
     find_package(Qt5 COMPONENTS Qml Core)
 
-    set(compiler_path "${_qt5Core_install_prefix}/bin/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}")
+    set(compiler_path "${Qt5_PREFIX}/bin/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}")
     if(NOT EXISTS "${compiler_path}" )
         message(FATAL_ERROR "The package \"Qt5QuickCompilerConfig\" references the file
    \"${compiler_path}\"
@@ -45,6 +45,10 @@ but not all the files it references.
     endif()
 
     get_target_property(rcc_path ${Qt5Core_RCC_EXECUTABLE} IMPORTED_LOCATION)
+    if(NOT EXISTS "${rcc_path}" )
+    message(FATAL_ERROR "The package \"Qt5QuickCompilerConfig\" references the file
+        \"${rcc_path}\" but this file does not exist.")
+    endif()
 
     set(rcc_files ${_RCC_UNPARSED_ARGUMENTS})
     set(rcc_options ${_RCC_OPTIONS})
