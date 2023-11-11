@@ -173,6 +173,7 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     list(APPEND _MZ_CONAN_INSTALL_ARGS
         --profile:host ${CMAKE_BINARY_DIR}/profile.conan
         --profile:build ${CMAKE_BINARY_DIR}/build_profile.conan
+        -s build_type=Release -s &:build_type=${CMAKE_BUILD_TYPE}
     )
 
     option(CONAN_BUILD_MISSING "Automatically build package binaries not on the remote" OFF)
