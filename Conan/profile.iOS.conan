@@ -46,8 +46,6 @@ capnproto/*:build_tools=True
 [buildenv]
 *: CXXFLAGS=-D_FORTIFY_SOURCE=1
 *: CPPFLAGS=-D_FORTIFY_SOURCE=1
-# https://github.com/mesonbuild/meson/issues/12282#issuecomment-1754872730
-*: LDFLAGS+=-Wl,-ld_classic
 MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
 
 [conf]

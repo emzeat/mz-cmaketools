@@ -214,6 +214,8 @@ if(_MZ_CONAN_FILE AND NOT CONAN_EXPORTED)
     set(MZ_CONAN_INSTALL_DIR ${CMAKE_BINARY_DIR}/conan)
     list(APPEND _MZ_CONAN_INSTALL_ARGS
         --output-folder=${MZ_CONAN_INSTALL_DIR}
+        --generator VirtualBuildEnv
+        --generator VirtualRunEnv
     )
     if(_MZ_CONAN_VERSION_1)
         list(APPEND _MZ_CONAN_INSTALL_ARGS
@@ -250,11 +252,25 @@ endif()
 # also make sure to include the env to import any binaries
 if(MZ_WINDOWS)
     set(_MZ_PATH_SEP ";")
-    set(MZ_CONAN_BUILD_ENV ${MZ_CONAN_INSTALL_DIR}/conanbuild.bat)
-    if(EXISTS ${MZ_CONAN_BUILD_ENV})
+    file(WRITE ${MZ_CONAN_INSTALL_DIR}/echo_path.bat "
+        @echo off
+        SetLocal EnableDelayedExpansion
+        call %1
+        echo !PATH!
+    ")
+    file(GLOB MZ_CONAN_BUILD_ENV ${MZ_CONAN_INSTALL_DIR}/conanbuildenv-*.bat)
+    if(MZ_CONAN_BUILD_ENV)
         execute_process(
-            COMMAND bash -c "call ${MZ_CONAN_BUILD_ENV}; echo %PATH%"
+            COMMAND ${MZ_CONAN_INSTALL_DIR}/echo_path.bat ${MZ_CONAN_BUILD_ENV}
             OUTPUT_VARIABLE MZ_CONAN_BUILD_ENV_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
+    file(GLOB MZ_CONAN_RUN_ENV ${MZ_CONAN_INSTALL_DIR}/conanrunenv-*.bat)
+    if(MZ_CONAN_RUN_ENV)
+        execute_process(
+            COMMAND ${MZ_CONAN_INSTALL_DIR}/echo_path.bat ${MZ_CONAN_RUN_ENV}
+            OUTPUT_VARIABLE MZ_CONAN_RUN_ENV_PATH
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     endif()
@@ -268,12 +284,29 @@ else()
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     endif()
+    set(MZ_CONAN_RUN_ENV ${MZ_CONAN_INSTALL_DIR}/conanrun.sh)
+    if(EXISTS ${MZ_CONAN_RUN_ENV})
+        execute_process(
+            COMMAND bash -c "source ${MZ_CONAN_RUN_ENV}; echo $PATH"
+            OUTPUT_VARIABLE MZ_CONAN_RUN_ENV_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
 endif()
+# calculate the delta added by Conan for use in the presets
 if(MZ_CONAN_BUILD_ENV_PATH)
-    # calculate the delta added by Conan for use in the presets
-    string(REPLACE "$ENV{PATH}${_MZ_PATH_SEP}" "" _MZ_CONAN_PATH "${MZ_CONAN_BUILD_ENV_PATH}")
+    string(REPLACE "$ENV{PATH}${_MZ_PATH_SEP}" "" _MZ_CONAN_BUILD_PATH "${MZ_CONAN_BUILD_ENV_PATH}")
+    string(REPLACE "${_MZ_PATH_SEP}$ENV{PATH}" "" _MZ_CONAN_BUILD_PATH "${MZ_CONAN_BUILD_ENV_PATH}")
+endif()
+if(MZ_CONAN_RUN_ENV_PATH)
+    string(REPLACE "$ENV{PATH}${_MZ_PATH_SEP}" "" _MZ_CONAN_RUN_PATH "${MZ_CONAN_RUN_ENV_PATH}")
+    string(REPLACE "${_MZ_PATH_SEP}$ENV{PATH}" "" _MZ_CONAN_RUN_PATH "${MZ_CONAN_RUN_ENV_PATH}")
+endif()
+if(_MZ_CONAN_RUN_PATH OR _MZ_CONAN_BUILD_PATH)
+    set(_MZ_CONAN_PATH "${_MZ_CONAN_RUN_PATH}${_MZ_PATH_SEP}${_MZ_CONAN_BUILD_PATH}")
     # update env with the full PATH
-    set(ENV{PATH} "${MZ_CONAN_BUILD_ENV_PATH}")
+    set(ENV{PATH} "${_MZ_CONAN_PATH}${_MZ_PATH_SEP}$ENV{PATH}")
+    string(REPLACE "\\" "\\\\" _MZ_CONAN_PATH "${_MZ_CONAN_PATH}")
 endif()
 
 include(${MZ_TOOLS_PATH}/presets.cmake)

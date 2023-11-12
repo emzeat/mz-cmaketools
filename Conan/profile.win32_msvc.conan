@@ -26,6 +26,9 @@ compiler=msvc
 compiler.version=192
 compiler.runtime=dynamic
 compiler.runtime_type=Release
+compiler.cppstd=14
+ccache:compiler.cppstd=17
+qt:compiler.cppstd=17
 build_type=Release
 
 [options]
@@ -33,8 +36,10 @@ build_type=Release
 *:static=False
 capnproto*:shared=False
 perfetto*:shared=False
+qt*:with_vulkan=False
 
 [conf]
-tools.microsoft.msbuild:vs_version = 16
+tools.microsoft.msbuild:vs_version=16
+tools.cmake.cmaketoolchain:generator=Ninja
 
 [buildenv]
