@@ -44,6 +44,7 @@ if( MZ_IOS )
     find_library(FOUNDATION Foundation REQUIRED)
     find_library(SECURITY Security REQUIRED)
     find_library(UIKIT UIKit REQUIRED)
+    find_library(IOKIT IOKit REQUIRED)
     find_library(CORESERVICES CoreServices REQUIRED)
     find_library(CORETEXT CoreText REQUIRED)
     find_library(COREGRAPHICS CoreGraphics REQUIRED)
@@ -51,7 +52,7 @@ if( MZ_IOS )
     find_library(METAL Metal REQUIRED)
 
     target_link_libraries(Qt5::Core INTERFACE
-        ${SECURITY} ${FOUNDATION} ${CORESERVICES} ${UIKIT} ${CORETEXT} ${COREGRAPHICS} ${SYSTEMCONFIGURATION}
+        ${SECURITY} ${FOUNDATION} ${CORESERVICES} ${UIKIT} ${IOKIT} ${CORETEXT} ${COREGRAPHICS} ${SYSTEMCONFIGURATION}
     )
     target_link_libraries(Qt5::Gui INTERFACE
         ${METAL}

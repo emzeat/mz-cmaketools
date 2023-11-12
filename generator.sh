@@ -93,7 +93,7 @@ function get_compiler {
                 -DIOS_PLATFORM=SIMULATOR64 \
                 -DENABLE_ARC=0 \
                 -DENABLE_VISIBILITY=1 \
-                -DENABLE_BITCODE=1 \
+                -DENABLE_BITCODE=0 \
                 -DIOS_DEPLOYMENT_TARGET=13.0"
             ;;
         ios_legacy)
@@ -104,7 +104,7 @@ function get_compiler {
                 -DIOS_PLATFORM=OS \
                 -DENABLE_ARC=0 \
                 -DENABLE_VISIBILITY=1 \
-                -DENABLE_BITCODE=1 \
+                -DENABLE_BITCODE=0 \
                 -DIOS_DEPLOYMENT_TARGET=9.0 \
                 -DIOS_ARCH=armv7"
             ;;
@@ -116,7 +116,7 @@ function get_compiler {
                 -DIOS_PLATFORM=OS64 \
                 -DENABLE_ARC=0 \
                 -DENABLE_VISIBILITY=1 \
-                -DENABLE_BITCODE=1 \
+                -DENABLE_BITCODE=0 \
                 -DIOS_DEPLOYMENT_TARGET=13.0 \
                 -DIOS_ARCH=arm64"
             # force, the others do not work right now
