@@ -495,12 +495,6 @@ if(MZ_IOS)
     set(MZ_BUILD_ENV ${MZ_BUILD_ENV} ARFLAGS=${ARCH_FLAGS}\ -isysroot\ ${CMAKE_OSX_SYSROOT}\ -m${XCODE_IOS_PLATFORM}-version-min=${IOS_DEPLOYMENT_TARGET})
 endif()
 
-# workaround for changes in XCode 15
-# https://github.com/mesonbuild/meson/issues/12282#issuecomment-1754872730
-if(MZ_IOS)
-    add_link_options(-Wl,-ld_classic)
-endif()
-
 # force -fPIC on external libs
 if(MZ_LINUX)
     set(MZ_BUILD_ENV ${MZ_BUILD_ENV} CFLAGS=-fPIC)
