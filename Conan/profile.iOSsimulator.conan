@@ -44,8 +44,8 @@ openimageio/*:static=True
 openimageio/*:shared=False
 
 [buildenv]
-*: CXXFLAGS="-D_FORTIFY_SOURCE=1"
-*: CPPFLAGS="-D_FORTIFY_SOURCE=1"
+*: CXXFLAGS=-D_FORTIFY_SOURCE=1
+*: CPPFLAGS=-D_FORTIFY_SOURCE=1
 MACOSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}
 
 [conf]
