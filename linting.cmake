@@ -1,4 +1,3 @@
-#
 # linting.cmake
 #
 # Copyright (c) 2013 - 2023 Marius Zwicker
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ##################################################
 #
@@ -53,7 +51,7 @@ mz_include_guard(GLOBAL)
 
 # try to gather the executables first
 if( NOT CLANG_TIDY )
-    find_package(clang-tools-extra QUIET)
+    find_package(clang-tools-extra)
     if(TARGET clang-tools-extra::clang-tidy)
       get_property(CLANG_TIDY TARGET clang-tools-extra::clang-tidy PROPERTY IMPORTED_LOCATION)
     else()
@@ -64,7 +62,7 @@ if( NOT CLANG_TIDY )
     endif()
 endif()
 if( NOT CLANG_FORMAT )
-    find_package(clang-tools-extra QUIET)
+    find_package(clang-tools-extra)
     if(TARGET clang-tools-extra::clang-format)
       get_property(CLANG_FORMAT TARGET clang-tools-extra::clang-format PROPERTY IMPORTED_LOCATION)
     else()
@@ -77,7 +75,7 @@ endif()
 
 if( CLANG_TIDY )
     option(MZ_DO_CPPLINT "Enable to run clang-tidy on configured targets" ON)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Force enabled by lintin.cmake" FORCE)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Force enabled by linting.cmake" FORCE)
 endif()
 if( CLANG_FORMAT OR CLAZY )
     # default to off in release builds so that we do not alter the code anymore
