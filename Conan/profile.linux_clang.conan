@@ -1,7 +1,6 @@
-#
 # profile.linux_clang.conan
 #
-# Copyright (c) 2008 - 2022 Marius Zwicker
+# Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -17,7 +16,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 ${_MZ_CONAN_PROFILE_INCLUDES}
 include(${_MZ_CONAN_DIR}/profile.unix.conan)
@@ -27,6 +25,7 @@ os=Linux
 arch=x86_64
 compiler=clang
 compiler.version=6.0
+ccache:compiler.version=10
 compiler.libcxx=libstdc++11
 build_type=Release
 
