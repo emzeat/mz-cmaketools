@@ -27,7 +27,6 @@ compiler.version=192
 compiler.runtime=dynamic
 compiler.runtime_type=Release
 compiler.cppstd=14
-ccache:compiler.cppstd=17
 qt:compiler.cppstd=17
 build_type=Release
 

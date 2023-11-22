@@ -23,6 +23,7 @@ include(${_MZ_CONAN_DIR}/profile.unix.conan)
 [settings]
 os=Macos
 os.version=${MACOSX_DEPLOYMENT_TARGET}
+ccache:os.version=10.15
 arch=x86_64
 compiler=apple-clang
 compiler.version=13.1
