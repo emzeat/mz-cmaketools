@@ -29,11 +29,12 @@ parser = argparse.ArgumentParser(description='Helper to enforce a given encoding
 parser.add_argument('--encoding', default='utf8', help='Select the output encoding')
 args = parser.parse_args()
 
+sys.stdin.reconfigure(errors='ignore')
 while True:
     buf = sys.stdin.read(256)
     if not buf:
         break
-    buf = buf.encode(args.encoding, errors='replace').decode()
+    buf = buf.encode(args.encoding, errors='replace').decode(errors='replace')
     sys.stdout.write(buf)
 
 sys.stdout.flush()
