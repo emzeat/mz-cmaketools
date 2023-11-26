@@ -1,4 +1,4 @@
-# profile.win32_msvc.conan
+# profile.common.conan
 #
 # Copyright (c) 2008 - 2023 Marius Zwicker
 # All rights reserved.
@@ -17,29 +17,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-${_MZ_CONAN_PROFILE_INCLUDES}
-include(${_MZ_CONAN_DIR}/profile.common.conan)
-
-[settings]
-os=Windows
-arch=x86_64
-compiler=msvc
-compiler.version=192
-compiler.runtime=dynamic
-compiler.runtime_type=Release
-compiler.cppstd=14
-qt:compiler.cppstd=17
-build_type=Release
-
-[options]
-*:shared=True
-*:static=False
-capnproto*:shared=False
-perfetto*:shared=False
-qt*:with_vulkan=False
-
 [conf]
-tools.microsoft.msbuild:vs_version=16
-tools.cmake.cmaketoolchain:generator=Ninja
-
-[buildenv]
+tools.env.virtualenv:auto_use=True
