@@ -106,7 +106,11 @@ mz_message("Qt5::uic    '${QT_UIC_EXECUTABLE}'")
 mz_message("Qt5::quickc '${QT_QUICK_COMPILER}'")
 
 # Make sure discovery of plugings and the like works
-file(WRITE ${EXECUTABLE_OUTPUT_PATH}/qt.conf "
+set(Qt5_CONF "${Qt5_PREFIX}/bin/qt.conf")
+if(EXISTS ${Qt5_CONF})
+    file(COPY ${Qt5_CONF} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+endif()
+file(APPEND ${EXECUTABLE_OUTPUT_PATH}/qt.conf "
 [Paths]
 Prefix = ${Qt5_PREFIX}
 ")
