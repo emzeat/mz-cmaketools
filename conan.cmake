@@ -109,7 +109,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/conanfile.txt)
     set(_MZ_CONAN_FILE ${CMAKE_SOURCE_DIR}/conanfile.txt)
 elseif(EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
     set(_MZ_CONAN_FILE ${CMAKE_SOURCE_DIR}/conanfile.py)
-else()
+elseif(NOT CONAN_EXPORTED)
     mz_conan_warning("No conanfile.(txt|py) - skipping install")
 endif()
 
