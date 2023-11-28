@@ -91,7 +91,7 @@ if( CLANG_TIDY )
   if( MZ_DO_CPPLINT )
     mz_message("Linting (C++) is enabled")
   else()
-    mz_warning_message("Linting (C++) is disabled, this is not recommended")
+    mz_message("!! Linting (C++) is disabled")
   endif()
 
   find_package(ccache QUIET)
@@ -111,7 +111,9 @@ if( CLANG_TIDY )
     find_program(LINTER_CACHE linter-cache)
   endif()
   if(CCACHE AND LINTER_CACHE)
-    mz_message("Linting (C++) will be accelerated using ccache")
+    if(MZ_DO_CPPLINT)
+      mz_message("Linting (C++) will be accelerated using ccache")
+    endif()
     list(APPEND MZ_CLANG_TIDY
       ${LINTER_CACHE}
         --ccache=${CCACHE}
