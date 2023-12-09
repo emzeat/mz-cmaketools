@@ -1,4 +1,5 @@
 clang-*
+clang_*
 gcc-*
 msvc-*
 vs*

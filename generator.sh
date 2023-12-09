@@ -32,7 +32,7 @@ cmake using a predefined directory naming scheme
 Valid arguments:
     'help' show this list
     'mode=(release|reldbg|debug)' to control build configuration, default: '$MZ_CMAKETOOLS_mode'
-    'compiler=(clang|gcc|ios|ios_legacy|ios_simulator|msvc)' to select compiler, default: '$MZ_CMAKETOOLS_compiler'
+    'compiler=(clang|clang_arm64|clang_x86_64|gcc|ios|ios_legacy|ios_simulator|msvc)' to select compiler, default: '$MZ_CMAKETOOLS_compiler'
     'generator=(ninja|ninja_64|makefiles|sublime|xcode)', default: '$MZ_CMAKETOOLS_generator'
     'location=(inside|outside)' configures location of build files, default: '$MZ_CMAKETOOLS_location'
     '-DFOO=BAR' additional args to pass to cmake, default: '$MZ_CMAKETOOLS_args'
@@ -125,6 +125,24 @@ function get_compiler {
         clang)
             my_cc=clang
             my_cxx=clang++
+            ;;
+        clang_x86_64)
+            export CONAN_CMAKE_SYSTEM_PROCESSOR=x86_64
+            export CONAN_CMAKE_OSX_ARCHITECTURES="x86_64"
+            my_cc=clang
+            my_cxx=clang++
+            my_args="${my_args} \
+                -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+                -DCMAKE_SYSTEM_PROCESSOR=x86_64"
+            ;;
+        clang_arm64)
+            export CONAN_CMAKE_SYSTEM_PROCESSOR=arm64
+            export CONAN_CMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+            my_cc=clang
+            my_cxx=clang++
+            my_args="${my_args} \
+                -DCMAKE_OSX_ARCHITECTURES=arm64 \
+                -DCMAKE_SYSTEM_PROCESSOR=arm64"
             ;;
         *)
             my_cc=gcc

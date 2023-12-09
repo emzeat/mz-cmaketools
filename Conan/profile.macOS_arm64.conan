@@ -1,0 +1,48 @@
+# profile.macOS_arm64.conan
+#
+# Copyright (c) 2008 - 2023 Marius Zwicker
+# All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+${_MZ_CONAN_PROFILE_INCLUDES}
+include(${_MZ_CONAN_DIR}/profile.unix.conan)
+
+[settings]
+os=Macos
+os.version=${MACOSX_DEPLOYMENT_TARGET}
+ccache:os.version=10.15
+arch=armv8
+compiler=apple-clang
+compiler.version=13.1
+compiler.libcxx=libc++
+build_type=Release
+
+[buildenv]
+CONAN_CMAKE_DISABLE_CHECK_COMPILER=ON
+MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
+# generate universal binaries so we can support
+# building from x86_64 to apple silicon
+CXXFLAGS=-arch arm64 -arch x86_64
+CFLAGS=-arch arm64 -arch x86_64
+LDFLAGS=-arch arm64 -arch x86_64
+CMAKE_OSX_ARCHITECTURES=arm64;x86_64
+
+[conf]
+tools.cmake.cmaketoolchain:system_processor=armv8
+
+[options]
+libgit2/*:with_iconv=True
+qt/*:config=-device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} QMAKE_APPLE_DEVICE_ARCHS="arm64 x86_64"

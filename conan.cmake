@@ -66,7 +66,21 @@ endmacro()
 
 # import the platform specific profile
 if(MZ_MACOS)
-    set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
+    if(NOT CMAKE_OSX_ARCHITECTURES)
+        set(CMAKE_OSX_ARCHITECTURES ${CMAKE_HOST_SYSTEM_PROCESSOR})
+    endif()
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL x86_64)
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
+        # no need to set up cross compiling, apple silicon can run
+        # x86_64 just fine
+    elseif(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS_arm64.conan)
+        if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL x86_64)
+            set(_MZ_CONAN_BUILD_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
+        endif()
+    else()
+        message(FATAL_ERROR "Unknown OSX architecture: ${CMAKE_OSX_ARCHITECTURES}")
+    endif()
     set(CONAN_DISABLE_CHECK_COMPILER ON)
 elseif(MZ_IOS)
     if (IOS_PLATFORM STREQUAL "OS64")
