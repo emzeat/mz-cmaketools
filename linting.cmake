@@ -154,6 +154,13 @@ macro(mz_auto_format _TARGET)
   endif()
 
   if( CLANG_TIDY AND MZ_DO_CPPLINT )
+    foreach(INCL IN LISTS CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
+        if( MZ_MACOS AND INCL MATCHES ".+c\\+\\+.+" )
+            # workaround mixing clang-tidy versions on modern macOS failing
+            # to find the C++ system includes by explicitly passing them
+            list(APPEND MZ_CLANG_TIDY --extra-arg-before=-isystem${INCL})
+        endif()
+    endforeach()
     if(CLANG_TIDY_EXTRA_ARGS)
         list(APPEND MZ_CLANG_TIDY ${CLANG_TIDY_EXTRA_ARGS})
     endif()
@@ -190,7 +197,6 @@ macro(mz_auto_format _TARGET)
           add_custom_command(OUTPUT ${lint_output}
             COMMAND
               ${MZ_CLANG_TIDY}
-              ${CLANG_TIDY_EXTRA_ARGS}
               -p ${CMAKE_BINARY_DIR}
               --checks=-clang-diagnostic-unused-command-line-argument
               --quiet
