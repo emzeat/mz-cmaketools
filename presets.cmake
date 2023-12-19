@@ -51,21 +51,6 @@ function(mz_write_if_changed FILENAME CONTENT)
     endif()
 endfunction()
 
-# collect other presets
-if(EXISTS ${CMAKE_SOURCE_DIR}/CMakeUserPresets.json)
-    file(READ ${CMAKE_SOURCE_DIR}/CMakeUserPresets.json _PRESET_JSON)
-    string(JSON _PRESET_INCLUDE_LEN ERROR_VARIABLE _PRESET_DISCARD LENGTH "${_PRESET_JSON}" include)
-    if(_PRESET_INCLUDE_LEN GREATER 0)
-        foreach(_PRESET_INCLUDE_INDEX RANGE 1 ${_PRESET_INCLUDE_LEN})
-            math(EXPR _PRESET_INCLUDE_INDEX "${_PRESET_INCLUDE_INDEX} - 1")
-            string(JSON _PRESET_INCLUDE GET "${_PRESET_JSON}" include ${_PRESET_INCLUDE_INDEX})
-            if(EXISTS "${_PRESET_INCLUDE}")
-                list(APPEND PRESET_INCLUDES "\"${_PRESET_INCLUDE}\"")
-            endif()
-        endforeach()
-    endif()
-endif()
-
 # collect any active VS environment
 # No smart way to simply iterate the environment in CMake :(
 macro(presetEnvAdd VAR)
@@ -116,7 +101,12 @@ if(CMAKE_BUILD_TYPE)
 endif()
 if(_MZ_CONAN_PATH)
     string(REPLACE ";" "$<SEMICOLON>" _TMP "${_MZ_CONAN_PATH}" )
-    list(APPEND PRESET_ENV "\"PATH\": \"${_TMP}$<SEMICOLON>\$penv{PATH}\"")
+    execute_process(COMMAND ${PYTHON3} -m site --user-base
+        OUTPUT_VARIABLE _MZ_PYTHON3_USER_BASE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    list(APPEND PRESET_ENV "\"PATH\": \"${_MZ_PYTHON3_USER_BASE}/bin$<SEMICOLON>${_TMP}$<SEMICOLON>\$penv{PATH}\"")
 endif()
 list(APPEND PRESET_INCLUDES "\"${PRESET_JSON}\"")
 list(REMOVE_DUPLICATES PRESET_VARIABLES)
@@ -170,16 +160,10 @@ mz_write_if_changed(${PRESET_JSON}
 )
 
 # make sure the presets get included from the toplevel
-file(REMOVE ${CMAKE_SOURCE_DIR}/CMakePresets.json)
-mz_write_if_changed(${CMAKE_SOURCE_DIR}/CMakeUserPresets.json
-"{
-    \"version\": 6,
-    \"cmakeMinimumRequired\": {
-        \"major\": 3,
-        \"minor\": 23,
-        \"patch\": 0
-    },
-    \"include\": [
-        ${PRESET_INCLUDES}
-    ]
-}")
+execute_process(
+    COMMAND_ECHO STDOUT
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${PYTHON3} ${MZ_TOOLS_PATH}/presets.py
+        --output ${CMAKE_SOURCE_DIR}/CMakeUserPresets.json
+        --add ${PRESET_JSON}
+)
