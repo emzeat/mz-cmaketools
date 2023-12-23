@@ -33,6 +33,8 @@ args = parser.parse_args()
 try:
     presets = json.loads(args.output.read_text())
     presets["version"] = 3
+    # force reinitialization in case no preset yet
+    presets["configurePresets"]
 except:  # pylint: disable=bare-except
     presets = {
         "version": 3,

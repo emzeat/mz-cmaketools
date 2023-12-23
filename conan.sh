@@ -26,7 +26,7 @@ echo "== configuring conan '$conan_version'"
 if ! conan --version | grep -q ${conan_version}; then
     echo "-- need to upgrade Conan"
     python3 -m pip install --disable-pip-version-check --user conan==${conan_version}
-    export PATH="$(python3 -m site --user-base)/bin":$PATH
+    export PATH="$(python3 -m site --user-base)/bin":"$(python3 -m site --user-base)/Scripts":$PATH
 fi
 
 echo "-- $(which conan)"
