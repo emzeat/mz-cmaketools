@@ -1,6 +1,6 @@
 # conan.cmake
 #
-# Copyright (c) 2019 - 2023 Marius Zwicker
+# Copyright (c) 2019 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -73,8 +73,9 @@ if(MZ_MACOS)
         set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
         # no need to set up cross compiling, apple silicon can run
         # x86_64 just fine
-    elseif(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
-        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS_arm64.conan)
+    elseif("arm64" IN_LIST CMAKE_OSX_ARCHITECTURES)
+        set(_MZ_CONAN_PROFILE ${_MZ_CONAN_DIR}/profile.macOS_universal.conan)
+        set(ENV{CONAN_CMAKE_SYSTEM_PROCESSOR} aarch64)
         if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL x86_64)
             set(_MZ_CONAN_BUILD_PROFILE ${_MZ_CONAN_DIR}/profile.macOS.conan)
         endif()

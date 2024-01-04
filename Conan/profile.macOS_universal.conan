@@ -1,6 +1,6 @@
-# profile.macOS_arm64.conan
+# profile.macOS_universal.conan
 #
-# Copyright (c) 2008 - 2023 Marius Zwicker
+# Copyright (c) 2008 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -45,4 +45,4 @@ tools.cmake.cmaketoolchain:system_processor=armv8
 
 [options]
 libgit2/*:with_iconv=True
-qt/*:config=-device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} QMAKE_APPLE_DEVICE_ARCHS="arm64 x86_64"
+qt/*:config=-device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET} -device-option QMAKE_APPLE_DEVICE_ARCHS="x86_64 arm64" QMAKE_APPLE_DEVICE_ARCHS="x86_64 arm64"

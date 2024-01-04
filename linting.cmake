@@ -1,6 +1,6 @@
 # linting.cmake
 #
-# Copyright (c) 2013 - 2023 Marius Zwicker
+# Copyright (c) 2013 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -58,7 +58,11 @@ if( NOT CLANG_TIDY )
       find_program(CLANG_TIDY clang-tidy QUIET)
     endif()
     if(NOT CLANG_TIDY)
-      mz_warning_message("clang-tools-extra package and clang-tidy is unavailable on this platform - linting will be skipped")
+      mz_message("clang-tools-extra package and clang-tidy is unavailable on this platform - linting will be skipped")
+    endif()
+    if(CLANG_TIDY AND "arm64" IN_LIST CMAKE_OSX_ARCHITECTURES AND "x86_64" IN_LIST CMAKE_OSX_ARCHITECTURES)
+      mz_message("clang-tidy cannot handle universal builds - linting will be skipped")
+      unset(CLANG_TIDY)
     endif()
 endif()
 if( NOT CLANG_FORMAT )

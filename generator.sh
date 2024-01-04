@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # generator.sh
 #
-# Copyright (c) 2008 - 2023 Marius Zwicker
+# Copyright (c) 2008 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -140,7 +140,7 @@ function get_compiler {
             my_cc=clang
             my_cxx=clang++
             my_args="${my_args} \
-                -DCMAKE_OSX_ARCHITECTURES=arm64 \
+                -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 \
                 -DCMAKE_SYSTEM_PROCESSOR=arm64"
             ;;
         *)
