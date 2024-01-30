@@ -60,6 +60,7 @@ macro(presetEnvAdd VAR)
         list(APPEND PRESET_ENV "\"${VAR}\": \"${_TMP}\"")
     endif()
 endmacro()
+presetEnvAdd(DevEnvDir)
 presetEnvAdd(ExtensionSdkDir)
 presetEnvAdd(INCLUDE)
 presetEnvAdd(LIB)
@@ -85,6 +86,7 @@ presetEnvAdd(WindowsSdkDir)
 presetEnvAdd(WindowsSDKLibVersion)
 presetEnvAdd(WindowsSdkVerBinPath)
 presetEnvAdd(WindowsSDKVersion)
+presetEnvAdd(__VSCMD_PREINIT_PATH)
 
 # collect env and cmake variables
 if(CMAKE_C_COMPILER)
@@ -100,7 +102,7 @@ if(CMAKE_BUILD_TYPE)
     list(APPEND PRESET_VARIABLES "\"CMAKE_BUILD_TYPE\": \"${CMAKE_BUILD_TYPE}\"")
 endif()
 if(_MZ_CONAN_PATH)
-    string(REPLACE ";" "$<SEMICOLON>" _TMP "${_MZ_CONAN_PATH}" )
+    string(REPLACE ";" "$<SEMICOLON>" _CONAN_PATH "${_MZ_CONAN_PATH}" )
     execute_process(COMMAND ${PYTHON3} -m site --user-base
         COMMAND_ECHO STDOUT
         OUTPUT_VARIABLE _MZ_PYTHON3_USER_BASE
@@ -108,7 +110,7 @@ if(_MZ_CONAN_PATH)
         ERROR_QUIET
     )
     string(REPLACE "\\" "\\\\" _MZ_PYTHON3_USER_BASE "${_MZ_PYTHON3_USER_BASE}")
-    list(APPEND PRESET_ENV "\"PATH\": \"${_MZ_PYTHON3_USER_BASE}/bin$<SEMICOLON>${_MZ_PYTHON3_USER_BASE}/Scripts$<SEMICOLON>${_TMP}$<SEMICOLON>\$penv{PATH}\"")
+    list(APPEND PRESET_ENV "\"PATH\": \"${_MZ_PYTHON3_USER_BASE}/bin$<SEMICOLON>${_MZ_PYTHON3_USER_BASE}/Scripts$<SEMICOLON>${_CONAN_PATH}$<SEMICOLON>\$penv{PATH}\"")
 endif()
 list(APPEND PRESET_INCLUDES "\"${PRESET_JSON}\"")
 list(REMOVE_DUPLICATES PRESET_VARIABLES)
