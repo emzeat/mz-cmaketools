@@ -1,6 +1,6 @@
 # compiler.cmake
 #
-# Copyright (c) 2008 - 2023 Marius Zwicker
+# Copyright (c) 2008 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -275,8 +275,8 @@ endmacro()
 #
 function(__Boost_MZ_COMPILER_DUMPVERSION _OUTPUT_VERSION)
 
-  exec_program(${CMAKE_CXX_COMPILER}
-    ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+  execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
     OUTPUT_VARIABLE _boost_COMPILER_VERSION
   )
   string(
@@ -290,8 +290,8 @@ endfunction()
 # runs compiler with "--version" and searches for clang
 #
 function(__MZ_COMPILER_IS_CLANG _OUTPUT _OUTPUT_VERSION)
-  exec_program(${CMAKE_CXX_COMPILER}
-    ARGS ${CMAKE_CXX_COMPILER_ARG1} --version
+  execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version
     OUTPUT_VARIABLE _MZ_CLANG_VERSION
   )
 
