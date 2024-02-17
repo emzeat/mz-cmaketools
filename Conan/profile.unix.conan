@@ -1,6 +1,6 @@
 # profile.unix.conan
 #
-# Copyright (c) 2008 - 2023 Marius Zwicker
+# Copyright (c) 2008 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -29,3 +29,6 @@ CPPFLAGS=-D_FORTIFY_SOURCE=1
 *:fPIC=True
 *:shared=False
 *:static=True
+
+[conf]
+tools.system.package_manager:mode=install
