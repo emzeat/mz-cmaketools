@@ -292,25 +292,26 @@ endfunction()
 function(__MZ_COMPILER_IS_CLANG _OUTPUT _OUTPUT_VERSION)
   execute_process(
     COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version
+    ERROR_QUIET
     OUTPUT_VARIABLE _MZ_CLANG_VERSION
   )
 
-  if("${_MZ_CLANG_VERSION}" MATCHES ".*clang.*")
+  if(_MZ_CLANG_VERSION AND "${_MZ_CLANG_VERSION}" MATCHES ".*clang.*")
     set(${_OUTPUT} TRUE PARENT_SCOPE)
+
+    string(
+      REGEX MATCH "[0-9]+\\.[0-9](\\.[0-9])?(\\-[0-9])?"
+      _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
+    )
+    string(
+      REPLACE "." "" _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
+    )
+
+    set(${_OUTPUT_VERSION} ${_MZ_CLANG_VERSION} PARENT_SCOPE)
+    mz_debug_message("Possible clang version ${_MZ_CLANG_VERSION}")
   else()
     set(${_OUTPUT} FALSE PARENT_SCOPE)
   endif()
-
-  string(
-    REGEX MATCH "[0-9]+\\.[0-9](\\.[0-9])?(\\-[0-9])?"
-    _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
-  )
-  string(
-    REPLACE "." "" _MZ_CLANG_VERSION ${_MZ_CLANG_VERSION}
-  )
-
-  set(${_OUTPUT_VERSION} ${_MZ_CLANG_VERSION} PARENT_SCOPE)
-  mz_debug_message("Possible clang version ${_MZ_CLANG_VERSION}")
 endfunction()
 
 # we only run the very first time
@@ -334,9 +335,9 @@ if(TRUE OR NOT MZ_COMPILER_TEST_HAS_RUN)
         set(MZ_MACOS TRUE CACHE INTERNAL MZ_MACOS )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(MZ_LINUX TRUE CACHE INTERNAL MZ_LINUX )
-	if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-	    set(MZ_LINUX_ARM TRUE CACHE INTERNAL MZ_LINUX_ARM)
-            mz_message("arm detected, assuming raspberry pi")
+        if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+            set(MZ_LINUX_ARM TRUE CACHE INTERNAL MZ_LINUX_ARM)
+                mz_message("arm detected, assuming raspberry pi")
         endif()
     else()
         set(MZ_WINDOWS TRUE CACHE INTERNAL MZ_WINDOWS )
