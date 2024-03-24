@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # conan.sh
 #
-# Copyright (c) 2008 - 2023 Marius Zwicker
+# Copyright (c) 2008 - 2024 Marius Zwicker
 # All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -24,9 +24,15 @@ conan_version=1.61.0
 
 echo "== configuring conan '$conan_version'"
 if ! conan --version | grep -q ${conan_version}; then
-    echo "-- need to upgrade Conan"
-    python3 -m pip install --disable-pip-version-check --user conan==${conan_version}
     export PATH="$(python3 -m site --user-base)/bin":"$(python3 -m site --user-base)/Scripts":$PATH
+fi
+if ! conan --version | grep -q ${conan_version}; then
+    echo "-- need to upgrade Conan using $(which python3)"
+    python3 -m pip install \
+        --disable-pip-version-check \
+        --break-system-packages \
+        --user \
+        conan==${conan_version}
 fi
 
 echo "-- $(which conan)"
