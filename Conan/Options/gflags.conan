@@ -1,4 +1,4 @@
-# glog.conan
+# gflags.conan
 #
 # Copyright (c) 2008 - 2024 Marius Zwicker
 # All rights reserved.
@@ -18,5 +18,4 @@
 # limitations under the License.
 
 [options]
-glog/*:with_gflags=True
-glog/*:with_threads=True
+gflags/*:nothreads=False
